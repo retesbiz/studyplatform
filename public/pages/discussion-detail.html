@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Discussion — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .disc-post {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--rad-lg);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .disc-post-title {
+    font-family: var(--fh);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 10px 0 14px;
+    line-height: 1.35;
+  }
+  .disc-post-body {
+    font-size: 15px;
+    color: var(--ink2);
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .disc-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink3);
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .disc-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--acc-lt);
+    color: var(--acc);
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .disc-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: var(--red, #e53e3e);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--rad);
+    transition: background 0.15s;
+  }
+  .disc-delete-btn:hover { background: var(--red-lt, #fff5f5); }
+
+  .replies-heading {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .reply-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--rad-lg);
+    padding: 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reply-body {
+    font-size: 14px;
+    color: var(--ink2);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .reply-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink3);
+  }
+  .reply-av {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--bg2);
+    color: var(--ink2);
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .reply-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--ink3);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--rad);
+    transition: all 0.15s;
+  }
+  .reply-delete-btn:hover { color: var(--red, #e53e3e); background: var(--red-lt, #fff5f5); }
+
+  .reply-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--rad-lg);
+    padding: 20px 24px;
+    margin-top: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .reply-box h4 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-mark">📚</div><span class="sidebar-logo-text">StudyNest</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <a class="sidebar-link active" href="discussions.html"><span class="nav-icon">💬</span> Community</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <a href="discussions.html" style="font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:4px;white-space:nowrap">← Back to Community</a>
+      <div class="topbar-actions" style="margin-left:auto">
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar" style="cursor:pointer" onclick="location.href='profile.html'">?</div>
+      </div>
+    </header>
+
+    <div class="page-body" id="page-body">
+      <div class="empty-state" style="padding:80px">
+        <div class="empty-state-icon">⏳</div><h4>Loading discussion…</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+initPage();
+
+const CAT_ICONS = {
+  'Cybersecurity': '🔐', 'Web Dev': '🌐', 'Databases': '🗄️',
+  'Data Science': '🤖', 'DevOps': '☁️', 'General': '💬'
+};
+const CAT_COLORS = {
+  'Cybersecurity': 'badge-red', 'Web Dev': 'badge-blue', 'Databases': 'badge-amber',
+  'Data Science': 'badge-green', 'DevOps': 'badge-gray', 'General': 'badge-gray'
+};
+
+const discId = new URLSearchParams(location.search).get('id');
+if (!discId) location.href = 'discussions.html';
+
+let currentUserId = null;
+let disc = null;
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadDiscussion() {
+  disc = await api('GET', '/discussions/' + discId);
+  if (!disc) { location.href = 'discussions.html'; return; }
+
+  const me = await api('GET', '/users/me');
+  if (me) currentUserId = me.id;
+
+  document.title = disc.title + ' — StudyNest';
+  render();
+}
+
+function render() {
+  const icon  = CAT_ICONS[disc.category]  || '💬';
+  const badge = CAT_COLORS[disc.category] || 'badge-gray';
+  const name  = (disc.first_name + ' ' + (disc.last_name || '')).trim();
+  const isOwner = currentUserId && disc.user_id === currentUserId;
+
+  const repliesHtml = (disc.replies || []).length === 0
+    ? `<div style="text-align:center;padding:32px 0;color:var(--ink3);font-size:14px">No replies yet — be the first to respond!</div>`
+    : (disc.replies || []).map(r => {
+        const rName = (r.first_name + ' ' + (r.last_name || '')).trim();
+        const rOwner = currentUserId && r.user_id === currentUserId;
+        const initials = (r.first_name?.[0] || '') + (r.last_name?.[0] || '');
+        return `
+          <div class="reply-card">
+            <div class="reply-body">${escHtml(r.body)}</div>
+            <div class="reply-meta">
+              <div class="reply-av">${r.avatar || initials || '👤'}</div>
+              <span>${escHtml(rName)}</span>
+              <span>·</span>
+              <span>${timeAgo(r.created_at)}</span>
+              ${rOwner ? `<button class="reply-delete-btn" onclick="deleteReply(${r.id})">Delete</button>` : ''}
+            </div>
+          </div>`;
+      }).join('')
+
+  const postInitials = (disc.first_name?.[0] || '') + (disc.last_name?.[0] || '');
+
+  document.getElementById('page-body').innerHTML = `
+    <div class="disc-post">
+      <div>
+        <span class="badge ${badge}" style="display:inline-flex">${icon} ${disc.category}</span>
+      </div>
+      <div class="disc-post-title">${escHtml(disc.title)}</div>
+      <div class="disc-post-body">${escHtml(disc.body)}</div>
+      <div class="disc-meta">
+        <div class="disc-avatar">${disc.avatar || postInitials || '👤'}</div>
+        <span>${escHtml(name)}</span>
+        <span>·</span>
+        <span>${timeAgo(disc.created_at)}</span>
+        <span>·</span>
+        <span>${disc.reply_count} ${disc.reply_count === 1 ? 'reply' : 'replies'}</span>
+        ${isOwner ? `<button class="disc-delete-btn" onclick="deleteDiscussion()">🗑 Delete post</button>` : ''}
+      </div>
+    </div>
+
+    <div class="replies-heading">
+      💬 ${(disc.replies || []).length} ${(disc.replies || []).length === 1 ? 'Reply' : 'Replies'}
+    </div>
+
+    <div id="replies-list" style="display:flex;flex-direction:column;gap:10px">
+      ${repliesHtml}
+    </div>
+
+    <div class="reply-box">
+      <h4>Leave a Reply</h4>
+      <div id="reply-error" style="display:none;background:var(--red-lt);border:1px solid var(--red);border-radius:var(--rad);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px"></div>
+      <textarea class="form-input" id="reply-body" rows="4" placeholder="Share your thoughts or answer…" style="resize:vertical;margin-bottom:12px"></textarea>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" id="reply-btn" onclick="postReply()">Post Reply</button>
+      </div>
+    </div>
+  `;
+}
+
+async function postReply() {
+  const body    = document.getElementById('reply-body').value.trim();
+  const errDiv  = document.getElementById('reply-error');
+  const btn     = document.getElementById('reply-btn');
+
+  errDiv.style.display = 'none';
+  if (!body) { errDiv.textContent = 'Reply cannot be empty.'; errDiv.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Posting…';
+  const res = await api('POST', '/discussions/' + discId + '/reply', { body });
+  btn.disabled = false; btn.textContent = 'Post Reply';
+
+  if (res) {
+    disc.replies = res;
+    disc.reply_count = res.length;
+    document.getElementById('reply-body').value = '';
+    toast('Reply posted!', 'success');
+    render();
+    setTimeout(() => {
+      const list = document.getElementById('replies-list');
+      if (list) list.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+}
+
+async function deleteReply(rid) {
+  if (!confirm('Delete this reply?')) return;
+  const res = await api('DELETE', '/discussions/' + discId + '/reply/' + rid);
+  if (res) {
+    toast('Reply deleted.', 'success');
+    loadDiscussion();
+  }
+}
+
+async function deleteDiscussion() {
+  if (!confirm('Delete this discussion? This cannot be undone.')) return;
+  const res = await api('DELETE', '/discussions/' + discId);
+  if (res) {
+    toast('Discussion deleted.', 'success');
+    setTimeout(() => location.href = 'discussions.html', 900);
+  }
+}
+
+loadDiscussion();
+</script>
+</body>
+</html>

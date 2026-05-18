@@ -35,8 +35,8 @@ app.use('/api/users',     require('./routes/users'));
 app.use('/api/courses',   require('./routes/courses'));
 app.use('/api/notes',     require('./routes/notes'));
 app.use('/api/quizzes',   require('./routes/quizzes'));
-app.use('/api/dashboard', require('./routes/dashboard'));
-app.use('/api/ai',        require('./routes/ai'));
+app.use('/api/dashboard',    require('./routes/dashboard'));
+app.use('/api/discussions', require('./routes/discussions'));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

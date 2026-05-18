@@ -96,6 +96,29 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
   FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
+-- ── Discussions ───────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS discussions (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT NOT NULL,
+  title       VARCHAR(255) NOT NULL,
+  body        TEXT NOT NULL,
+  category    VARCHAR(100) NOT NULL DEFAULT 'General',
+  reply_count INT NOT NULL DEFAULT 0,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS discussion_replies (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  discussion_id INT NOT NULL,
+  user_id       INT NOT NULL,
+  body          TEXT NOT NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (discussion_id) REFERENCES discussions(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id)       REFERENCES users(id)       ON DELETE CASCADE
+);
+
 -- ── Seed: Courses ─────────────────────────────────────────────────────────────
 INSERT IGNORE INTO courses (id, title, subject, description, icon, color_class, modules, duration, level, rating, students) VALUES
 (1, 'Introduction to Cryptography', 'Cybersecurity', 'Learn the fundamentals of encryption, hashing, and secure communication protocols.', '🔐', 'c1', 12, '8 hrs', 'Beginner',    4.9, 3200),
