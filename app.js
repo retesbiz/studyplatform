@@ -22,7 +22,9 @@ app.get('/api/health', async (req, res) => {
   };
   try {
     await pool.query('SELECT 1');
-    res.json({ status: 'ok', db: 'connected', vars });
+    const [tables] = await pool.query(`SHOW TABLES`);
+    const tableNames = tables.map(r => Object.values(r)[0]);
+    res.json({ status: 'ok', db: 'connected', tables: tableNames, vars });
   } catch (err) {
     res.status(500).json({ status: 'error', db: err.message, vars });
   }
