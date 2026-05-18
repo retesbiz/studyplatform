@@ -36,6 +36,7 @@ app.use('/api/courses',   require('./routes/courses'));
 app.use('/api/notes',     require('./routes/notes'));
 app.use('/api/quizzes',   require('./routes/quizzes'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/ai',        require('./routes/ai'));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
