@@ -41,6 +41,35 @@ router.get('/categories', requireAuth, async (req, res) => {
   res.json(rows.map(r => r.subject));
 });
 
+// GET /api/courses/:id
+router.get('/:id', requireAuth, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT c.*,
+             e.progress, e.completed,
+             CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS enrolled
+      FROM courses c
+      LEFT JOIN enrollments e ON e.course_id = c.id AND e.user_id = ?
+      WHERE c.id = ?`, [req.user.id, req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Course not found.' });
+
+    const [modules] = await pool.query(
+      'SELECT * FROM course_modules WHERE course_id = ? ORDER BY sort_order',
+      [req.params.id]
+    );
+
+    const course = rows[0];
+    course.moduleList = modules.map(m => ({
+      ...m,
+      topicList: m.topics ? m.topics.split(',').map(t => t.trim()) : [],
+    }));
+    res.json(course);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // POST /api/courses/:id/enroll
 router.post('/:id/enroll', requireAuth, async (req, res) => {
   try {

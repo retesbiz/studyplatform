@@ -108,6 +108,82 @@ INSERT IGNORE INTO courses (id, title, subject, description, icon, color_class, 
 (8, 'Cloud Computing & AWS',        'DevOps',        'Deploy and manage applications on AWS using EC2, S3, Lambda, and more.', '☁️', 'c2', 16, '12 hrs', 'Intermediate', 4.5, 3400),
 (9, 'React & Modern JavaScript',    'Web Dev',       'Build modern UIs with React, hooks, state management, and REST API integration.', '⚛️', 'c3', 20, '16 hrs', 'Intermediate', 4.9, 8900);
 
+-- ── Course Modules ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS course_modules (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  course_id   INT NOT NULL,
+  sort_order  INT NOT NULL DEFAULT 0,
+  title       VARCHAR(255) NOT NULL,
+  description TEXT,
+  topics      TEXT,
+  duration    VARCHAR(30) NOT NULL DEFAULT '30 min',
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+INSERT IGNORE INTO course_modules (id, course_id, sort_order, title, description, topics, duration) VALUES
+-- Course 1: Introduction to Cryptography
+(1,  1,1,'What is Cryptography?','Explore the history and goals of cryptography — confidentiality, integrity, and authentication.','History of cryptography,CIA triad goals,Classical ciphers,Modern use cases,Symmetric vs asymmetric overview','40 min'),
+(2,  1,2,'Symmetric Encryption','Understand block and stream ciphers, and how AES secures data at rest and in transit.','AES algorithm,DES and 3DES,Block vs stream ciphers,ECB vs CBC modes,Padding schemes','45 min'),
+(3,  1,3,'Asymmetric Encryption','Learn how public/private key pairs work and why RSA and ECC power modern security.','RSA algorithm,Key generation,Encryption and decryption,Elliptic Curve Cryptography,Key sizes and security','45 min'),
+(4,  1,4,'Hash Functions','Discover how hash functions ensure data integrity and why MD5 is no longer safe.','MD5 and SHA-1 weaknesses,SHA-256 and SHA-3,Collision resistance,Preimage resistance,Use in certificates','40 min'),
+(5,  1,5,'Digital Signatures & PKI','Understand how digital signatures prove authenticity and how PKI manages trust at scale.','Signing and verification,RSA-PSS and ECDSA,X.509 certificates,Certificate Authorities,Certificate chains','50 min'),
+(6,  1,6,'TLS/SSL & Applied Cryptography','See how TLS combines symmetric, asymmetric, and hash algorithms to secure HTTPS connections.','TLS 1.2 vs TLS 1.3 handshake,Cipher suites,Perfect Forward Secrecy,Certificate validation,Common mistakes','45 min'),
+-- Course 2: Web Application Security
+(7,  2,1,'OWASP Top 10 Overview','Survey the ten most critical web application security risks and understand the threat landscape.','OWASP Top 10 list,Risk scoring methodology,Real-world breach examples,Security mindset,Threat modelling','40 min'),
+(8,  2,2,'SQL Injection','Learn how attackers manipulate SQL queries through user input and how to stop them completely.','Classic SQLi payloads,Blind and time-based SQLi,Parameterised queries,ORM protection,Database hardening','50 min'),
+(9,  2,3,'Cross-Site Scripting (XSS)','Understand reflected, stored, and DOM-based XSS and how Content Security Policy defends against them.','Reflected vs stored vs DOM XSS,Cookie theft,CSP headers,Output encoding,HttpOnly and Secure flags','50 min'),
+(10, 2,4,'CSRF & Broken Authentication','Examine forged cross-site requests and the authentication flaws that expose user accounts.','CSRF tokens,SameSite cookies,Session fixation,Credential stuffing,Multi-factor authentication','45 min'),
+(11, 2,5,'HTTP Security Headers','Configure server headers that harden your application against common browser-based attacks.','X-Frame-Options,Content-Security-Policy,HSTS,X-Content-Type-Options,Referrer-Policy','40 min'),
+(12, 2,6,'API Security & Secure SDLC','Protect REST APIs and integrate security practices throughout the development lifecycle.','JWT security pitfalls,Rate limiting,CORS configuration,Security code reviews,Penetration testing basics','55 min'),
+-- Course 3: Advanced SQL & Databases
+(13, 3,1,'Query Optimisation','Understand how the query planner works and write SQL that executes efficiently at scale.','EXPLAIN and EXPLAIN ANALYZE,Index scans vs full-table scans,Query cost estimation,Covering indexes,N+1 problem','45 min'),
+(14, 3,2,'Joins Deep Dive','Master all join types including self-joins and lateral joins for complex relational queries.','INNER LEFT RIGHT FULL OUTER joins,CROSS JOIN,Self-join patterns,LATERAL joins,Join order optimisation','45 min'),
+(15, 3,3,'Window Functions','Use OVER(), PARTITION BY, and ranking functions to perform analytics directly in SQL.','ROW_NUMBER RANK DENSE_RANK,LAG and LEAD,Running totals with SUM OVER,NTILE and percentiles,Analytics queries','50 min'),
+(16, 3,4,'Transactions & ACID','Guarantee data consistency with transactions and understand isolation levels for concurrency.','ACID properties,BEGIN COMMIT ROLLBACK,Isolation levels,Deadlock detection,Optimistic vs pessimistic locking','50 min'),
+(17, 3,5,'Indexes & Performance Tuning','Design the right indexes for your workload and avoid performance degradation.','B-Tree vs Hash indexes,Composite indexes,Partial indexes,Index maintenance,Slow query log analysis','45 min'),
+(18, 3,6,'Database Design & Normalisation','Apply normalisation rules to eliminate redundancy and design schemas that scale cleanly.','1NF 2NF 3NF BCNF,Denormalisation trade-offs,ER diagrams,Stored procedures,Database migrations','40 min'),
+-- Course 4: Machine Learning Fundamentals
+(19, 4,1,'Introduction to ML','Understand what machine learning is, the types of learning, and real-world applications.','Supervised vs unsupervised vs reinforcement,ML workflow,Data splits,Bias in datasets,Choosing an algorithm','40 min'),
+(20, 4,2,'Data Preprocessing','Clean, transform, and prepare raw data so models can learn from it effectively.','Handling missing values,Feature scaling,Encoding categoricals,Train/val/test split,Data leakage prevention','50 min'),
+(21, 4,3,'Regression Algorithms','Predict continuous values using linear, polynomial, and regularised regression models.','Linear regression,Gradient descent,Ridge and Lasso,Polynomial features,R-squared and RMSE metrics','55 min'),
+(22, 4,4,'Classification Algorithms','Classify data into categories using logistic regression, decision trees, SVMs, and k-NN.','Logistic regression,Decision trees,Support Vector Machines,K-Nearest Neighbours,Precision recall F1-score','55 min'),
+(23, 4,5,'Ensemble Methods','Combine multiple models to achieve better predictions than any single model alone.','Bagging and boosting,Random forests,Gradient Boosting and XGBoost,Stacking,Voting classifiers','50 min'),
+(24, 4,6,'Neural Networks Basics','Build your first neural network, understand backpropagation, and explore activation functions.','Perceptrons and layers,Activation functions,Backpropagation,Epochs and batches,Overfitting and regularisation','60 min'),
+-- Course 5: Full Stack Web Development
+(25, 5,1,'HTML5 & Semantic Markup','Write clean, accessible HTML5 with semantic elements and proper document structure.','Semantic tags,Forms and validation,Accessibility (ARIA),Meta tags and SEO,HTML5 APIs','35 min'),
+(26, 5,2,'CSS3 & Responsive Design','Style pages with Flexbox, Grid, and media queries for all screen sizes.','Flexbox layout,CSS Grid,Media queries,CSS variables,Animations and transitions,Mobile-first design','45 min'),
+(27, 5,3,'JavaScript Essentials','Cover core JS — closures, prototypes, the event loop, and modern ES6+ syntax.','ES6+ syntax,Closures and scope,Promises and async/await,Event loop,Modules (import/export)','60 min'),
+(28, 5,4,'Node.js & Express.js','Build a backend server with routing, middleware, and REST API design using Express.','Node.js event model,Express routing,Middleware chain,Error handling,REST API conventions','60 min'),
+(29, 5,5,'MySQL & Authentication','Persist data in MySQL and secure your API with JWT-based auth and bcrypt passwords.','MySQL schema design,CRUD with mysql2,Password hashing with bcrypt,JWT sign and verify,Auth middleware','60 min'),
+(30, 5,6,'React & Deployment','Build interactive UIs with React hooks and deploy your full stack app to the cloud.','React components and JSX,useState and useEffect,Fetching APIs,React Router,Railway deployment,CI/CD basics','70 min'),
+-- Course 6: Network Security Essentials
+(31, 6,1,'OSI & TCP/IP Models','Understand how data travels across networks and where security controls apply at each layer.','OSI 7 layers,TCP/IP stack,Encapsulation,Common protocols per layer,Packet analysis with Wireshark','40 min'),
+(32, 6,2,'Firewalls & Packet Filtering','Configure and understand stateful firewalls, packet filters, and next-gen firewall features.','Stateless vs stateful firewalls,iptables basics,Access Control Lists,NAT,DMZ architecture','40 min'),
+(33, 6,3,'VPNs & Encrypted Tunnels','Set up secure tunnels and understand VPN protocols like IPSec and WireGuard.','VPN types (site-to-site and remote access),IPSec and IKEv2,OpenVPN,WireGuard,Split tunnelling','40 min'),
+(34, 6,4,'Intrusion Detection & Prevention','Deploy IDS/IPS systems that monitor traffic and block attacks in real time.','Signature vs anomaly detection,Snort rules,Network vs host-based IDS,False positives,SIEM basics','40 min'),
+(35, 6,5,'Wireless & DNS Security','Secure Wi-Fi networks and protect DNS from poisoning and hijacking attacks.','WPA2 and WPA3,Evil twin attacks,DNSSEC,DNS-over-HTTPS,Common wireless attacks (deauth KRACK)','35 min'),
+-- Course 7: Python for Data Science
+(36, 7,1,'Python Foundations','Set up your environment and master Python syntax, data types, and control flow.','Lists dicts sets tuples,Comprehensions,Functions and lambdas,File I/O,Virtual environments and pip','40 min'),
+(37, 7,2,'NumPy Arrays','Perform fast numerical computations with arrays, broadcasting, and linear algebra.','ndarray creation,Indexing and slicing,Broadcasting,Vectorised operations,Linear algebra with linalg','45 min'),
+(38, 7,3,'Pandas DataFrames','Load, clean, and transform tabular data using pandas — the workhorse of data science.','DataFrame and Series,read_csv and read_excel,Filtering and groupby,merge and join,apply and map','55 min'),
+(39, 7,4,'Data Visualisation','Tell stories with data using Matplotlib and Seaborn charts from bar plots to heatmaps.','Matplotlib anatomy,Line and bar charts,Seaborn statistical plots,Subplots,Exporting figures','45 min'),
+(40, 7,5,'Exploratory Data Analysis','Systematically explore a dataset to understand distributions, correlations, and outliers.','Descriptive statistics,Correlation matrices,Outlier detection (IQR Z-score),Missing data analysis,EDA checklist','50 min'),
+(41, 7,6,'Intro to Scikit-learn','Train, evaluate, and tune machine learning models using the scikit-learn library.','Train/test split,Pipelines,LinearRegression and LogisticRegression,Cross-validation,Confusion matrix and ROC','60 min'),
+-- Course 8: Cloud Computing & AWS
+(42, 8,1,'Cloud Concepts & IAM','Understand cloud deployment models and control access with IAM roles and policies.','IaaS vs PaaS vs SaaS,AWS global infrastructure,IAM users roles policies,Least privilege,MFA and access keys','40 min'),
+(43, 8,2,'EC2 & Networking (VPC)','Launch virtual machines on EC2 and isolate them inside a custom Virtual Private Cloud.','EC2 instance types,Security groups,Key pairs and SSH,VPC subnets,Internet Gateway and NAT Gateway','55 min'),
+(44, 8,3,'S3 & Storage Services','Store objects at unlimited scale with S3 and understand the AWS storage ecosystem.','S3 buckets and objects,Storage classes,Lifecycle policies,Static website hosting,EBS and EFS comparison','45 min'),
+(45, 8,4,'RDS & Managed Databases','Deploy and manage relational databases on AWS without managing the underlying server.','RDS engines (MySQL Postgres),Multi-AZ and read replicas,Automated backups,Parameter groups,Aurora basics','45 min'),
+(46, 8,5,'Lambda & Serverless','Build event-driven functions that scale to zero and integrate with other AWS services.','Lambda function anatomy,Triggers and event sources,Cold starts,API Gateway integration,Step Functions','50 min'),
+(47, 8,6,'Deployment & Cost Optimisation','Use Elastic Beanstalk and CloudFormation for IaC and keep your AWS bill under control.','Elastic Beanstalk,CloudFormation templates,AWS Cost Explorer,Reserved vs spot instances,Trusted Advisor','50 min'),
+-- Course 9: React & Modern JavaScript
+(48, 9,1,'Modern JavaScript (ES6+)','Master the JS features that React and modern frameworks are built on.','Arrow functions,Destructuring,Spread and rest,Modules,Optional chaining,Promises and async/await','50 min'),
+(49, 9,2,'React Fundamentals','Build your first React components using JSX and understand how React renders the DOM.','JSX syntax,Functional components,Props,Conditional rendering,Lists and keys,Component composition','55 min'),
+(50, 9,3,'React Hooks Deep Dive','Use useState, useEffect, useRef, and custom hooks to manage state and side effects cleanly.','useState patterns,useEffect and cleanup,useRef,useMemo and useCallback,Custom hooks,Rules of Hooks','60 min'),
+(51, 9,4,'Routing & Data Fetching','Build multi-page React apps with React Router and fetch data from REST APIs.','React Router v6,Dynamic routes,useNavigate and useParams,fetch and axios,Loading and error states','55 min'),
+(52, 9,5,'State Management','Scale your application state with Context API and Redux Toolkit.','Context API,useReducer,Redux Toolkit (createSlice),RTK Query,Local vs global state decisions','60 min'),
+(53, 9,6,'Testing & Deployment','Write unit and integration tests and deploy your React app to production.','React Testing Library,jest.fn and mocks,Snapshot tests,Vite build optimisation,Deploying to Netlify and Railway','55 min');
+
 -- ── Seed: Quizzes ─────────────────────────────────────────────────────────────
 INSERT IGNORE INTO quizzes (id, title, subject, description, difficulty, duration_min) VALUES
 (1, 'Cryptography Basics',        'Cybersecurity', 'Test your knowledge of encryption algorithms and cryptographic principles.', 'Easy',   10),
