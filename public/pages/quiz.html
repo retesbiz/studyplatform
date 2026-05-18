@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Quizzes — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .quiz-header-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  .timer { font-family:var(--fh); font-size:22px; font-weight:700; color:var(--ink); padding:8px 18px; border:2px solid var(--border); border-radius:var(--rad); background:var(--surface); }
+  .timer.urgent { color:var(--red); border-color:var(--red); animation:pulse .8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+  .q-number { font-size:13px; color:var(--ink3); font-weight:600; margin-bottom:10px; }
+  .q-text { font-size:18px; font-weight:600; color:var(--ink); line-height:1.5; margin-bottom:24px; }
+  .result-circle { width:120px; height:120px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 24px; border:6px solid; }
+  .result-circle.pass { border-color:var(--acc); color:var(--acc); }
+  .result-circle.fail { border-color:var(--red); color:var(--red); }
+  .result-pct { font-family:var(--fh); font-size:32px; font-weight:700; line-height:1; }
+  .result-lbl { font-size:12px; font-weight:600; margin-top:2px; }
+  .answer-row { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .answer-row:last-child { border:none; }
+  .ans-icon { font-size:16px; flex-shrink:0; margin-top:2px; }
+  .ans-q { font-size:13px; font-weight:600; color:var(--ink); margin-bottom:3px; }
+  .ans-exp { font-size:12px; color:var(--ink3); line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-mark">📚</div><span class="sidebar-logo-text">StudyNest</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link active" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title" id="topbar-title">Quizzes</span>
+      <div class="topbar-actions" style="margin-left:auto">
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar" style="cursor:pointer" onclick="location.href='profile.html'">?</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- ── QUIZ LIST ── -->
+      <div id="view-list">
+        <div class="page-hero">
+          <h1>Quizzes</h1>
+          <p>Test your knowledge and track your scores.</p>
+        </div>
+        <div id="quiz-grid" class="course-grid">
+          <div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">⏳</div><h4>Loading…</h4></div>
+        </div>
+      </div>
+
+      <!-- ── QUIZ SESSION ── -->
+      <div id="view-session" style="display:none;max-width:680px">
+        <div class="quiz-header-bar">
+          <div>
+            <div id="session-subject" style="font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px"></div>
+            <h2 id="session-title" style="margin:0"></h2>
+          </div>
+          <div class="timer" id="timer">00:00</div>
+        </div>
+        <div class="progress-bar" style="height:8px;margin-bottom:28px">
+          <div class="progress-fill" id="session-progress" style="width:0%;transition:width .3s"></div>
+        </div>
+        <div id="question-area"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:24px">
+          <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- ── RESULTS ── -->
+      <div id="view-results" style="display:none;max-width:680px">
+        <div class="card" style="text-align:center;margin-bottom:24px;padding:32px">
+          <div class="result-circle" id="result-circle">
+            <div class="result-pct" id="result-pct"></div>
+            <div class="result-lbl" id="result-grade"></div>
+          </div>
+          <h2 id="result-title"></h2>
+          <p id="result-sub" class="text-muted" style="margin-bottom:20px"></p>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn-ghost" onclick="showList()">← All Quizzes</button>
+            <button class="btn btn-primary" id="retry-btn">Retry Quiz</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Answer Review</div></div>
+          <div id="answer-review"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+initPage();
+
+let quizzes     = [];
+let activeQuiz  = null;
+let questions   = [];
+let answers     = {};
+let currentQ    = 0;
+let timerSecs   = 0;
+let timerHandle = null;
+let startTime   = null;
+
+// ── List ─────────────────────────────────────────────────────────────────────
+async function loadQuizzes() {
+  quizzes = await api('GET', '/quizzes') || [];
+  document.getElementById('quiz-grid').innerHTML = quizzes.length
+    ? quizzes.map(q => {
+        const pct = q.attempt_count > 0 ? Math.round(q.best_score / q.best_total * 100) : null;
+        return `
+        <div class="course-card">
+          <div class="course-thumb ${q.difficulty==='Easy'?'c1':q.difficulty==='Hard'?'c6':'c3'}" style="font-size:40px">
+            ${q.subject==='Cybersecurity'?'🔐':q.subject==='Databases'?'🗄️':q.subject==='Data Science'?'🤖':'🌐'}
+            <div class="course-thumb-badge">
+              <span class="badge ${q.difficulty==='Easy'?'badge-green':q.difficulty==='Hard'?'badge-red':'badge-amber'}">${q.difficulty}</span>
+            </div>
+          </div>
+          <div class="course-body">
+            <div class="course-subject">${q.subject}</div>
+            <div class="course-title">${q.title}</div>
+            <div class="course-meta">
+              <span>❓ ${q.question_count} questions</span>
+              <span>⏱ ${q.duration_min} min</span>
+              ${q.attempt_count > 0 ? `<span>🏆 Best: ${pct}%</span>` : ''}
+            </div>
+            <button class="btn btn-primary btn-full btn-sm" style="margin-top:12px" onclick="startQuiz(${q.id})">
+              ${q.attempt_count > 0 ? 'Retake Quiz' : 'Start Quiz'}
+            </button>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🧠</div><h4>No quizzes available</h4></div>`;
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+async function startQuiz(id) {
+  activeQuiz = quizzes.find(q => q.id === id);
+  const data = await api('GET', '/quizzes/' + id);
+  if (!data) return;
+
+  questions = data.questions;
+  answers   = {};
+  currentQ  = 0;
+
+  document.getElementById('session-title').textContent   = data.title;
+  document.getElementById('session-subject').textContent = data.subject;
+  document.getElementById('topbar-title').textContent    = data.title;
+
+  timerSecs   = data.duration_min * 60;
+  startTime   = Date.now();
+  startTimer();
+
+  showView('session');
+  renderQuestion();
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerHandle);
+  timerHandle = setInterval(() => {
+    timerSecs--;
+    const m = String(Math.floor(timerSecs / 60)).padStart(2,'0');
+    const s = String(timerSecs % 60).padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = m + ':' + s;
+    el.classList.toggle('urgent', timerSecs <= 30);
+    if (timerSecs <= 0) { clearInterval(timerHandle); submitQuiz(); }
+  }, 1000);
+}
+
+// ── Render question ───────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q   = questions[currentQ];
+  const tot = questions.length;
+  document.getElementById('session-progress').style.width = ((currentQ) / tot * 100) + '%';
+  document.getElementById('next-btn').disabled = !answers[q.id];
+
+  document.getElementById('question-area').innerHTML = `
+    <div class="q-number">Question ${currentQ + 1} of ${tot}</div>
+    <div class="q-text">${q.question}</div>
+    ${['A','B','C','D'].map(k => `
+      <div class="quiz-option ${answers[q.id] === k ? 'selected' : ''}" onclick="selectAnswer('${k}')">
+        <span class="quiz-key">${k}</span>
+        ${q['option_' + k.toLowerCase()]}
+      </div>`).join('')}`;
+}
+
+function selectAnswer(key) {
+  answers[questions[currentQ].id] = key;
+  document.getElementById('next-btn').disabled = false;
+  renderQuestion();
+}
+
+function nextQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    submitQuiz();
+  }
+  document.getElementById('next-btn').textContent = currentQ >= questions.length - 1 ? 'Submit ✓' : 'Next →';
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────────
+async function submitQuiz() {
+  clearInterval(timerHandle);
+  const timeTaken = Math.round((Date.now() - startTime) / 1000);
+
+  const result = await api('POST', '/quizzes/' + activeQuiz.id + '/attempt', { answers, timeTaken });
+  if (!result) return;
+
+  showResults(result);
+}
+
+// ── Results ───────────────────────────────────────────────────────────────────
+function showResults(result) {
+  const pct   = Math.round(result.score / result.total * 100);
+  const pass  = pct >= 60;
+  const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+
+  document.getElementById('result-pct').textContent   = pct + '%';
+  document.getElementById('result-grade').textContent = grade;
+  document.getElementById('result-circle').className  = 'result-circle ' + (pass ? 'pass' : 'fail');
+  document.getElementById('result-title').textContent = pass ? '🎉 Well done!' : '📚 Keep studying!';
+  document.getElementById('result-sub').textContent   =
+    result.score + ' / ' + result.total + ' correct  ·  ' + (pass ? 'Passed' : 'Not passed');
+  document.getElementById('topbar-title').textContent = 'Results';
+  document.getElementById('retry-btn').onclick = () => startQuiz(activeQuiz.id);
+
+  document.getElementById('answer-review').innerHTML = result.results.map((r, i) => `
+    <div class="answer-row">
+      <div class="ans-icon">${r.isCorrect ? '✅' : '❌'}</div>
+      <div>
+        <div class="ans-q">Q${i+1}: ${questions[i]?.question || ''}</div>
+        <div class="ans-exp">
+          ${r.isCorrect ? 'Correct!' : `Your answer: <strong>${r.given || '(skipped)'}</strong> · Correct: <strong>${r.correct}</strong>`}
+          ${r.explanation ? ' — ' + r.explanation : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  showView('results');
+  loadQuizzes();
+}
+
+// ── Navigation helpers ────────────────────────────────────────────────────────
+function showList() {
+  clearInterval(timerHandle);
+  document.getElementById('topbar-title').textContent = 'Quizzes';
+  showView('list');
+}
+function showView(name) {
+  ['list','session','results'].forEach(v =>
+    document.getElementById('view-' + v).style.display = v === name ? 'block' : 'none');
+}
+
+loadQuizzes();
+</script>
+</body>
+</html>

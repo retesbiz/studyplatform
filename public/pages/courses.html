@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Courses — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-mark">📚</div><span class="sidebar-logo-text">StudyNest</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link active" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title">Courses</span>
+      <div class="topbar-search">
+        <span class="topbar-search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search courses…" oninput="loadCourses()">
+      </div>
+      <div class="topbar-actions">
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar" style="cursor:pointer" onclick="location.href='profile.html'">?</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-hero">
+        <h1>Course Library</h1>
+        <p>Explore topics, enrol in courses, and track your progress.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab-item active" onclick="setTab('all',this)">📚 All Courses</button>
+        <button class="tab-item" onclick="setTab('enrolled',this)">🎓 My Courses</button>
+        <button class="tab-item" onclick="setTab('completed',this)">✅ Completed</button>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;align-items:center">
+        <select class="form-input" id="filter-category" style="width:auto;padding:8px 12px" onchange="loadCourses()">
+          <option value="">All Categories</option>
+        </select>
+        <select class="form-input" id="filter-level" style="width:auto;padding:8px 12px" onchange="loadCourses()">
+          <option value="">All Levels</option>
+          <option>Beginner</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+        </select>
+        <span class="text-muted text-sm" id="results-count"></span>
+      </div>
+
+      <!-- Course grid -->
+      <div class="course-grid" id="course-grid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-icon">⏳</div><h4>Loading courses…</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enrol modal -->
+<div class="modal-overlay" id="enrol-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h4 id="modal-title">Enrol in Course</h4>
+      <button class="modal-close" onclick="closeModal('enrol-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="modal-desc" style="margin-bottom:20px"></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('enrol-modal')">Cancel</button>
+        <button class="btn btn-primary" id="modal-enrol-btn">Enrol Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+initPage();
+
+let currentTab = 'all';
+
+// Pre-fill search from URL param
+const urlSearch = new URLSearchParams(location.search).get('search');
+if (urlSearch) document.getElementById('search-input').value = urlSearch;
+
+async function loadCourses() {
+  const search   = document.getElementById('search-input').value.trim();
+  const category = document.getElementById('filter-category').value;
+  const level    = document.getElementById('filter-level').value;
+
+  const params = new URLSearchParams({ tab: currentTab });
+  if (search)   params.set('search', search);
+  if (category) params.set('category', category);
+  if (level)    params.set('level', level);
+
+  const courses = await api('GET', '/courses?' + params);
+  if (!courses) return;
+
+  document.getElementById('results-count').textContent = courses.length + ' course' + (courses.length !== 1 ? 's' : '');
+
+  if (!courses.length) {
+    document.getElementById('course-grid').innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state-icon">🔍</div>
+        <h4>No courses found</h4>
+        <p>Try adjusting your search or filters.</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('course-grid').innerHTML = courses.map(c => `
+    <div class="course-card">
+      <div class="course-thumb ${c.color_class}">
+        ${c.icon}
+        <div class="course-thumb-badge">
+          <span class="badge ${c.level === 'Beginner' ? 'badge-green' : c.level === 'Advanced' ? 'badge-red' : 'badge-amber'}">${c.level}</span>
+        </div>
+      </div>
+      <div class="course-body">
+        <div class="course-subject">${c.subject}</div>
+        <div class="course-title">${c.title}</div>
+        <div class="course-meta">
+          <span>📦 ${c.modules} modules</span>
+          <span>⏱ ${c.duration}</span>
+          <span>⭐ ${c.rating}</span>
+        </div>
+        ${c.enrolled ? `
+          <div class="course-progress-label">
+            <span>Progress</span><strong>${c.progress}%</strong>
+          </div>
+          <div class="progress-bar"><div class="progress-fill ${c.completed ? '' : ''}" style="width:${c.progress}%"></div></div>
+          <button class="btn btn-secondary btn-full btn-sm" style="margin-top:12px"
+            onclick="updateProgress(${c.id}, ${Math.min(100, (c.progress || 0) + 10)})">
+            ${c.completed ? '✅ Completed' : '▶ Continue'}
+          </button>
+        ` : `
+          <button class="btn btn-primary btn-full btn-sm" style="margin-top:12px"
+            onclick="showEnrolModal(${c.id}, '${c.title.replace(/'/g,"\\'")}', '${c.description ? c.description.replace(/'/g,"\\'").substring(0,100) : ''}…')">
+            Enrol Free
+          </button>
+        `}
+      </div>
+    </div>`).join('');
+}
+
+async function loadCategories() {
+  const cats = await api('GET', '/courses/categories');
+  if (!cats) return;
+  const sel = document.getElementById('filter-category');
+  cats.forEach(c => {
+    const o = document.createElement('option');
+    o.value = o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function setTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadCourses();
+}
+
+function showEnrolModal(id, title, desc) {
+  document.getElementById('modal-title').textContent = 'Enrol in ' + title;
+  document.getElementById('modal-desc').textContent  = desc;
+  document.getElementById('modal-enrol-btn').onclick = () => enrol(id);
+  openModal('enrol-modal');
+}
+
+async function enrol(id) {
+  const btn = document.getElementById('modal-enrol-btn');
+  btn.disabled = true; btn.textContent = 'Enrolling…';
+  const res = await api('POST', '/courses/' + id + '/enroll');
+  btn.disabled = false; btn.textContent = 'Enrol Now';
+  if (res) {
+    closeModal('enrol-modal');
+    toast('Enrolled successfully! 🎉', 'success');
+    loadCourses();
+  }
+}
+
+async function updateProgress(id, progress) {
+  await api('PATCH', '/courses/' + id + '/progress', { progress });
+  toast(progress >= 100 ? 'Course completed! 🎉' : 'Progress updated', 'success');
+  loadCourses();
+}
+
+loadCategories();
+loadCourses();
+</script>
+</body>
+</html>

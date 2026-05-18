@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Profile — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .profile-hero { background: linear-gradient(135deg, var(--acc), var(--acc2)); border-radius: var(--rad-xl); padding: 36px; color: #fff; display: flex; align-items: center; gap: 28px; margin-bottom: 24px; }
+  .profile-avatar-lg { width: 88px; height: 88px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; }
+  .profile-hero h2 { color: #fff; margin-bottom: 4px; }
+  .profile-hero p  { color: rgba(255,255,255,0.8); font-size: 14px; margin: 0; }
+  .profile-stats   { display: flex; gap: 28px; margin-top: 16px; }
+  .profile-stat-num { font-family: var(--fh); font-size: 22px; font-weight: 700; color: #fff; }
+  .profile-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.7); }
+  .mastery-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .mastery-label { font-size: 13px; font-weight: 500; color: var(--ink2); width: 130px; flex-shrink: 0; }
+  .mastery-bar { flex: 1; height: 8px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+  .mastery-fill { height: 100%; background: var(--acc); border-radius: 4px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+  .mastery-pct { font-size: 12px; font-weight: 600; color: var(--acc); width: 36px; text-align: right; flex-shrink: 0; }
+  .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .achievement { text-align: center; padding: 16px 10px; border-radius: var(--rad); border: 1.5px solid var(--border); }
+  .achievement.earned { background: var(--acc-lt); border-color: var(--acc); }
+  .achievement.locked { opacity: 0.4; filter: grayscale(1); }
+  .achievement-icon { font-size: 28px; margin-bottom: 6px; }
+  .achievement-name { font-size: 12px; font-weight: 600; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-mark">📚</div><span class="sidebar-logo-text">StudyNest</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link active" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title">Profile</span>
+      <div class="topbar-actions" style="margin-left:auto">
+        <button class="btn btn-secondary btn-sm" onclick="openModal('edit-modal')">✏️ Edit Profile</button>
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar" style="cursor:pointer" onclick="openModal('edit-modal')">?</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <!-- Hero -->
+      <div class="profile-hero">
+        <div class="profile-avatar-lg" id="profile-avatar">🎓</div>
+        <div>
+          <h2 id="profile-name">Loading…</h2>
+          <p id="profile-university">—</p>
+          <p id="profile-field" style="margin-top:2px"></p>
+          <div class="profile-stats">
+            <div><div class="profile-stat-num" id="ps-streak">—</div><div class="profile-stat-lbl">Day Streak</div></div>
+            <div><div class="profile-stat-num" id="ps-quizzes">—</div><div class="profile-stat-lbl">Quizzes</div></div>
+            <div><div class="profile-stat-num" id="ps-notes">—</div><div class="profile-stat-lbl">Notes</div></div>
+            <div><div class="profile-stat-num" id="ps-courses">—</div><div class="profile-stat-lbl">Courses</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- About -->
+        <div>
+          <div class="card" style="margin-bottom:18px">
+            <div class="card-header"><div class="card-title">About</div></div>
+            <div id="profile-bio" style="font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:16px">—</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--ink3)">
+              <div>🎓 <span id="about-uni">—</span></div>
+              <div>📚 <span id="about-field">—</span></div>
+              <div>📅 Member since <span id="about-since">—</span></div>
+            </div>
+          </div>
+
+          <!-- Quiz history -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Quiz History</div></div>
+            <div id="quiz-history">
+              <div class="empty-state" style="padding:20px"><div class="empty-state-icon">🧠</div><h4>No quizzes yet</h4></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mastery + Achievements -->
+        <div>
+          <div class="card" style="margin-bottom:18px">
+            <div class="card-header"><div class="card-title">Subject Mastery</div></div>
+            <div id="mastery-section">
+              <div style="color:var(--ink3);font-size:13px">Complete quizzes to see your mastery.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Achievements</div></div>
+            <div class="badge-grid" id="achievements-grid">
+              <!-- populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h4>Edit Profile</h4>
+      <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <label class="form-label">Avatar</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap" id="avatar-picker">
+          <div class="avatar-opt selected" data-val="🎓" onclick="selectAvatar(this)">🎓</div>
+          <div class="avatar-opt" data-val="🦊" onclick="selectAvatar(this)">🦊</div>
+          <div class="avatar-opt" data-val="🐧" onclick="selectAvatar(this)">🐧</div>
+          <div class="avatar-opt" data-val="🦉" onclick="selectAvatar(this)">🦉</div>
+          <div class="avatar-opt" data-val="🤖" onclick="selectAvatar(this)">🤖</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First name</label><input class="form-input" id="edit-fn" type="text"></div>
+        <div class="form-group"><label class="form-label">Last name</label><input class="form-input" id="edit-ln" type="text"></div>
+      </div>
+      <div class="form-group"><label class="form-label">University</label><input class="form-input" id="edit-uni" type="text"></div>
+      <div class="form-group">
+        <label class="form-label">Field of Study</label>
+        <select class="form-input" id="edit-field">
+          <option value="">Select…</option>
+          <option>Computer Science</option><option>Information Technology</option>
+          <option>Cybersecurity</option><option>Data Science</option>
+          <option>Software Engineering</option><option>Mathematics</option>
+          <option>Business / Management</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" id="edit-bio" rows="3" style="resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-ghost" onclick="closeModal('edit-modal')">Cancel</button>
+        <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<style>
+  .avatar-opt { width:44px;height:44px;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);cursor:pointer;transition:all .15s;background:var(--bg2); }
+  .avatar-opt:hover { border-color:var(--acc); }
+  .avatar-opt.selected { border-color:var(--acc);background:var(--acc-lt);box-shadow:0 0 0 3px var(--acc-md); }
+</style>
+<script>
+initPage();
+
+let selectedAvatar = '🎓';
+
+const ACHIEVEMENTS = [
+  { icon:'🚀', name:'First Login',    earned: true },
+  { icon:'📝', name:'Note Taker',     key:'notes',   threshold:1  },
+  { icon:'📚', name:'Note Master',    key:'notes',   threshold:10 },
+  { icon:'🧠', name:'Quiz Taker',     key:'quizzes', threshold:1  },
+  { icon:'🏆', name:'Quiz Champion',  key:'quizzes', threshold:5  },
+  { icon:'🎓', name:'Course Starter', key:'courses', threshold:1  },
+  { icon:'🔥', name:'On a Streak',    key:'streak',  threshold:3  },
+  { icon:'⭐', name:'High Scorer',    key:'score',   threshold:80 },
+];
+
+async function loadProfile() {
+  const [user, stats, history] = await Promise.all([
+    api('GET', '/users/me'),
+    api('GET', '/dashboard/stats'),
+    api('GET', '/quizzes/attempts/history'),
+  ]);
+
+  if (user) {
+    const name = (user.firstName + ' ' + user.lastName).trim();
+    document.getElementById('profile-name').textContent       = name;
+    document.getElementById('profile-avatar').textContent     = user.avatar || '🎓';
+    document.getElementById('profile-university').textContent = user.university || 'No university set';
+    document.getElementById('profile-field').textContent      = user.field || '';
+    document.getElementById('profile-bio').textContent        = user.bio || 'No bio yet.';
+    document.getElementById('about-uni').textContent          = user.university || '—';
+    document.getElementById('about-field').textContent        = user.field || '—';
+    document.getElementById('about-since').textContent        = formatDate(user.createdAt);
+
+    // Pre-fill edit form
+    document.getElementById('edit-fn').value    = user.firstName || '';
+    document.getElementById('edit-ln').value    = user.lastName  || '';
+    document.getElementById('edit-uni').value   = user.university || '';
+    document.getElementById('edit-field').value = user.field || '';
+    document.getElementById('edit-bio').value   = user.bio || '';
+    selectedAvatar = user.avatar || '🎓';
+    document.querySelectorAll('.avatar-opt').forEach(el => {
+      el.classList.toggle('selected', el.dataset.val === selectedAvatar);
+    });
+  }
+
+  if (stats) {
+    document.getElementById('ps-streak').textContent  = stats.streak;
+    document.getElementById('ps-quizzes').textContent = stats.quizzesCompleted;
+    document.getElementById('ps-notes').textContent   = stats.notesCreated;
+    document.getElementById('ps-courses').textContent = stats.enrolledCourses + stats.completedCourses;
+
+    // Achievements
+    document.getElementById('achievements-grid').innerHTML = ACHIEVEMENTS.map(a => {
+      let earned = a.earned || false;
+      if (a.key === 'notes'   && stats.notesCreated      >= a.threshold) earned = true;
+      if (a.key === 'quizzes' && stats.quizzesCompleted  >= a.threshold) earned = true;
+      if (a.key === 'courses' && (stats.enrolledCourses + stats.completedCourses) >= a.threshold) earned = true;
+      if (a.key === 'streak'  && stats.streak            >= a.threshold) earned = true;
+      if (a.key === 'score'   && stats.averageScore      >= a.threshold) earned = true;
+      return `<div class="achievement ${earned ? 'earned' : 'locked'}">
+        <div class="achievement-icon">${a.icon}</div>
+        <div class="achievement-name">${a.name}</div>
+      </div>`;
+    }).join('');
+  }
+
+  if (history && history.length) {
+    document.getElementById('quiz-history').innerHTML = history.slice(0, 5).map(h => {
+      const pct = Math.round(h.score / h.total * 100);
+      return `<div class="leaderboard-row">
+        <div class="lb-info">
+          <div class="lb-name">${h.title}</div>
+          <div class="lb-detail">${h.subject} · ${formatDate(h.completed_at)}</div>
+        </div>
+        <div class="lb-score">${pct}%</div>
+        <span class="badge ${pct>=60?'badge-green':'badge-red'}" style="margin-left:8px">${pct>=60?'Pass':'Fail'}</span>
+      </div>`;
+    }).join('');
+
+    // Mastery by subject
+    const bySubject = {};
+    history.forEach(h => {
+      if (!bySubject[h.subject]) bySubject[h.subject] = { score: 0, total: 0 };
+      bySubject[h.subject].score += h.score;
+      bySubject[h.subject].total += h.total;
+    });
+    document.getElementById('mastery-section').innerHTML = Object.entries(bySubject).map(([sub, d]) => {
+      const pct = Math.round(d.score / d.total * 100);
+      return `<div class="mastery-row">
+        <div class="mastery-label">${sub}</div>
+        <div class="mastery-bar"><div class="mastery-fill" style="width:${pct}%"></div></div>
+        <div class="mastery-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function selectAvatar(el) {
+  document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAvatar = el.dataset.val;
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('save-profile-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const res = await api('PATCH', '/users/me', {
+    firstName:  document.getElementById('edit-fn').value.trim(),
+    lastName:   document.getElementById('edit-ln').value.trim(),
+    university: document.getElementById('edit-uni').value.trim(),
+    field:      document.getElementById('edit-field').value,
+    bio:        document.getElementById('edit-bio').value.trim(),
+    avatar:     selectedAvatar,
+  });
+  btn.disabled = false; btn.textContent = 'Save Changes';
+  if (res) {
+    localStorage.setItem('user', JSON.stringify(res));
+    closeModal('edit-modal');
+    toast('Profile updated!', 'success');
+    loadProfile();
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

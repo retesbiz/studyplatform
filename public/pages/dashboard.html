@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">📚</div>
+      <span class="sidebar-logo-text">StudyNest</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link active" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="topbar-search">
+        <span class="topbar-search-icon">🔍</span>
+        <input type="text" placeholder="Search courses, notes…" id="global-search"
+          onkeydown="if(event.key==='Enter')location.href='courses.html?search='+encodeURIComponent(this.value)">
+      </div>
+      <div class="topbar-actions">
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar"
+          style="cursor:pointer" onclick="location.href='profile.html'">?</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div style="margin-bottom:24px">
+        <h2 id="greeting">Loading…</h2>
+        <p>Here's your study summary for today.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-icon green">🎓</div>
+          <div class="stat-num" id="stat-enrolled">—</div>
+          <div class="stat-lbl">Enrolled Courses</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon amber">🧠</div>
+          <div class="stat-num" id="stat-quizzes">—</div>
+          <div class="stat-lbl">Quizzes Completed</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">📝</div>
+          <div class="stat-num" id="stat-notes">—</div>
+          <div class="stat-lbl">Notes Created</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon red">🔥</div>
+          <div class="stat-num" id="stat-streak">—</div>
+          <div class="stat-lbl">Day Streak</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px">
+        <div>
+          <div class="section-title">
+            Continue Learning
+            <a href="courses.html" style="font-size:13px;font-weight:500;color:var(--acc)">View all →</a>
+          </div>
+          <div id="continue-learning">
+            <div class="empty-state">
+              <div class="empty-state-icon">🎓</div>
+              <h4>No courses yet</h4>
+              <p>Browse our library and enrol in a course.</p>
+              <a href="courses.html" class="btn btn-primary btn-sm" style="margin-top:12px">Browse Courses</a>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Recent Activity</div>
+          <div class="card card-flat" id="activity-list">
+            <div class="empty-state" style="padding:24px">
+              <div class="empty-state-icon">📋</div>
+              <h4>No activity yet</h4>
+              <p>Take a quiz or write a note to see it here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:28px">Quick Actions</div>
+      <div class="grid-3">
+        <a href="notes.html?new=1" class="card" style="text-decoration:none;display:flex;align-items:center;gap:14px;padding:18px 20px">
+          <div class="stat-icon blue" style="margin:0;flex-shrink:0">📝</div>
+          <div><div style="font-weight:600;font-size:14px">New Note</div><div class="text-muted text-sm">Capture ideas fast</div></div>
+        </a>
+        <a href="quiz.html" class="card" style="text-decoration:none;display:flex;align-items:center;gap:14px;padding:18px 20px">
+          <div class="stat-icon amber" style="margin:0;flex-shrink:0">🧠</div>
+          <div><div style="font-weight:600;font-size:14px">Take a Quiz</div><div class="text-muted text-sm">Test your knowledge</div></div>
+        </a>
+        <a href="courses.html" class="card" style="text-decoration:none;display:flex;align-items:center;gap:14px;padding:18px 20px">
+          <div class="stat-icon green" style="margin:0;flex-shrink:0">🎓</div>
+          <div><div style="font-weight:600;font-size:14px">Browse Courses</div><div class="text-muted text-sm">Explore new topics</div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+initPage();
+
+(function setGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = g + ', ' + (getUser()?.firstName || 'there') + '! 👋';
+})();
+
+async function loadDashboard() {
+  const [stats, courses, activity] = await Promise.all([
+    api('GET', '/dashboard/stats'),
+    api('GET', '/dashboard/courses'),
+    api('GET', '/dashboard/activity'),
+  ]);
+
+  if (stats) {
+    document.getElementById('stat-enrolled').textContent = stats.enrolledCourses;
+    document.getElementById('stat-quizzes').textContent  = stats.quizzesCompleted;
+    document.getElementById('stat-notes').textContent    = stats.notesCreated;
+    document.getElementById('stat-streak').textContent   = stats.streak + ' days';
+  }
+
+  if (courses && courses.length) {
+    document.getElementById('continue-learning').innerHTML = courses.map(c => `
+      <div class="card card-sm" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="course-thumb ${c.color_class}"
+            style="width:44px;height:44px;border-radius:var(--rad);font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            ${c.icon}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.title}</div>
+            <div class="text-muted text-sm">${c.subject}</div>
+            <div class="progress-bar" style="margin-top:6px">
+              <div class="progress-fill" style="width:${c.progress}%"></div>
+            </div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:3px">${c.progress}% complete</div>
+          </div>
+          <a href="courses.html" class="btn btn-secondary btn-sm">Continue</a>
+        </div>
+      </div>`).join('');
+  }
+
+  if (activity && activity.length) {
+    document.getElementById('activity-list').innerHTML =
+      '<div style="padding:4px 8px">' +
+      activity.map(a => `
+        <div class="schedule-item">
+          <div class="schedule-time">${timeAgo(a.ts)}</div>
+          <div class="schedule-dot" style="background:${a.type === 'quiz' ? 'var(--amb)' : 'var(--acc)'}"></div>
+          <div>
+            <div class="schedule-title">
+              ${a.type === 'quiz' ? 'Completed: ' + a.title : 'Updated note: ' + a.title}
+            </div>
+            <div class="schedule-sub">${a.subject}${a.type === 'quiz' ? ' · ' + a.score + '/' + a.total + ' correct' : ''}</div>
+          </div>
+        </div>`).join('') +
+      '</div>';
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
