@@ -188,9 +188,15 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (res.ok) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      window.location.href = 'dashboard.html';
+      window.location.href = '/pages/dashboard.html';
     } else {
-      errBanner.textContent = data.message || 'Invalid email or password. Please try again.';
+      // If this is a Google/GitHub account, offer the right button
+      if (data.message && data.message.includes('Google or GitHub')) {
+        errBanner.innerHTML = '⚠️ This email is registered via Google or GitHub. ' +
+          '<a href="/api/auth/google" style="color:var(--red);font-weight:700;text-decoration:underline">Sign in with Google</a>';
+      } else {
+        errBanner.textContent = data.message || 'Invalid email or password. Please try again.';
+      }
       errBanner.style.display = 'block';
     }
   } catch (err) {
@@ -202,8 +208,28 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   }
 });
 
+// Show OAuth error from URL params
+const urlErr = new URLSearchParams(location.search).get('error');
+if (urlErr) {
+  const msgs = {
+    google_failed:       'Google sign-in failed. Please try again.',
+    google_denied:       'Google sign-in was cancelled.',
+    github_failed:       'GitHub sign-in failed. Please try again.',
+    github_denied:       'GitHub sign-in was cancelled.',
+    oauth_not_configured:'Social login is not configured yet.',
+    invalid_state:       'Sign-in session expired. Please try again.',
+    oauth_failed:        'Social sign-in failed. Please try again.',
+  };
+  const banner = document.getElementById('error-banner');
+  banner.textContent = msgs[urlErr] || 'Sign-in failed. Please try again.';
+  banner.style.display = 'block';
+}
+
+// Show hint if this is a Google/GitHub account trying email login
+document.getElementById('login-form').addEventListener('submit', async (e) => {}, { once: false });
+
 // Redirect if already logged in
-if (localStorage.getItem('token')) window.location.href = 'dashboard.html';
+if (localStorage.getItem('token')) window.location.href = '/pages/dashboard.html';
 </script>
 </body>
 </html>
