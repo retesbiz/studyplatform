@@ -12,14 +12,14 @@ function logout() {
   fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => {});
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-  window.location.href = 'login.html';
+  window.location.href = '/pages/login.html';
 }
 
 // ── PAGE INIT (call on every page) ───────────────────────
 function initPage() {
   // Redirect to login if not authenticated
   if (!getToken()) {
-    window.location.href = 'login.html';
+    window.location.href = '/pages/login.html';
     return;
   }
 

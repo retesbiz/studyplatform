@@ -99,7 +99,7 @@ router.post('/logout', (_req, res) => res.json({ message: 'Logged out.' }));
 
 router.get('/google', (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID)
-    return res.redirect('/public/pages/login.html?error=oauth_not_configured');
+    return res.redirect('/pages/login.html?error=oauth_not_configured');
 
   // Sign a short-lived state token to prevent CSRF
   const state = jwt.sign({ provider: 'google' }, process.env.JWT_SECRET, { expiresIn: '10m' });
@@ -173,7 +173,7 @@ router.get('/google/callback', async (req, res) => {
 
 router.get('/github', (req, res) => {
   if (!process.env.GITHUB_CLIENT_ID)
-    return res.redirect('/public/pages/login.html?error=oauth_not_configured');
+    return res.redirect('/pages/login.html?error=oauth_not_configured');
 
   const state = jwt.sign({ provider: 'github' }, process.env.JWT_SECRET, { expiresIn: '10m' });
   const callbackUrl = `${siteUrl(req)}/api/auth/github/callback`;

@@ -6,13 +6,13 @@
 <title>StudyNest</title>
 <script>
   if (localStorage.getItem('token')) {
-    window.location.replace('public/pages/dashboard.html');
+    window.location.replace('/pages/dashboard.html');
   } else {
-    window.location.replace('public/pages/login.html');
+    window.location.replace('/pages/login.html');
   }
 </script>
 <noscript>
-  <meta http-equiv="refresh" content="0;url=public/pages/login.html">
+  <meta http-equiv="refresh" content="0;url=/pages/login.html">
 </noscript>
 </head>
 <body></body>
