@@ -4,7 +4,7 @@ A fully functional study platform built for students — with courses, notes, qu
 
 ## Live Demo
 
-> Add your Railway URL here after deployment
+**https://web-production-1b3cf.up.railway.app**
 
 ## Features
 
