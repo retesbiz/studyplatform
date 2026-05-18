@@ -46,6 +46,21 @@ router.patch('/me', requireAuth, async (req, res) => {
   }
 });
 
+// DELETE /api/users/me
+router.delete('/me', requireAuth, async (req, res) => {
+  const id = req.user.id;
+  try {
+    await pool.query('DELETE FROM quiz_attempts WHERE user_id = ?', [id]);
+    await pool.query('DELETE FROM enrollments WHERE user_id = ?', [id]);
+    await pool.query('DELETE FROM notes WHERE user_id = ?', [id]);
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    res.json({ message: 'Account deleted.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // PATCH /api/users/me/password
 router.patch('/me/password', requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;

@@ -301,8 +301,6 @@ small { font-size: 12px; color: var(--ink3); }
    MAIN APP LAYOUT
    ============================================================ */
 .app-shell {
-  display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
   min-height: 100vh;
 }
 
