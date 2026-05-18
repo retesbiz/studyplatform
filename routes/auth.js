@@ -117,7 +117,7 @@ router.get('/google', (req, res) => {
 
 router.get('/google/callback', async (req, res) => {
   const { code, state, error } = req.query;
-  const base = '/public/pages';
+  const base = '/pages';
 
   if (error) return res.redirect(`${base}/login.html?error=google_denied`);
 
@@ -189,7 +189,7 @@ router.get('/github', (req, res) => {
 
 router.get('/github/callback', async (req, res) => {
   const { code, state, error } = req.query;
-  const base = '/public/pages';
+  const base = '/pages';
 
   if (error) return res.redirect(`${base}/login.html?error=github_denied`);
 
