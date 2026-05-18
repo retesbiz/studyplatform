@@ -1,13 +1,15 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Railway injects MYSQL_URL or DATABASE_URL; fall back to individual vars for local dev
+const uri = process.env.MYSQL_URL || process.env.DATABASE_URL;
+
 let pool;
 
-if (process.env.DATABASE_URL) {
-  // PlanetScale / cloud MySQL — connection URL format
+if (uri) {
   pool = mysql.createPool({
-    uri: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: true },
+    uri,
+    ssl: { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit: 5,
   });
