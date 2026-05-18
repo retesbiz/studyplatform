@@ -1,19 +1,32 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Railway injects MYSQL_URL or DATABASE_URL; fall back to individual vars for local dev
 const uri = process.env.MYSQL_URL || process.env.DATABASE_URL;
 
 let pool;
 
 if (uri) {
+  // Cloud MySQL via connection URL (Railway, PlanetScale, etc.)
   pool = mysql.createPool({
     uri,
-    ssl: { rejectUnauthorized: false },
+    ssl:                { rejectUnauthorized: false },
     waitForConnections: true,
-    connectionLimit: 5,
+    connectionLimit:    5,
+  });
+} else if (process.env.MYSQLHOST) {
+  // Railway individual MySQL variables
+  pool = mysql.createPool({
+    host:               process.env.MYSQLHOST,
+    port:               process.env.MYSQLPORT    || 3306,
+    user:               process.env.MYSQLUSER,
+    password:           process.env.MYSQLPASSWORD,
+    database:           process.env.MYSQLDATABASE,
+    ssl:                { rejectUnauthorized: false },
+    waitForConnections: true,
+    connectionLimit:    5,
   });
 } else {
+  // Local development
   pool = mysql.createPool({
     host:               process.env.DB_HOST     || 'localhost',
     port:               process.env.DB_PORT     || 3306,
