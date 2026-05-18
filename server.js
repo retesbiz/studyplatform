@@ -9,11 +9,14 @@ async function initDb() {
   const sql  = fs.readFileSync(path.join(__dirname, 'db/schema.sql'), 'utf8');
 
   // Split on semicolons but ignore empty chunks
+  const isCloud = !!(process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.MYSQLHOST);
   const statements = sql
     .replace(/--.*$/gm, '')        // strip comments
     .split(';')
     .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .filter(s => s.length > 0)
+    // Skip CREATE DATABASE / USE on cloud — DB already exists with a different name
+    .filter(s => !isCloud || (!/^CREATE DATABASE/i.test(s) && !/^USE /i.test(s)));
 
   for (const stmt of statements) {
     try {
