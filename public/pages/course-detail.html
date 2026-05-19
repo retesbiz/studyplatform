@@ -132,9 +132,32 @@
   .module-content p { margin-bottom: 10px; }
   .module-content strong { color: var(--ink); }
   .module-content code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
+
+  /* ── Flashcards ── */
+  .fc-section { margin-bottom: 20px; }
+  .fc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .fc-label { font-size:13px; font-weight:700; color:var(--acc); display:flex; align-items:center; gap:6px; }
+  .fc-counter { font-size:12px; color:var(--ink3); }
+  .fc-stage { perspective: 1000px; height: 160px; margin-bottom:10px; cursor:pointer; }
+  .fc-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .45s ease; }
+  .fc-card.flipped { transform: rotateY(180deg); }
+  .fc-front, .fc-back {
+    position:absolute; inset:0;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border-radius:var(--rad-lg); padding:20px 24px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+  }
+  .fc-front { background:var(--acc); color:#fff; font-size:15px; font-weight:600; line-height:1.5; }
+  .fc-back  { background:var(--surface); border:2px solid var(--acc); color:var(--ink2); font-size:13px; line-height:1.6; transform:rotateY(180deg); }
+  .fc-controls { display:flex; align-items:center; gap:8px; }
+  .fc-btn { padding:5px 14px; border-radius:var(--rad); border:1.5px solid var(--border); background:var(--surface); font-size:13px; cursor:pointer; transition:all .15s; color:var(--ink2); }
+  .fc-btn:hover { border-color:var(--acc); color:var(--acc); }
+  .fc-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .fc-shuffle { margin-left:auto; font-size:12px; }
 </style>
 <script src="../js/app.js"></script>
 <script src="../js/course-content.js"></script>
+<script src="../js/flashcards.js"></script>
 <script>
 initPage();
 
@@ -221,6 +244,24 @@ async function loadCourse() {
             <span class="accordion-arrow" id="arrow-${m.id}">▾</span>
           </div>
           <div class="accordion-body" id="body-${m.id}">
+            ${(typeof FLASHCARDS !== 'undefined' && FLASHCARDS[m.id] && FLASHCARDS[m.id].length) ? `
+            <div class="fc-section">
+              <div class="fc-header">
+                <div class="fc-label">📇 Flashcards <span style="font-weight:400;color:var(--ink3)">(click card to flip)</span></div>
+                <div class="fc-counter" id="fc-counter-${m.id}">1 / ${FLASHCARDS[m.id].length}</div>
+              </div>
+              <div class="fc-stage" onclick="flipCard(${m.id})">
+                <div class="fc-card" id="fc-card-${m.id}">
+                  <div class="fc-front" id="fc-front-${m.id}">${FLASHCARDS[m.id][0].q}</div>
+                  <div class="fc-back"  id="fc-back-${m.id}">${FLASHCARDS[m.id][0].a}</div>
+                </div>
+              </div>
+              <div class="fc-controls">
+                <button class="fc-btn" id="fc-prev-${m.id}" onclick="event.stopPropagation();fcNav(${m.id},-1)" disabled>← Prev</button>
+                <button class="fc-btn" id="fc-next-${m.id}" onclick="event.stopPropagation();fcNav(${m.id},+1)" ${FLASHCARDS[m.id].length <= 1 ? 'disabled' : ''}>Next →</button>
+                <button class="fc-btn fc-shuffle" onclick="event.stopPropagation();fcShuffle(${m.id})">🔀 Shuffle</button>
+              </div>
+            </div>` : ''}
             ${(typeof COURSE_CONTENT !== 'undefined' && COURSE_CONTENT[m.id])
               ? `<div class="module-content">${COURSE_CONTENT[m.id]}</div>`
               : `<div class="accordion-desc">${m.description || ''}</div>`}
@@ -257,6 +298,60 @@ async function updateProgress(progress) {
 }
 
 loadCourse();
+
+// ── Flashcard state (per module) ──────────────────────────────────────────────
+const fcState = {};
+
+function fcGetState(mid) {
+  if (!fcState[mid]) {
+    const cards = (typeof FLASHCARDS !== 'undefined' && FLASHCARDS[mid]) ? [...FLASHCARDS[mid]] : [];
+    fcState[mid] = { cards, index: 0 };
+  }
+  return fcState[mid];
+}
+
+function flipCard(mid) {
+  const card = document.getElementById('fc-card-' + mid);
+  if (card) card.classList.toggle('flipped');
+}
+
+function fcNav(mid, dir) {
+  const s = fcGetState(mid);
+  s.index = Math.max(0, Math.min(s.cards.length - 1, s.index + dir));
+  // Reset flip
+  const card = document.getElementById('fc-card-' + mid);
+  if (card) card.classList.remove('flipped');
+  fcRender(mid);
+}
+
+function fcShuffle(mid) {
+  const s = fcGetState(mid);
+  for (let i = s.cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [s.cards[i], s.cards[j]] = [s.cards[j], s.cards[i]];
+  }
+  s.index = 0;
+  const card = document.getElementById('fc-card-' + mid);
+  if (card) card.classList.remove('flipped');
+  fcRender(mid);
+  toast('Cards shuffled!', 'success');
+}
+
+function fcRender(mid) {
+  const s = fcGetState(mid);
+  const c = s.cards[s.index];
+  if (!c) return;
+  const front   = document.getElementById('fc-front-' + mid);
+  const back    = document.getElementById('fc-back-' + mid);
+  const counter = document.getElementById('fc-counter-' + mid);
+  const prev    = document.getElementById('fc-prev-' + mid);
+  const next    = document.getElementById('fc-next-' + mid);
+  if (front)   front.textContent   = c.q;
+  if (back)    back.textContent    = c.a;
+  if (counter) counter.textContent = (s.index + 1) + ' / ' + s.cards.length;
+  if (prev)    prev.disabled       = s.index === 0;
+  if (next)    next.disabled       = s.index === s.cards.length - 1;
+}
 </script>
 </body>
 </html>
