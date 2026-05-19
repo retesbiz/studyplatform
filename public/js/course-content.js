@@ -1,64 +1,372 @@
 /* Study content for each course module, keyed by module ID */
 const COURSE_CONTENT = {
   // ── Course 1: Introduction to Cryptography ────────────────────────────
-  1: `<p>Cryptography is the science of securing information by transforming it into an unreadable format using mathematical algorithms. It has existed for thousands of years — from Caesar's letter-substitution cipher to today's AES encryption securing billions of internet transactions every second.</p>
-<p>Modern cryptography rests on three core goals known as the CIA triad: <strong>Confidentiality</strong> ensures only authorised parties can read the data; <strong>Integrity</strong> ensures data has not been tampered with in transit; and <strong>Authentication</strong> verifies that communicating parties are who they claim to be.</p>
+  1: `
+<p>Cryptography is the science of protecting information by transforming it into an unreadable form using mathematical algorithms. Only someone with the correct key can reverse the transformation and read the original data. The word itself comes from the Greek <em>kryptós</em> (hidden) and <em>gráphein</em> (to write). It is one of the oldest sciences in human history and today underpins virtually every secure digital system on the planet.</p>
+
+<h5 class="content-heading">A Brief History of Cryptography</h5>
+<p>Humans have been hiding messages for over 3,000 years. The <strong>Caesar cipher</strong> (used by Julius Caesar around 50 BC) shifted each letter of the alphabet by a fixed number — rotating "HELLO" by 3 gives "KHOOR". The Spartans used a <strong>scytale</strong> — a rod around which a strip of leather was wound — so that the message only made sense when wrapped around a rod of the same diameter. These classical ciphers were clever for their time but trivially broken today using frequency analysis (common letters like E, T, A appear most often in English text).</p>
+<p>The 20th century brought mechanical cryptography. The German <strong>Enigma machine</strong> used rotating electromechanical rotors to encrypt military communications in World War II. Alan Turing and the team at Bletchley Park cracked Enigma, directly contributing to the Allied victory and giving birth to the field of computer science. The lesson: no matter how complex the machine, if the underlying algorithm is flawed, it can be broken.</p>
+<p>The 1970s marked the modern era. The US government published the <strong>Data Encryption Standard (DES)</strong> in 1977 — the first widely-used standardised encryption algorithm. In 1976, Whitfield Diffie and Martin Hellman published their groundbreaking paper on <strong>public-key cryptography</strong>, solving the fundamental key distribution problem that had plagued cryptographers for centuries. Today we have AES, RSA, ECC, and SHA-256 — algorithms audited by thousands of researchers and tested by billions of real-world deployments.</p>
+
+<h5 class="content-heading">The Three Goals of Cryptography (CIA Triad)</h5>
+<p><strong>Confidentiality</strong> — Only authorised parties can read the data. Encryption achieves this by transforming plaintext into ciphertext that is meaningless to anyone without the key. Example: your WhatsApp messages are end-to-end encrypted so only you and the recipient can read them — not WhatsApp, not your ISP, not an attacker on the same Wi-Fi.</p>
+<p><strong>Integrity</strong> — The data has not been altered in transit or storage. Cryptographic hash functions and Message Authentication Codes (MACs) detect tampering. Example: when you download software, the website provides a SHA-256 hash of the file. You compute the hash of your downloaded file and compare — if they match, the file was not corrupted or modified.</p>
+<p><strong>Authentication</strong> — You can verify the identity of the party you are communicating with. Digital signatures and certificates achieve this. Example: when your browser connects to your bank, a digital certificate proves the server is genuinely your bank — not an attacker impersonating it.</p>
+<p>Many security systems also add a fourth property: <strong>Non-repudiation</strong> — the sender cannot later deny having sent a message, because only they possess the private key used to sign it. This is critical for legal and financial transactions.</p>
+
+<h5 class="content-heading">Kerckhoffs's Principle — The Golden Rule</h5>
+<p>Auguste Kerckhoffs stated in 1883: <em>"A cryptosystem should be secure even if everything about the system, except the key, is public knowledge."</em> This is the foundational principle of modern cryptography. We do NOT rely on keeping the algorithm secret (security through obscurity fails — algorithms get leaked or reverse-engineered). We rely on the mathematical hardness of the problem and the secrecy of the key alone.</p>
+<p>This is why AES, RSA, and SHA-256 are all fully public, open standards that anyone can inspect — yet they remain secure. If an algorithm can only be trusted while it stays secret, it is inherently weak.</p>
+
+<h5 class="content-heading">Types of Cryptography</h5>
+<p><strong>Symmetric cryptography</strong> uses one key for both encryption and decryption. It is fast, efficient, and ideal for large data. The challenge: how do two parties agree on that shared secret key over an insecure channel? (Covered in Module 2.)</p>
+<p><strong>Asymmetric cryptography</strong> uses a mathematically linked key pair — a public key (share freely) and a private key (never share). Solves the key distribution problem but is computationally slower. Used for key exchange, digital signatures, and certificates. (Covered in Module 3.)</p>
+<p><strong>Hash functions</strong> are one-way transformations — you can compute a hash from data but cannot recover the data from the hash. Used for integrity verification, password storage, and digital signatures. (Covered in Module 4.)</p>
+
+<h5 class="content-heading">Classical Ciphers and Why They Fail</h5>
+<p>Classical ciphers like the Caesar cipher, Vigenère cipher, and substitution ciphers all fail because they do not achieve <strong>confusion</strong> (hiding the relationship between key and ciphertext) and <strong>diffusion</strong> (spreading the influence of each plaintext bit across the ciphertext) — two properties that modern ciphers guarantee. Frequency analysis: in English text, 'E' appears ~13% of the time. If you encrypt by substitution and count which ciphertext character appears most, you can deduce it maps to 'E'. Within minutes, the entire cipher is broken.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Plaintext:</strong> The original readable data before encryption.</li>
-<li><strong>Ciphertext:</strong> The scrambled, unreadable output after encryption.</li>
-<li><strong>Key:</strong> A secret value that controls the encryption and decryption process.</li>
-<li><strong>Kerckhoffs's principle:</strong> A system should be secure even if everything about it, except the key, is public.</li>
+<li><strong>Plaintext:</strong> The original, readable data before encryption is applied.</li>
+<li><strong>Ciphertext:</strong> The scrambled, unreadable output produced after encryption.</li>
+<li><strong>Key:</strong> A secret value (a number) that controls the encryption and decryption algorithm's behaviour.</li>
+<li><strong>Encryption:</strong> The process of transforming plaintext into ciphertext using a key and algorithm.</li>
+<li><strong>Decryption:</strong> The reverse process — recovering plaintext from ciphertext using the key.</li>
+<li><strong>Kerckhoffs's Principle:</strong> Security must rest on the key alone, not on keeping the algorithm secret.</li>
+<li><strong>CIA Triad:</strong> Confidentiality, Integrity, Authentication — the three core goals of cryptographic systems.</li>
+<li><strong>Non-repudiation:</strong> The property that prevents a sender from denying they sent a message.</li>
+<li><strong>Confusion:</strong> Each bit of the ciphertext should depend on many parts of the key — hides the key–ciphertext relationship.</li>
+<li><strong>Diffusion:</strong> Changing one bit of the plaintext should change roughly half the bits of the ciphertext.</li>
+<li><strong>Frequency analysis:</strong> Cryptanalysis technique that exploits statistical patterns in natural language to break substitution ciphers.</li>
 </ul>`,
 
-  2: `<p>Symmetric encryption uses a single secret key for both encrypting and decrypting data. It is fast and efficient, making it ideal for encrypting large volumes of data such as files, databases, and network streams. The entire security of the system depends on keeping that one key secret.</p>
-<p>AES (Advanced Encryption Standard) is the gold standard — adopted by the US government in 2001 and used worldwide. AES operates on 128-bit blocks and supports 128, 192, or 256-bit keys. The mode of operation matters greatly: ECB mode is insecure because identical plaintext blocks produce identical ciphertext, while GCM mode provides both encryption and authentication.</p>
+  2: `
+<p>Symmetric encryption uses a single shared secret key for both encrypting and decrypting data. It is orders of magnitude faster than asymmetric encryption and is the workhorse for actually encrypting bulk data — files, database records, network streams, disk volumes. The critical challenge is key distribution: both parties must possess the same key before they can communicate securely, which requires a secure channel to share that key.</p>
+
+<h5 class="content-heading">The Fall of DES</h5>
+<p>The <strong>Data Encryption Standard (DES)</strong>, published in 1977, was the first widely-standardised symmetric cipher. It operates on 64-bit blocks with a 56-bit key. By 1999, the Electronic Frontier Foundation's "Deep Crack" machine exhausted all 2⁵⁶ possible keys in just 22 hours, proving DES was dead. The key was too short. <strong>Triple-DES (3DES)</strong> applied DES three times with different keys, providing ~112-bit effective security — but it is slow and also now deprecated. Both are forbidden in modern systems.</p>
+
+<h5 class="content-heading">AES — The Advanced Encryption Standard</h5>
+<p>In 2001, after a public 5-year competition, NIST (National Institute of Standards and Technology) selected the Rijndael algorithm as the new standard, naming it <strong>AES (Advanced Encryption Standard)</strong>. AES operates on 128-bit blocks and supports three key sizes: 128-bit (10 rounds), 192-bit (12 rounds), and 256-bit (14 rounds). AES-256 is used by the US government to protect TOP SECRET information.</p>
+<p>Each encryption round applies four transformations to a 4×4 byte state matrix:</p>
+<ul class="content-list">
+<li><strong>SubBytes:</strong> Each byte is replaced with a corresponding value from a fixed lookup table (S-box) — provides confusion.</li>
+<li><strong>ShiftRows:</strong> Each row of the state is shifted left by a different number of bytes — spreads bytes across columns.</li>
+<li><strong>MixColumns:</strong> Each column is multiplied by a fixed polynomial in a Galois Field — provides diffusion across all bytes in the column.</li>
+<li><strong>AddRoundKey:</strong> Each byte is XOR-ed with the corresponding byte of the round key derived from the main key via key schedule.</li>
+</ul>
+<p>The result is that after just a few rounds, every bit of the ciphertext depends on every bit of the plaintext and the key — true confusion and diffusion. AES has received decades of cryptanalysis by the world's best researchers. The best known attack reduces a 128-bit key's security by less than 2 bits. For all practical purposes, AES is unbreakable with correct implementation.</p>
+
+<h5 class="content-heading">Block Ciphers vs Stream Ciphers</h5>
+<p>A <strong>block cipher</strong> encrypts data in fixed-size chunks. AES encrypts one 128-bit (16-byte) block at a time. If your message is longer than one block, you need a <strong>mode of operation</strong> to handle multiple blocks.</p>
+<p>A <strong>stream cipher</strong> generates a pseudorandom keystream and XORs it with the plaintext one bit (or byte) at a time. Stream ciphers are simpler and faster on hardware with limited resources. The danger: <em>never reuse the same key + IV (initialisation vector) combination</em>. XORing two ciphertexts encrypted with the same keystream cancels out the keystream entirely, leaving the XOR of the two plaintexts — which is trivially attacked using frequency analysis.</p>
+
+<h5 class="content-heading">Modes of Operation — This is Where Most Mistakes Happen</h5>
+<p><strong>ECB (Electronic Codebook)</strong> — Never use. Each block is encrypted independently. Identical plaintext blocks produce identical ciphertext blocks. The famous "ECB Penguin" demonstrates this: encrypting a bitmap image with ECB preserves the visual structure of the original image because all the white pixels produce the same ciphertext block. ECB leaks patterns catastrophically.</p>
+<p><strong>CBC (Cipher Block Chaining)</strong> — Each plaintext block is XOR-ed with the previous ciphertext block before encryption, chaining them together. Requires a random IV (Initialisation Vector) for the first block. Much better than ECB, but: (1) sequential — cannot parallelise encryption; (2) padding oracle attacks (POODLE, BEAST) have broken many CBC implementations; (3) requires padding to fill the last block to a full 128 bits (PKCS#7 padding). CBC is legacy — avoid for new systems.</p>
+<p><strong>CTR (Counter Mode)</strong> — Encrypts a counter value (not the plaintext directly) to generate a keystream, then XORs with plaintext. Turns AES into a stream cipher. Fully parallelisable. No padding required. But provides no authentication — an attacker can flip bits in the ciphertext to predictably flip corresponding bits in the decrypted plaintext.</p>
+<p><strong>GCM (Galois/Counter Mode)</strong> — The recommended modern choice. Combines CTR mode encryption with a Galois field authentication tag (GHASH). This provides both <em>encryption</em> and <em>authentication</em> in a single pass — an Authenticated Encryption with Associated Data (AEAD) scheme. The 128-bit authentication tag detects any tampering with the ciphertext. GCM is parallelisable, fast in hardware, and is the cipher mode used in TLS 1.3. Critical: each (key, IV) pair must be used for only one message — reusing the nonce/IV in GCM completely destroys both confidentiality and authenticity.</p>
+<p><strong>ChaCha20-Poly1305</strong> — An alternative AEAD scheme. ChaCha20 is a stream cipher (not AES-based), combined with the Poly1305 MAC for authentication. It was designed by Daniel Bernstein and is particularly fast in software on CPUs without hardware AES acceleration (common in mobile/IoT devices). TLS 1.3 and WireGuard use it as their primary or fallback cipher.</p>
+
+<h5 class="content-heading">Initialisation Vectors (IVs) and Nonces</h5>
+<p>An <strong>IV (Initialisation Vector)</strong> or <strong>nonce (number used once)</strong> is a random value that must be unique for each encryption operation with the same key. It does not need to be secret — it can be transmitted alongside the ciphertext. Its purpose is to ensure that encrypting the same plaintext twice produces different ciphertexts, preventing pattern leakage. The IV must be truly random (generated by a CSPRNG — Cryptographically Secure Pseudo-Random Number Generator), not sequential or predictable.</p>
+
+<h5 class="content-heading">Key Sizes and Security Levels</h5>
+<p>Security is measured in "bits" — the number of bits in the key or the equivalent work factor to break the system. AES-128 = 128-bit security (2¹²⁸ operations to brute-force). AES-256 = 256-bit security. For context: the entire computational power of Earth's computers combined could not brute-force AES-128 before the sun burns out. The transition from 128-bit to 256-bit is recommended for long-term secrets or post-quantum preparedness.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>AES:</strong> The most widely used symmetric cipher, replacing the older DES standard.</li>
-<li><strong>Block cipher:</strong> Encrypts data in fixed-size chunks (128-bit blocks for AES).</li>
-<li><strong>Stream cipher:</strong> Encrypts data one bit or byte at a time (e.g. ChaCha20).</li>
-<li><strong>GCM mode:</strong> Recommended — provides encryption plus authentication in one step.</li>
+<li><strong>Symmetric encryption:</strong> One shared key encrypts and decrypts — fast, suitable for bulk data.</li>
+<li><strong>AES (Advanced Encryption Standard):</strong> The global standard symmetric cipher. Block size: 128 bits. Key sizes: 128/192/256 bits.</li>
+<li><strong>Block cipher:</strong> Encrypts fixed-size blocks of data (AES uses 128-bit blocks).</li>
+<li><strong>Stream cipher:</strong> Generates a keystream XOR-ed with plaintext — e.g., ChaCha20. Never reuse key+nonce.</li>
+<li><strong>ECB mode:</strong> Insecure — identical plaintext blocks produce identical ciphertext. Never use.</li>
+<li><strong>CBC mode:</strong> Chains blocks together; requires random IV; legacy — vulnerable to padding oracle attacks.</li>
+<li><strong>CTR mode:</strong> Converts block cipher to stream cipher; parallelisable; no authentication.</li>
+<li><strong>GCM mode:</strong> AEAD — provides encryption + authentication in one step. Recommended for new systems.</li>
+<li><strong>ChaCha20-Poly1305:</strong> Alternative AEAD; fast in software; used in TLS 1.3 and WireGuard.</li>
+<li><strong>IV / Nonce:</strong> Random unique value per encryption operation with the same key — prevents pattern leakage.</li>
+<li><strong>PKCS#7 padding:</strong> Scheme for padding the last block of a CBC-encrypted message to a full 128-bit block.</li>
+<li><strong>CSPRNG:</strong> Cryptographically Secure Pseudo-Random Number Generator — required for generating keys, IVs, and nonces.</li>
+<li><strong>AEAD:</strong> Authenticated Encryption with Associated Data — provides both confidentiality and integrity in one primitive.</li>
+<li><strong>DES / 3DES:</strong> Obsolete ciphers — 56-bit DES is brute-forceable in hours; both are deprecated and forbidden.</li>
 </ul>`,
 
-  3: `<p>Asymmetric encryption uses two mathematically linked keys: a public key that anyone can see, and a private key kept secret by its owner. Data encrypted with the public key can only be decrypted with the private key. This solves the key distribution problem of symmetric cryptography — you can share your public key openly without risk.</p>
-<p>RSA relies on the mathematical difficulty of factoring large prime numbers. Elliptic Curve Cryptography (ECC) achieves equivalent security with much smaller keys — a 256-bit ECC key is as strong as a 3072-bit RSA key — making it ideal for mobile devices and modern TLS certificates.</p>
+  3: `
+<p>Symmetric encryption is fast and strong, but it has a fundamental problem: how do two parties share the secret key before they can start communicating? If you send the key over the internet unprotected, an attacker intercepts it. If you meet in person to exchange keys, that does not scale to billions of internet users. This is the <strong>key distribution problem</strong>, and asymmetric cryptography solves it elegantly.</p>
+
+<h5 class="content-heading">Public-Key Cryptography — The Core Idea</h5>
+<p>In 1976, Whitfield Diffie and Martin Hellman proposed a revolutionary concept: what if each party had two mathematically linked keys — a <strong>public key</strong> they share openly with the world, and a <strong>private key</strong> they keep completely secret? The mathematical relationship between the keys must have a crucial property: it must be easy to compute in one direction, but computationally infeasible to reverse. This is called a <strong>trapdoor one-way function</strong>.</p>
+<p>The result: anyone can encrypt a message using your public key, but only you — with the corresponding private key — can decrypt it. You can post your public key on your website. No secret channel is needed to share it.</p>
+
+<h5 class="content-heading">RSA — Rivest–Shamir–Adleman</h5>
+<p>RSA, published in 1977 by Ron Rivest, Adi Shamir, and Leonard Adleman, is based on the mathematical hardness of <strong>integer factorisation</strong>: multiplying two large prime numbers together is trivial, but given only the product (a very large number), finding those two prime factors is computationally infeasible for large enough numbers.</p>
+<p><strong>RSA key generation (simplified):</strong></p>
+<ul class="content-list">
+<li>Choose two large, random prime numbers <code>p</code> and <code>q</code> (each 1024+ bits for RSA-2048).</li>
+<li>Compute the modulus: <code>n = p × q</code>. This is public.</li>
+<li>Compute Euler's totient: <code>φ(n) = (p−1)(q−1)</code>. This stays secret.</li>
+<li>Choose a public exponent <code>e</code> (commonly 65537) such that <code>gcd(e, φ(n)) = 1</code>.</li>
+<li>Compute the private exponent <code>d</code> such that <code>e × d ≡ 1 (mod φ(n))</code>. This is the private key.</li>
+<li><strong>Public key:</strong> (n, e). <strong>Private key:</strong> (n, d). Discard p, q, φ(n) after key generation.</li>
+</ul>
+<p><strong>Encryption:</strong> C = Mᵉ mod n. <strong>Decryption:</strong> M = Cᵈ mod n. The mathematics works because of Euler's theorem, and the security relies entirely on the difficulty of factoring n back into p and q. For RSA-2048, no known algorithm can factor n in feasible time with classical computers.</p>
+<p><strong>OAEP padding is mandatory.</strong> Raw RSA (textbook RSA without padding) is deterministic and malleable — the same plaintext always produces the same ciphertext, and an attacker can manipulate ciphertexts in predictable ways. <strong>OAEP (Optimal Asymmetric Encryption Padding)</strong> adds randomness and structure before encryption, making ciphertexts non-deterministic and defeating chosen-ciphertext attacks. Always use RSA-OAEP, never raw RSA.</p>
+
+<h5 class="content-heading">Diffie-Hellman Key Exchange</h5>
+<p>Diffie-Hellman (DH) does not encrypt data directly — it solves a narrower problem: how can two parties establish a shared secret over a public channel, without ever transmitting that secret? They use the mathematical hardness of the <strong>discrete logarithm problem</strong>.</p>
+<p>Simplified analogy: Alice and Bob agree on a public paint colour (the modulus p and generator g). Alice mixes in her secret colour and sends the result to Bob. Bob mixes in his secret colour and sends the result to Alice. Both now mix in the other's result — and both arrive at the same combined colour. An eavesdropper sees the intermediate mixes but cannot reverse-engineer the secret colours without solving the discrete log problem.</p>
+<p><strong>Ephemeral Diffie-Hellman (DHE)</strong> generates a fresh key pair for every session — this provides <strong>Perfect Forward Secrecy (PFS)</strong>. If an attacker records encrypted traffic today and later compromises the server's long-term private key, they still cannot decrypt past sessions because those session keys were ephemeral and are now gone forever.</p>
+
+<h5 class="content-heading">Elliptic Curve Cryptography (ECC)</h5>
+<p>ECC achieves the same security as RSA but with dramatically smaller key sizes, making it faster and more efficient — critical for mobile devices, IoT, and high-traffic servers. ECC is based on the <strong>elliptic curve discrete logarithm problem (ECDLP)</strong>: given a point P on a specific elliptic curve, and the result Q = k×P of multiplying P by a secret scalar k, finding k is computationally infeasible.</p>
+<p>An elliptic curve is defined by the equation y² = x³ + ax + b over a finite field. Points on the curve have a geometric addition operation: draw a line through two points, find where it intersects the curve, and reflect over the x-axis — that intersection is the "sum". Repeated application of this operation (scalar multiplication) is easy to compute but impossible to reverse efficiently.</p>
+<p>Security comparison: RSA-2048 provides ~112-bit security. To get equivalent security with ECC you only need a 224-bit key. ECC-256 (like Curve25519 or P-256) provides ~128-bit security and is used in TLS 1.3, Signal, Bitcoin, and almost all modern systems.</p>
+<p>Common curves: <strong>P-256 (NIST)</strong> — widely deployed, standard choice; <strong>Curve25519</strong> — designed by Daniel Bernstein, faster and harder to implement incorrectly, used in TLS 1.3 and Signal; <strong>secp256k1</strong> — used in Bitcoin.</p>
+
+<h5 class="content-heading">ECDH — Elliptic Curve Diffie-Hellman</h5>
+<p>ECDH applies Diffie-Hellman key exchange using elliptic curve arithmetic. Each party generates an ECC key pair. They exchange public keys. Each computes (their private key × other party's public key) — both arrive at the same shared secret point on the curve. This shared point's x-coordinate becomes the basis for a symmetric session key. ECDHE (Ephemeral ECDH) generates a fresh key pair per session for PFS.</p>
+
+<h5 class="content-heading">Hybrid Encryption — How Real Systems Work</h5>
+<p>Asymmetric cryptography is ~1000× slower than symmetric cryptography. Real-world systems use a <strong>hybrid approach</strong>: use asymmetric cryptography (RSA-OAEP or ECDH) to securely establish a shared symmetric key, then use that symmetric key (AES-256-GCM) to encrypt the actual data. TLS does exactly this: the handshake uses ECDHE to establish a session key, then AES-GCM encrypts the data stream. You get the key distribution benefits of asymmetric crypto and the speed benefits of symmetric crypto.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Public key:</strong> Freely shareable; used to encrypt data or verify a signature.</li>
-<li><strong>Private key:</strong> Never shared; used to decrypt data or create a signature.</li>
-<li><strong>RSA:</strong> Based on integer factorisation; widely used but requires large keys.</li>
-<li><strong>ECC:</strong> Elliptic Curve Cryptography — smaller keys, faster operations, same security level.</li>
+<li><strong>Key distribution problem:</strong> How to securely share a symmetric key over an insecure channel — solved by asymmetric cryptography.</li>
+<li><strong>Public key:</strong> Freely shareable — used to encrypt messages sent to you, or to verify your signature.</li>
+<li><strong>Private key:</strong> Never shared — used to decrypt messages, or to create a digital signature.</li>
+<li><strong>Trapdoor one-way function:</strong> Easy to compute in one direction, computationally infeasible to reverse without the trapdoor (private key).</li>
+<li><strong>RSA:</strong> Security based on integer factorisation. Key sizes: 2048-bit minimum, 4096-bit recommended for long-term use.</li>
+<li><strong>OAEP padding:</strong> Mandatory padding scheme for RSA encryption — adds randomness and prevents malleable attacks.</li>
+<li><strong>Diffie-Hellman (DH):</strong> Key agreement protocol using the discrete logarithm problem — lets two parties derive a shared secret without transmitting it.</li>
+<li><strong>DHE / ECDHE:</strong> Ephemeral Diffie-Hellman — fresh keys per session, providing Perfect Forward Secrecy.</li>
+<li><strong>ECC (Elliptic Curve Cryptography):</strong> Security based on the ECDLP — same security as RSA with much smaller keys.</li>
+<li><strong>Curve25519:</strong> A modern, high-performance elliptic curve — fast, secure, and resistant to implementation errors.</li>
+<li><strong>Perfect Forward Secrecy (PFS):</strong> Property ensuring past session keys cannot be recovered even if the long-term private key is later compromised.</li>
+<li><strong>Hybrid encryption:</strong> Asymmetric crypto establishes a key; symmetric crypto encrypts the data — used in TLS, PGP, and all practical systems.</li>
+<li><strong>RSA-2048 vs ECC-256:</strong> Both provide ~112–128 bit security. ECC-256 keys are 8× smaller and 10-40× faster for the same security level.</li>
 </ul>`,
 
-  4: `<p>A cryptographic hash function takes an input of any size and produces a fixed-size output called a digest. Hash functions are one-way — you cannot reverse them to recover the original input. Even a single character change in the input produces a completely different hash, a property called the avalanche effect.</p>
-<p>MD5 and SHA-1 are now broken — researchers have found collisions (two different inputs producing the same hash). For any new system, use SHA-256 or SHA-3. Hashes are used everywhere: verifying file downloads, storing passwords, digital signatures, and powering blockchain integrity checks.</p>
+  4: `
+<p>A <strong>cryptographic hash function</strong> takes an input (message) of any size — a single byte or a terabyte file — and produces a fixed-size output called a <strong>digest</strong> or <strong>hash</strong>. The function is deterministic (same input → same output), one-way (you cannot reverse it to recover the input), and produces dramatically different output for even the tiniest change in input. Hash functions are used in digital signatures, password storage, file integrity, blockchains, and data structures like Merkle trees.</p>
+
+<h5 class="content-heading">The Three Security Properties of a Hash Function</h5>
+<p><strong>1. Pre-image resistance (one-way):</strong> Given a hash value H, it must be computationally infeasible to find any input M such that hash(M) = H. If this fails, you can forge messages that hash to any desired value.</p>
+<p><strong>2. Second pre-image resistance:</strong> Given an input M1 and its hash H, it must be infeasible to find a different input M2 (≠ M1) such that hash(M2) = H. If this fails, an attacker can substitute a fake document that hashes to the same value as a real one.</p>
+<p><strong>3. Collision resistance:</strong> It must be computationally infeasible to find any two distinct inputs M1 and M2 where hash(M1) = hash(M2). This is the strongest property (and hardest to achieve) — finding any collision, not just one that targets a specific hash. A broken hash function like MD5 has collisions that can be found in seconds.</p>
+
+<h5 class="content-heading">The Avalanche Effect</h5>
+<p>A critical property of good hash functions is the <strong>avalanche effect</strong>: flipping a single bit of the input causes roughly 50% of the output bits to change — completely scrambling the output. Compare:</p>
+<ul class="content-list">
+<li>SHA-256("hello") = <code>2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824</code></li>
+<li>SHA-256("hellp") = <code>e81a70a1db2c98e234beabce2a82b5e0b0e2dbef15e68d06c0a6e1b74db16b7e</code></li>
+</ul>
+<p>One character change, completely different output. This makes it impossible to deduce anything about the input from the output.</p>
+
+<h5 class="content-heading">Common Hash Algorithms — Which Are Safe?</h5>
+<p><strong>MD5 (1992) — BROKEN. Do not use for security.</strong> Produces a 128-bit hash. Full collision attacks are practical in seconds on modern hardware. Researchers have created two different executable files with the same MD5 hash. MD5 should only be used as a non-cryptographic checksum (detecting accidental corruption, not malicious tampering). Using MD5 for password storage or digital signatures is a critical vulnerability.</p>
+<p><strong>SHA-1 (1995) — BROKEN. Do not use for security.</strong> Produces a 160-bit hash. In 2017, Google's Project Zero produced the first practical SHA-1 collision (the "SHAttered" attack) — two different PDF files with identical SHA-1 hashes. Major browsers and certificate authorities stopped accepting SHA-1 certificates.</p>
+<p><strong>SHA-256 (part of SHA-2 family, 2001) — SECURE. Recommended.</strong> Produces a 256-bit hash. Part of the SHA-2 family (SHA-224, SHA-256, SHA-384, SHA-512). No practical attack is known. Used in Bitcoin, TLS certificates, code signing, HMAC, and countless other applications. SHA-384 and SHA-512 offer larger output sizes for applications requiring longer-term security.</p>
+<p><strong>SHA-3 (Keccak, standardised 2015) — SECURE. Alternative to SHA-2.</strong> SHA-3 uses a completely different internal construction (sponge construction) than SHA-2 (Merkle-Damgård construction). This diversity matters: if a fundamental weakness were found in the Merkle-Damgård design, SHA-3 would remain unaffected. SHA-3 is recommended for new designs and as a backup to SHA-2.</p>
+<p><strong>BLAKE2 / BLAKE3</strong> — Not NIST standards, but fast and secure alternatives. BLAKE3 is the fastest cryptographic hash function available, often 3-10× faster than SHA-256, suitable for applications where hashing speed is critical (large files, databases).</p>
+
+<h5 class="content-heading">HMAC — Message Authentication Codes</h5>
+<p>A bare hash verifies data integrity but not authenticity — anyone can compute a hash. An <strong>HMAC (Hash-based Message Authentication Code)</strong> requires a secret key. HMAC-SHA256(key, message) produces a tag that only someone with the key can verify or produce. It is constructed as:</p>
+<p><code>HMAC(K, M) = H((K ⊕ opad) || H((K ⊕ ipad) || M))</code></p>
+<p>where opad and ipad are fixed padding constants. HMAC provides both integrity (data not altered) and authentication (came from someone with the key). HMAC is used in JWTs (signing the token), TLS record MAC, API request signing (AWS Signature v4), and OAuth.</p>
+
+<h5 class="content-heading">Password Storage — Why SHA-256 Alone Is Wrong</h5>
+<p>Storing passwords as raw SHA-256 hashes is dangerously insufficient. An attacker who steals your hash database can precompute billions of SHA-256 hashes from common passwords (a <strong>rainbow table</strong>) and look them up instantly. SHA-256 is designed to be fast — a modern GPU can compute 10 billion SHA-256 hashes per second. You must use a password hashing function designed to be slow and memory-hard.</p>
+<p><strong>bcrypt</strong> — A widely-used password hash function with a tunable cost factor. Automatically generates and stores a random salt. A cost factor of 12 means 2¹² = 4,096 iterations internally. As hardware gets faster, you increase the cost factor. Used in Node.js (bcryptjs library), Rails, Django. A bcrypt hash looks like: <code>$2b$12$[22-char-salt][31-char-hash]</code></p>
+<p><strong>scrypt</strong> — Designed to be both time-hard and memory-hard (requires a lot of RAM), defeating GPU and ASIC attacks. Used in many cryptocurrency key derivation schemes.</p>
+<p><strong>Argon2</strong> — Winner of the 2015 Password Hashing Competition. Three variants: Argon2d (fastest, GPU-resistant), Argon2i (side-channel resistant), Argon2id (hybrid, recommended). The current best practice for new applications. Provides tunable time cost, memory cost, and parallelism.</p>
+<p><strong>Salting:</strong> Always add a random unique salt (at least 16 bytes) per password before hashing. The salt is stored alongside the hash (it is not secret). The salt ensures that two users with the same password get different hashes, defeating rainbow tables and bulk cracking.</p>
+
+<h5 class="content-heading">Merkle Trees</h5>
+<p>A <strong>Merkle tree</strong> is a binary tree where each leaf node contains the hash of a data block, and each non-leaf node contains the hash of its two children. The single hash at the root (the <strong>Merkle root</strong>) cryptographically commits to the entire dataset. Changing any single leaf changes the root hash. Crucially, you can prove any specific piece of data is in the tree with only O(log n) hashes — called a <strong>Merkle proof</strong>. Used in: Bitcoin (transactions in a block), Git (commit objects), TLS Certificate Transparency logs.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Digest:</strong> The fixed-size hash output (e.g. SHA-256 always outputs 256 bits).</li>
-<li><strong>Collision:</strong> Two different inputs producing the same hash — catastrophic for security.</li>
-<li><strong>Avalanche effect:</strong> A tiny change in input causes a drastic change in the hash output.</li>
-<li><strong>Salting:</strong> Adding random data before hashing to defeat rainbow table attacks on passwords.</li>
+<li><strong>Hash function:</strong> A deterministic, one-way function producing a fixed-size digest from any input.</li>
+<li><strong>Digest / Hash:</strong> The fixed-size output of a hash function — e.g., SHA-256 always outputs exactly 256 bits (64 hex chars).</li>
+<li><strong>Pre-image resistance:</strong> Given H, infeasible to find M such that hash(M) = H.</li>
+<li><strong>Collision resistance:</strong> Infeasible to find any two distinct inputs with the same hash.</li>
+<li><strong>Avalanche effect:</strong> A single bit change in input changes ~50% of the output bits.</li>
+<li><strong>MD5:</strong> Broken — practical collisions in seconds. Never use for security purposes.</li>
+<li><strong>SHA-1:</strong> Broken — SHAttered collision attack demonstrated in 2017. Deprecated everywhere.</li>
+<li><strong>SHA-256:</strong> Current standard — secure, 256-bit output, widely supported. Default choice.</li>
+<li><strong>SHA-3 / Keccak:</strong> Sponge construction — structurally different from SHA-2, a safe alternative.</li>
+<li><strong>HMAC:</strong> Keyed hash function providing both integrity and authentication. HMAC-SHA256 is standard.</li>
+<li><strong>Rainbow table:</strong> Precomputed table of password→hash mappings used to crack unsalted password databases.</li>
+<li><strong>Salt:</strong> A random unique value added to each password before hashing — defeats rainbow tables.</li>
+<li><strong>bcrypt:</strong> Slow, salt-generating password hash with tunable cost factor. Minimum recommended cost: 12.</li>
+<li><strong>Argon2id:</strong> Current best-practice password hashing — memory-hard, time-hard, side-channel resistant.</li>
+<li><strong>Merkle tree:</strong> A hash tree where the root commits to the entire dataset; enables efficient proofs of inclusion.</li>
 </ul>`,
 
-  5: `<p>A digital signature lets you prove that a message or document came from you and was not altered. You hash the document, then encrypt that hash with your private key — the result is the signature. Anyone with your public key can decrypt and verify it matches the document's hash.</p>
-<p>Public Key Infrastructure (PKI) is the system of Certificate Authorities (CAs) that bind public keys to real-world identities. When your browser shows a padlock on HTTPS, it verified the server's X.509 certificate was signed by a CA your OS trusts. Certificate chains allow trust to flow from a small number of root CAs to millions of websites.</p>
+  5: `
+<p>A <strong>digital signature</strong> is the cryptographic equivalent of a handwritten signature — but far more secure. It proves two things simultaneously: (1) the message came from the claimed sender (authentication), and (2) the message has not been altered since it was signed (integrity). Unlike a handwritten signature, a digital signature is mathematically tied to the exact content of the document — changing a single character completely invalidates it.</p>
+
+<h5 class="content-heading">How Digital Signatures Work — Step by Step</h5>
+<p><strong>Signing (done by the sender):</strong></p>
+<ul class="content-list">
+<li>Compute a cryptographic hash of the document: <code>H = SHA-256(document)</code></li>
+<li>Encrypt the hash with your <em>private key</em>: <code>Signature = RSA_private_key(H)</code> — or in ECC: use ECDSA to produce a (r, s) signature pair from the hash.</li>
+<li>Send the document + the signature together.</li>
+</ul>
+<p><strong>Verification (done by the recipient):</strong></p>
+<ul class="content-list">
+<li>Recompute the hash of the received document: <code>H' = SHA-256(document)</code></li>
+<li>Decrypt the signature with the sender's <em>public key</em>: <code>H = RSA_public_key(Signature)</code></li>
+<li>If H == H', the signature is valid — the document came from the key's owner and was not altered.</li>
+</ul>
+<p>Note: only the hash is signed (not the full document), keeping signatures small regardless of document size. The public key does the verification, not the private key — so anyone can verify a signature, but only the private key holder can create one.</p>
+
+<h5 class="content-heading">Signature Algorithms</h5>
+<p><strong>RSA-PSS (Probabilistic Signature Scheme)</strong> — RSA-based signatures with randomised padding. PSS is the modern, secure version. (RSA-PKCS1 v1.5 signatures are the legacy version — still used widely but has theoretical vulnerabilities. Always prefer PSS for new systems.)</p>
+<p><strong>ECDSA (Elliptic Curve Digital Signature Algorithm)</strong> — The ECC-based signature scheme. Used in TLS certificates, Bitcoin transactions, JWT tokens (ES256 = ECDSA with P-256 + SHA-256). Critical implementation note: ECDSA requires a cryptographically random nonce k for each signature. If the same k is ever reused for two different messages, an attacker can calculate the private key. Sony's PlayStation 3 was broken this way — they used a constant k instead of a random one.</p>
+<p><strong>EdDSA (Edwards-curve Digital Signature Algorithm)</strong> — Specifically Ed25519 (using Curve25519). Deterministic — the nonce k is derived from the private key and message hash, so there is no catastrophic failure from a bad RNG. Fast, simple to implement correctly. Recommended for new systems. Used in SSH (ed25519 keys), Signal, WireGuard, and TLS 1.3.</p>
+
+<h5 class="content-heading">X.509 Certificates — What They Are</h5>
+<p>A <strong>certificate</strong> is a digitally signed document that binds a public key to an identity. It answers the question: "I have this public key — but how do I know it actually belongs to google.com and not an attacker?" The certificate contains:</p>
+<ul class="content-list">
+<li><strong>Subject:</strong> The entity the certificate belongs to (e.g., Common Name: google.com, Organisation: Google LLC).</li>
+<li><strong>Public key:</strong> The subject's public key.</li>
+<li><strong>Validity period:</strong> Not Before and Not After dates (typically 1–2 years for public web certs).</li>
+<li><strong>Issuer:</strong> The Certificate Authority that signed this certificate.</li>
+<li><strong>Subject Alternative Names (SANs):</strong> Additional domain names / IP addresses this cert is valid for.</li>
+<li><strong>Serial number:</strong> Unique identifier for this certificate within the issuing CA.</li>
+<li><strong>Signature:</strong> The CA's digital signature over all the above fields.</li>
+</ul>
+<p>X.509 is the international standard format (used by HTTPS, S/MIME, code signing, VPNs). Certificates are encoded in PEM format (Base64 between -----BEGIN CERTIFICATE----- headers) or DER format (binary). View any certificate by clicking the padlock in your browser and inspecting details.</p>
+
+<h5 class="content-heading">Certificate Authorities and the Chain of Trust</h5>
+<p>A <strong>Certificate Authority (CA)</strong> is a trusted organisation that verifies an applicant's identity and then signs a certificate for them. Your operating system and browser ship with a pre-installed list of ~150 trusted <strong>Root CAs</strong> (DigiCert, Sectigo, Let's Encrypt, GlobalSign, etc.). These root certificates are what you ultimately trust.</p>
+<p>In practice, root CAs don't sign end-entity certificates directly. They sign <strong>Intermediate CA certificates</strong>, which sign the end-entity certificates. This creates a <strong>certificate chain</strong>: End-entity cert ← signed by → Intermediate CA ← signed by → Root CA. Keeping the root CA offline in an air-gapped facility (Hardware Security Module) protects it — if an intermediate CA is compromised, it can be revoked without revoking the root.</p>
+<p><strong>Validation types:</strong></p>
+<ul class="content-list">
+<li><strong>DV (Domain Validation):</strong> CA verifies you control the domain (via DNS record or file upload). Automated, free via Let's Encrypt. The green padlock shows DV.</li>
+<li><strong>OV (Organisation Validation):</strong> CA verifies domain control + legal identity of the organisation. More expensive, takes days.</li>
+<li><strong>EV (Extended Validation):</strong> Strictest verification — physical address, legal status, business identity. Used to show the green company name bar in browsers (now removed in modern browsers in favour of padlock-only).</li>
+</ul>
+
+<h5 class="content-heading">Certificate Revocation</h5>
+<p>What happens when a certificate's private key is compromised before the certificate expires? The certificate must be <strong>revoked</strong>. There are two mechanisms:</p>
+<p><strong>CRL (Certificate Revocation List):</strong> A CA-published list of revoked certificate serial numbers. Browsers periodically download this list and check it. Problem: lists can be large, update infrequently, and browsers may use stale cached versions.</p>
+<p><strong>OCSP (Online Certificate Status Protocol):</strong> A client queries the CA in real-time: "Is certificate serial number X still valid?" The CA responds "good", "revoked", or "unknown". Problem: this adds latency and reveals browsing behaviour to the CA.</p>
+<p><strong>OCSP Stapling:</strong> The server fetches its own OCSP response from the CA, caches it, and includes it ("staples" it) in the TLS handshake. Eliminates the privacy problem and latency — the client gets a fresh revocation status without querying the CA directly.</p>
+<p><strong>Certificate Transparency (CT):</strong> All public TLS certificates must be logged in public, append-only CT logs. Browsers require proof of CT logging. This means if a CA fraudulently issues a certificate for google.com, Google will detect it by monitoring CT logs. Many major incidents (DigiNotar, CNNIC) led to this requirement.</p>
+
+<h5 class="content-heading">Public Key Infrastructure (PKI)</h5>
+<p>PKI is the entire ecosystem of policies, procedures, hardware, software, and people needed to create, manage, distribute, store, and revoke digital certificates. PKI is what enables HTTPS to be trusted at scale — billions of websites secured by a handful of root CAs that everyone has implicitly agreed to trust.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Digital signature:</strong> A hash of a document encrypted with the sender's private key.</li>
-<li><strong>X.509:</strong> The standard certificate format used in HTTPS and email security.</li>
-<li><strong>Certificate Authority (CA):</strong> A trusted organisation that vouches for a public key's owner.</li>
-<li><strong>Certificate chain:</strong> A hierarchy from a root CA down to the end-entity certificate.</li>
+<li><strong>Digital signature:</strong> Hash of data signed with a private key — proves origin and integrity.</li>
+<li><strong>Signing:</strong> Private key operation — produces the signature from the data's hash.</li>
+<li><strong>Verification:</strong> Public key operation — confirms the signature matches the data.</li>
+<li><strong>RSA-PSS:</strong> Modern RSA signature scheme with randomised padding — use instead of legacy PKCS1 v1.5.</li>
+<li><strong>ECDSA:</strong> ECC-based signatures — small, fast, used in TLS/JWT. Fatal if nonce k is reused.</li>
+<li><strong>EdDSA / Ed25519:</strong> Deterministic ECC signatures — safe nonce derivation, fast, recommended for new systems.</li>
+<li><strong>X.509 certificate:</strong> Standard format binding a public key to an identity — used in HTTPS, S/MIME, VPNs.</li>
+<li><strong>Certificate Authority (CA):</strong> Trusted entity that verifies identity and signs certificates.</li>
+<li><strong>Root CA:</strong> Self-signed CA at the top of the trust chain — stored in your OS/browser trust store.</li>
+<li><strong>Intermediate CA:</strong> Signed by the root CA; signs end-entity certs — root stays offline for safety.</li>
+<li><strong>Certificate chain:</strong> End-entity → Intermediate → Root — each signed by the one above it.</li>
+<li><strong>DV / OV / EV:</strong> Domain, Organisation, Extended Validation — levels of identity verification during issuance.</li>
+<li><strong>Let's Encrypt:</strong> Free, automated DV CA — revolutionised HTTPS adoption by making certs free and auto-renewable.</li>
+<li><strong>CRL:</strong> Certificate Revocation List — CA-published list of revoked serial numbers.</li>
+<li><strong>OCSP:</strong> Online Certificate Status Protocol — real-time cert validity query.</li>
+<li><strong>OCSP Stapling:</strong> Server includes its own OCSP response in the TLS handshake — no client CA query needed.</li>
+<li><strong>Certificate Transparency:</strong> Mandatory public logging of all TLS certs — enables detection of mis-issuance.</li>
+<li><strong>PKI:</strong> The full ecosystem managing digital certificates and public keys at scale.</li>
 </ul>`,
 
-  6: `<p>TLS (Transport Layer Security) is the protocol behind every HTTPS connection. It uses asymmetric cryptography to securely exchange a session key, then switches to fast symmetric encryption for the actual data. A MAC (Message Authentication Code) detects any tampering in transit. TLS 1.3 streamlined this process to a single round trip, making it faster and more secure than ever.</p>
-<p>The biggest applied cryptography mistakes are not algorithm weaknesses but implementation errors: hardcoding keys, using ECB mode, storing passwords with MD5, and skipping certificate validation. Always use battle-tested libraries (OpenSSL, libsodium) rather than writing your own cryptographic code.</p>
+  6: `
+<p><strong>TLS (Transport Layer Security)</strong> is the cryptographic protocol that secures HTTPS connections, email (SMTP/IMAP over TLS), VoIP, and many other application protocols. Every time you see a padlock in your browser, TLS is protecting that connection. TLS combines asymmetric cryptography (for key exchange), symmetric cryptography (for bulk data), and hash functions (for integrity) — it is applied cryptography in action.</p>
+
+<h5 class="content-heading">TLS 1.2 Handshake — How It Works</h5>
+<p>TLS 1.2 (2008) requires 2 round trips before the first byte of application data can flow:</p>
+<ul class="content-list">
+<li><strong>ClientHello:</strong> Client sends supported TLS versions, a random nonce (client_random), and a list of supported cipher suites (e.g., TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384).</li>
+<li><strong>ServerHello:</strong> Server picks the best cipher suite, sends server_random, and its certificate.</li>
+<li><strong>Key Exchange:</strong> Client verifies the certificate chain. Both sides use ECDHE to generate a shared pre-master secret. Both derive the session keys from client_random + server_random + pre-master secret using a PRF (pseudo-random function).</li>
+<li><strong>Finished:</strong> Both sides send a "Finished" message — a hash of the entire handshake — to verify nothing was tampered with. After this, all data is encrypted with symmetric session keys.</li>
+</ul>
+
+<h5 class="content-heading">TLS 1.3 — The Modern Standard</h5>
+<p>TLS 1.3 (2018) is a major redesign. It is simultaneously faster and more secure:</p>
+<ul class="content-list">
+<li><strong>1-RTT handshake:</strong> Reduced from 2 round trips to 1. The client sends its key share (ECDHE public key) in the very first message alongside the ClientHello. The server can respond with encrypted data in its first reply. Result: 66ms vs 100ms on a typical network connection.</li>
+<li><strong>0-RTT resumption:</strong> For reconnecting clients (within 24 hours), TLS 1.3 can resume a session with zero round trips — the client sends application data with the very first packet. Trade-off: 0-RTT data is replay-vulnerable (an attacker can replay those first bytes). Only use for non-sensitive idempotent operations (GET requests, not payments).</li>
+<li><strong>Removed all legacy cruft:</strong> Static RSA key exchange (no PFS), RC4, DES, 3DES, MD5, SHA-1, export-grade ciphers, and renegotiation were all removed. TLS 1.3 only supports 5 cipher suites, all providing AEAD and PFS.</li>
+<li><strong>Encrypted handshake:</strong> In TLS 1.3, the server's certificate is encrypted during the handshake (using ephemeral keys) — an eavesdropper cannot see which certificate the server sent. In TLS 1.2, the certificate was in plaintext.</li>
+</ul>
+
+<h5 class="content-heading">Cipher Suites — Reading and Choosing Them</h5>
+<p>A cipher suite specifies the algorithms used for each cryptographic operation in a TLS session. TLS 1.2 cipher suite name format:</p>
+<p><code>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</code></p>
+<ul class="content-list">
+<li><strong>ECDHE:</strong> Key exchange algorithm (Elliptic Curve Diffie-Hellman Ephemeral) — provides PFS.</li>
+<li><strong>RSA:</strong> Authentication method — how the server's identity is verified (using its RSA certificate).</li>
+<li><strong>AES_256_GCM:</strong> Symmetric encryption (AES-256 in GCM mode) — bulk data encryption.</li>
+<li><strong>SHA384:</strong> PRF / MAC hash function for key derivation and record MAC.</li>
+</ul>
+<p>TLS 1.3 simplified cipher suites to just the AEAD algorithm + hash: <code>TLS_AES_256_GCM_SHA384</code>, <code>TLS_CHACHA20_POLY1305_SHA256</code>. Key exchange and authentication are handled separately. All 5 TLS 1.3 cipher suites provide PFS.</p>
+
+<h5 class="content-heading">Perfect Forward Secrecy (PFS) — Why It Matters</h5>
+<p>In older TLS (with static RSA key exchange), the client encrypts the pre-master secret with the server's RSA public key. If an attacker records encrypted traffic today and later compromises the server's private RSA key (data breach, court order, years-long passive attack), they can decrypt all previously recorded sessions retroactively — including sessions from years ago.</p>
+<p>With <strong>Perfect Forward Secrecy</strong> (using DHE or ECDHE), fresh ephemeral key pairs are generated for every session. The session keys are derived from these ephemeral keys. After the session ends, the ephemeral private keys are deleted. Even with the server's long-term private key compromised, an attacker cannot reconstruct past session keys because the ephemeral keys are gone. Always verify ECDHE appears in the cipher suite.</p>
+
+<h5 class="content-heading">SNI and Certificate Selection</h5>
+<p><strong>SNI (Server Name Indication)</strong> is a TLS extension where the client includes the domain name it is connecting to in the ClientHello message (before encryption). This allows a single server/IP address to host multiple TLS certificates for different domains — essential for shared hosting. Without SNI, a server with one IP could only serve one TLS certificate. Note: in TLS 1.2, SNI is plaintext (an eavesdropper can see what domain you're connecting to, even if not the content). TLS 1.3 with <strong>Encrypted Client Hello (ECH)</strong> encrypts SNI — a newer development still being deployed.</p>
+
+<h5 class="content-heading">Historic TLS Attacks — Learn From Them</h5>
+<p><strong>BEAST (2011):</strong> Exploited CBC mode's predictable IV in TLS 1.0, allowing session cookie decryption. Fixed by upgrading to TLS 1.1/1.2 and preferring RC4 (now also broken). Real fix: use AES-GCM.</p>
+<p><strong>CRIME / BREACH (2012):</strong> Exploited TLS compression — an attacker could adaptively guess secret cookie values by observing compressed ciphertext length. Fix: disable TLS compression (it was removed in TLS 1.3).</p>
+<p><strong>POODLE (2014):</strong> Exploited padding oracle vulnerability in SSL 3.0 CBC mode. Fix: disable SSL 3.0 entirely. Extended to TLS 1.0/1.1 CBC — another reason to disable them.</p>
+<p><strong>Heartbleed (2014):</strong> Not a TLS protocol flaw — a buffer over-read bug in OpenSSL's heartbeat extension. Allowed any remote attacker to read 64KB of the server's memory per request, potentially exposing private keys, session tokens, and plaintext data. Affected ~17% of all HTTPS servers at the time. Fix: patch OpenSSL and regenerate all affected keys/certificates.</p>
+<p><strong>ROBOT (2017):</strong> Return Of Bleichenbacher's Oracle Threat. A padding oracle attack against RSA-PKCS1 v1.5 key exchange (not ECDHE). Allowed decryption of TLS sessions and forging of signatures for servers using static RSA key exchange. Fix: use ECDHE (PFS) cipher suites, eliminating static RSA key exchange entirely. TLS 1.3 removes static RSA key exchange completely.</p>
+
+<h5 class="content-heading">HSTS — HTTP Strict Transport Security</h5>
+<p>HSTS is an HTTP response header that tells the browser: "For the next [max-age] seconds, only access this domain over HTTPS — never plain HTTP, even if the user types http://." The header: <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>. HSTS prevents SSL stripping attacks (where an attacker silently downgrades HTTPS to HTTP). The HSTS preload list (built into all major browsers) ensures even first-visit connections are forced to HTTPS.</p>
+
+<h5 class="content-heading">The Ten Most Critical Applied Cryptography Mistakes</h5>
+<ul class="content-list">
+<li><strong>1. Hardcoding keys/secrets in source code</strong> — They end up in git history forever. Use environment variables.</li>
+<li><strong>2. Using ECB mode</strong> — Leaks patterns. Use GCM.</li>
+<li><strong>3. Reusing nonces/IVs</strong> — Catastrophic in CTR and GCM modes. Generate random IVs for every encryption.</li>
+<li><strong>4. Storing passwords with SHA-256 or MD5</strong> — Use bcrypt, scrypt, or Argon2id.</li>
+<li><strong>5. Skipping certificate validation</strong> — Never set <code>verify=False</code> or ignore cert errors. This defeats TLS entirely.</li>
+<li><strong>6. Using static RSA key exchange without PFS</strong> — All past sessions can be decrypted if the key is compromised.</li>
+<li><strong>7. Writing your own cryptographic code</strong> — Use audited libraries: libsodium, Bouncy Castle, OpenSSL. Crypto is easy to get subtly wrong in ways that are undetectable but completely insecure.</li>
+<li><strong>8. Using MD5 or SHA-1 for digital signatures or certificates</strong> — Broken. Use SHA-256 minimum.</li>
+<li><strong>9. Short RSA keys (< 2048 bits)</strong> — 1024-bit RSA can be factored. Use 2048-bit minimum, 4096-bit for long-term keys.</li>
+<li><strong>10. Allowing TLS 1.0 / SSL 3.0</strong> — Vulnerable to POODLE, BEAST. Disable; require TLS 1.2 minimum, TLS 1.3 preferred.</li>
+</ul>
+
+<h5 class="content-heading">Post-Quantum Cryptography — The Coming Transition</h5>
+<p>A sufficiently powerful <strong>quantum computer</strong> running <strong>Shor's algorithm</strong> could factor large integers and solve the discrete logarithm problem in polynomial time — completely breaking RSA, ECC, and Diffie-Hellman. Symmetric ciphers (AES-256) and hash functions (SHA-256) are quantum-resistant (Grover's algorithm halves security — AES-128 drops to 64-bit effective security, but AES-256 remains at 128-bit, which is acceptable).</p>
+<p>NIST completed its post-quantum cryptography standardisation in 2024. The new standards include: <strong>ML-KEM (CRYSTALS-Kyber)</strong> for key encapsulation, and <strong>ML-DSA (CRYSTALS-Dilithium)</strong> for digital signatures — both based on lattice problems that quantum computers cannot solve efficiently. Migration to post-quantum algorithms is already beginning in TLS, government systems, and cloud infrastructure. Harvest-now-decrypt-later attacks (recording today's encrypted traffic to decrypt once quantum computers exist) make this transition urgent for long-lived secrets.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>TLS handshake:</strong> The negotiation process where client and server agree on keys and algorithms.</li>
-<li><strong>Cipher suite:</strong> A named combination of key exchange, encryption, and MAC algorithms.</li>
-<li><strong>Perfect Forward Secrecy:</strong> Ensures past sessions stay safe even if the long-term key is later compromised.</li>
-<li><strong>HSTS:</strong> HTTP Strict Transport Security — forces browsers to always use HTTPS for a domain.</li>
+<li><strong>TLS (Transport Layer Security):</strong> The protocol securing HTTPS — combines asymmetric key exchange, symmetric encryption, and MAC.</li>
+<li><strong>TLS 1.3:</strong> Current standard — 1-RTT handshake, removes all legacy algorithms, encrypts certificate in handshake.</li>
+<li><strong>Cipher suite:</strong> Named combination of key exchange, authentication, encryption, and MAC algorithms for a TLS session.</li>
+<li><strong>ECDHE:</strong> Ephemeral Elliptic Curve Diffie-Hellman — provides Perfect Forward Secrecy in key exchange.</li>
+<li><strong>Perfect Forward Secrecy (PFS):</strong> Ephemeral session keys mean past sessions cannot be decrypted even if the long-term key is later stolen.</li>
+<li><strong>SNI:</strong> Server Name Indication — client sends the target domain in ClientHello, enabling virtual hosting of multiple certs.</li>
+<li><strong>0-RTT resumption:</strong> TLS 1.3 feature — client sends data with first packet; only safe for idempotent requests (replay risk).</li>
+<li><strong>HSTS:</strong> HTTP Strict Transport Security — browser policy forcing HTTPS for a domain for a defined period.</li>
+<li><strong>Certificate pinning:</strong> Client hardcodes expected certificate or public key — protects against rogue CAs but complex to manage.</li>
+<li><strong>Heartbleed:</strong> OpenSSL buffer over-read — not a TLS flaw, but a critical implementation bug exposing server memory.</li>
+<li><strong>POODLE:</strong> Padding oracle attack on SSL 3.0 / TLS CBC mode — fix by disabling SSL 3.0 and TLS 1.0/1.1.</li>
+<li><strong>ROBOT:</strong> Bleichenbacher padding oracle on RSA key exchange — fix by using ECDHE (PFS) only.</li>
+<li><strong>Post-quantum cryptography:</strong> Algorithms resistant to quantum computers — ML-KEM (Kyber) and ML-DSA (Dilithium) are the new NIST standards.</li>
+<li><strong>Shor's algorithm:</strong> Quantum algorithm that breaks RSA and ECC — motivation for post-quantum transition.</li>
 </ul>`,
 
   // ── Course 2: Web Application Security ───────────────────────────────
