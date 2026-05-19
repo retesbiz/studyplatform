@@ -130,7 +130,7 @@ async function loadQuizzes() {
         return `
         <div class="course-card">
           <div class="course-thumb ${q.difficulty==='Easy'?'c1':q.difficulty==='Hard'?'c6':'c3'}" style="font-size:40px">
-            ${q.subject==='Cybersecurity'?'🔐':q.subject==='Databases'?'🗄️':q.subject==='Data Science'?'🤖':'🌐'}
+            ${q.subject==='Cybersecurity'?'🔐':q.subject==='Databases'?'🗄️':q.subject==='Data Science'?'🤖':q.subject==='DevOps'?'☁️':'🌐'}
             <div class="course-thumb-badge">
               <span class="badge ${q.difficulty==='Easy'?'badge-green':q.difficulty==='Hard'?'badge-red':'badge-amber'}">${q.difficulty}</span>
             </div>
