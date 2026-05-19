@@ -31,6 +31,13 @@ async function initDb() {
   console.log('Database ready.');
 }
 
+async function migrateXp() {
+  const q = (sql) => pool.query(sql).catch(() => {});
+  await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INT NOT NULL DEFAULT 0`);
+  await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS level INT NOT NULL DEFAULT 1`);
+  console.log('XP migration done.');
+}
+
 async function seedQuizData() {
   // Idempotent quiz seed — runs on every startup, INSERT IGNORE skips existing rows
   const q = (sql, params) => pool.query(sql, params).catch(e => console.warn('Seed warn:', e.message));
@@ -165,6 +172,7 @@ async function seedQuizData() {
 }
 
 initDb()
+  .then(migrateXp)
   .then(seedQuizData)
   .then(() => app.listen(PORT, () => console.log(`StudyNest running on port ${PORT}`)))
   .catch(err => { console.error('Startup failed:', err.message); process.exit(1); });

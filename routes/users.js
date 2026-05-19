@@ -3,18 +3,31 @@ const bcrypt      = require('bcryptjs');
 const pool        = require('../db/connection');
 const requireAuth = require('../middleware/auth');
 
+const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8500, 12000, 20000];
+const LEVEL_NAMES = ['','Novice','Apprentice','Scholar','Adept','Expert','Master','Grandmaster','Legend','Mythic','Transcendent'];
+
 function publicUser(row) {
+  const xp    = row.xp    || 0;
+  const level = row.level || 1;
+  const nextXp = XP_LEVELS[level] || null;
+  const prevXp = XP_LEVELS[level - 1] || 0;
   return {
-    id:         row.id,
-    firstName:  row.first_name,
-    lastName:   row.last_name,
-    email:      row.email,
-    avatar:     row.avatar,
-    bio:        row.bio,
-    university: row.university,
-    field:      row.field,
-    role:       row.role,
-    createdAt:  row.created_at,
+    id:           row.id,
+    firstName:    row.first_name,
+    lastName:     row.last_name,
+    email:        row.email,
+    avatar:       row.avatar,
+    bio:          row.bio,
+    university:   row.university,
+    field:        row.field,
+    role:         row.role,
+    createdAt:    row.created_at,
+    xp,
+    level,
+    levelName:    LEVEL_NAMES[level] || 'Transcendent',
+    nextLevelXp:  nextXp,
+    prevLevelXp:  prevXp,
+    xpProgress:   nextXp ? Math.round((xp - prevXp) / (nextXp - prevXp) * 100) : 100,
   };
 }
 

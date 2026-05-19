@@ -2,6 +2,19 @@ const router      = require('express').Router();
 const pool        = require('../db/connection');
 const requireAuth = require('../middleware/auth');
 
+const XP_PER_CORRECT = 20;
+const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8500, 12000, 20000];
+const LEVEL_NAMES = ['','Novice','Apprentice','Scholar','Adept','Expert','Master','Grandmaster','Legend','Mythic','Transcendent'];
+
+function calcLevel(xp) {
+  let level = 1;
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    if (xp >= XP_LEVELS[i]) level = i + 1;
+    else break;
+  }
+  return Math.min(level, 10);
+}
+
 // GET /api/quizzes
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -60,13 +73,28 @@ router.post('/:id/attempt', requireAuth, async (req, res) => {
       isCorrect:   answers[q.id] === q.correct_answer,
     }));
 
-    const score = results.filter(r => r.isCorrect).length;
+    const score  = results.filter(r => r.isCorrect).length;
+    const xpEarned = score * XP_PER_CORRECT;
+
     await pool.query(
       'INSERT INTO quiz_attempts (user_id, quiz_id, score, total, time_taken) VALUES (?, ?, ?, ?, ?)',
       [req.user.id, req.params.id, score, questions.length, timeTaken]
     );
 
-    res.json({ score, total: questions.length, results });
+    // Award XP and recalculate level
+    const [[user]] = await pool.query('SELECT xp, level FROM users WHERE id = ?', [req.user.id]);
+    const oldLevel = user ? calcLevel(user.xp || 0) : 1;
+    const newXp    = (user?.xp || 0) + xpEarned;
+    const newLevel = calcLevel(newXp);
+    await pool.query('UPDATE users SET xp = ?, level = ? WHERE id = ?', [newXp, newLevel, req.user.id]);
+
+    res.json({
+      score, total: questions.length, results,
+      xpEarned, newXp, newLevel,
+      leveledUp:  newLevel > oldLevel,
+      levelName:  LEVEL_NAMES[newLevel] || 'Transcendent',
+      nextLevelXp: XP_LEVELS[newLevel] || null,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error.' });

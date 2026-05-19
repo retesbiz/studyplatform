@@ -92,7 +92,21 @@
             <div class="result-lbl" id="result-grade"></div>
           </div>
           <h2 id="result-title"></h2>
-          <p id="result-sub" class="text-muted" style="margin-bottom:20px"></p>
+          <p id="result-sub" class="text-muted" style="margin-bottom:16px"></p>
+          <!-- XP Banner -->
+          <div id="xp-banner" style="display:none;background:var(--acc-lt);border:1.5px solid var(--acc);border-radius:var(--rad);padding:14px 20px;margin-bottom:12px;text-align:left">
+            <div style="font-size:20px;font-weight:800;color:var(--acc);font-family:var(--fh)" id="xp-earned-text"></div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:4px" id="xp-level-text"></div>
+            <div style="margin-top:10px;background:var(--bg2);border-radius:100px;height:8px;overflow:hidden">
+              <div id="xp-progress-bar" style="height:100%;background:var(--acc);border-radius:100px;transition:width 1s ease;width:0%"></div>
+            </div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:4px" id="xp-progress-text"></div>
+          </div>
+          <!-- Level-up flash -->
+          <div id="levelup-banner" style="display:none;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:var(--rad);padding:14px 20px;margin-bottom:12px;color:#fff;text-align:left">
+            <div style="font-size:24px">🎉</div>
+            <div style="font-weight:800;font-size:17px;font-family:var(--fh)" id="levelup-text"></div>
+          </div>
           <div style="display:flex;gap:10px;justify-content:center">
             <button class="btn btn-ghost" onclick="showList()">← All Quizzes</button>
             <button class="btn btn-primary" id="retry-btn">Retry Quiz</button>
@@ -251,6 +265,8 @@ async function submitQuiz() {
   showResults(result);
 }
 
+const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8500, 12000, 20000];
+
 // ── Results ───────────────────────────────────────────────────────────────────
 function showResults(result) {
   const pct   = Math.round(result.score / result.total * 100);
@@ -265,6 +281,30 @@ function showResults(result) {
     result.score + ' / ' + result.total + ' correct  ·  ' + (pass ? 'Passed' : 'Not passed');
   document.getElementById('topbar-title').textContent = 'Results';
   document.getElementById('retry-btn').onclick = () => startQuiz(activeQuiz.id);
+
+  // XP banner
+  if (result.xpEarned !== undefined) {
+    document.getElementById('xp-banner').style.display = 'block';
+    document.getElementById('xp-earned-text').textContent =
+      result.xpEarned > 0 ? '+' + result.xpEarned + ' XP earned!' : 'No XP this attempt';
+    document.getElementById('xp-level-text').textContent =
+      'Level ' + result.newLevel + ' · ' + result.levelName + '  —  ' + result.newXp + ' total XP';
+    const prevXp = result.newLevel > 1 ? (XP_LEVELS[result.newLevel - 2] || 0) : 0;
+    const barPct = result.nextLevelXp
+      ? Math.min(100, Math.round((result.newXp - prevXp) / (result.nextLevelXp - prevXp) * 100))
+      : 100;
+    setTimeout(() => { document.getElementById('xp-progress-bar').style.width = barPct + '%'; }, 120);
+    document.getElementById('xp-progress-text').textContent = result.nextLevelXp
+      ? result.newXp + ' / ' + result.nextLevelXp + ' XP to next level'
+      : 'Max level reached!';
+  }
+
+  // Level-up flash
+  if (result.leveledUp) {
+    document.getElementById('levelup-banner').style.display = 'block';
+    document.getElementById('levelup-text').textContent =
+      'Level Up! You are now ' + result.levelName + ' (Level ' + result.newLevel + ')';
+  }
 
   document.getElementById('answer-review').innerHTML = result.results.map((r, i) => `
     <div class="answer-row">

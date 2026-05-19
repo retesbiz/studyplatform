@@ -58,6 +58,16 @@ async function refreshUserData() {
     if (res.status === 401) { logout(); return; }
     const data = await res.json();
     localStorage.setItem('user', JSON.stringify(data));
+    // Sync sidebar with fresh user data
+    const initials = ((data.firstName||'J')[0]+(data.lastName||'D')[0]).toUpperCase();
+    const sbAvatar = document.getElementById('sb-avatar');
+    const sbName   = document.getElementById('sb-name');
+    const tbAvatar = document.getElementById('topbar-avatar');
+    const roleEl   = document.querySelector('.sidebar-user-role');
+    if (sbAvatar) sbAvatar.textContent = data.avatar || initials;
+    if (sbName)   sbName.textContent   = (data.firstName+' '+data.lastName).trim() || 'Student';
+    if (tbAvatar) tbAvatar.textContent = data.avatar || initials;
+    if (roleEl && data.levelName) roleEl.textContent = 'Lv.' + data.level + ' · ' + data.levelName;
   } catch (e) {
     // Offline — use cached data
   }
