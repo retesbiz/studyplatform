@@ -39,6 +39,59 @@ app.use('/api/dashboard',    require('./routes/dashboard'));
 app.use('/api/discussions',  require('./routes/discussions'));
 app.use('/api/leaderboard', require('./routes/leaderboard'));
 
+// Seed fake leaderboard users (one-time, safe to re-run — skips if already seeded)
+app.post('/api/admin/seed-users', async (req, res) => {
+  const bcrypt = require('bcryptjs');
+  const pool   = require('./db/connection');
+  try {
+    const hash = await bcrypt.hash('Password123!', 10);
+    const avatars = ['🦊','🐧','🦉','🤖','🐻','🐼','🦁','🐯','🐸','🦋','🐙','🦄','🐳','🦅','🐺'];
+    const fakeUsers = [
+      ['Liam','Chen',9800,8],['Sophia','Nguyen',15200,9],['Marcus','Okafor',7400,7],
+      ['Aisha','Patel',22000,10],['Jake','Torres',3200,6],['Mei','Yamamoto',45000,13],
+      ['Carlos','Rivera',1800,5],['Emma','Johansson',58000,14],['Kwame','Asante',900,4],
+      ['Priya','Singh',31000,12],['Noah','Müller',12500,9],['Fatima','Al-Hassan',67500,15],
+      ['Ethan','Park',5000,7],['Isabella','Rossi',88000,16],['Zara','Williams',400,3],
+      ['Diego','Fernandez',2600,6],['Yuki','Tanaka',19000,10],['Amara','Diallo',110000,17],
+      ['Ryan','O\'Brien',8000,8],['Luna','Petrov',38000,13],
+    ];
+
+    let inserted = 0;
+    for (let i = 0; i < fakeUsers.length; i++) {
+      const [fn, ln, xp, level] = fakeUsers[i];
+      const email  = fn.toLowerCase() + '.' + ln.toLowerCase().replace(/[^a-z]/g,'') + '@studynest.demo';
+      const avatar = avatars[i % avatars.length];
+      try {
+        const [r] = await pool.query(
+          `INSERT INTO users (first_name,last_name,email,password,avatar,university,field,xp,level)
+           VALUES (?,?,?,?,?,?,?,?,?)`,
+          [fn, ln, email, hash, avatar,
+           ['MIT','Stanford','Oxford','ETH Zurich','NUS','UNSW','UCL','TU Berlin'][i % 8],
+           ['Computer Science','Cybersecurity','Data Science','Software Engineering','Information Technology'][i % 5],
+           xp, level]
+        );
+        const uid = r.insertId;
+        // Add quiz attempts spread across quizzes
+        const numAttempts = 3 + (i % 6);
+        for (let q = 1; q <= numAttempts; q++) {
+          const quizId = ((i + q) % 9) + 1;
+          const score  = 5 + Math.floor(Math.random() * 6);
+          await pool.query(
+            'INSERT INTO quiz_attempts (user_id,quiz_id,score,total,time_taken) VALUES (?,?,?,10,?)',
+            [uid, quizId, score, 300 + Math.floor(Math.random() * 400)]
+          ).catch(() => {});
+        }
+        inserted++;
+      } catch(e) {
+        if (!e.message.includes('Duplicate')) throw e;
+      }
+    }
+    res.json({ ok: true, inserted, message: `${inserted} demo users added.` });
+  } catch(e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // Temporary admin boost — sets the caller to level 10 + inserts demo quiz history
 app.post('/api/admin/boost-me', async (req, res) => {
   const jwt  = require('jsonwebtoken');
