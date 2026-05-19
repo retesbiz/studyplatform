@@ -33,8 +33,8 @@ async function initDb() {
 
 async function migrateXp() {
   const q = (sql) => pool.query(sql).catch(() => {});
-  await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INT NOT NULL DEFAULT 0`);
-  await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS level INT NOT NULL DEFAULT 1`);
+  await q(`ALTER TABLE users ADD COLUMN xp INT NOT NULL DEFAULT 0`);
+  await q(`ALTER TABLE users ADD COLUMN level INT NOT NULL DEFAULT 1`);
   console.log('XP migration done.');
 }
 

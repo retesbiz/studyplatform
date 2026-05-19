@@ -46,6 +46,10 @@ app.post('/api/admin/boost-me', async (req, res) => {
     const auth = (req.headers.authorization || '').replace('Bearer ', '');
     const { id } = jwt.verify(auth, process.env.JWT_SECRET);
 
+    // Ensure xp/level columns exist (migration may not have run)
+    try { await pool.query(`ALTER TABLE users ADD COLUMN xp INT NOT NULL DEFAULT 0`); } catch(e) {}
+    try { await pool.query(`ALTER TABLE users ADD COLUMN level INT NOT NULL DEFAULT 1`); } catch(e) {}
+
     await pool.query('UPDATE users SET xp = 20000, level = 10 WHERE id = ?', [id]);
     await pool.query('DELETE FROM quiz_attempts WHERE user_id = ?', [id]);
 
