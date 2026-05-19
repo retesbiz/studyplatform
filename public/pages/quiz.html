@@ -74,6 +74,7 @@
           <div>
             <div id="session-subject" style="font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px"></div>
             <h2 id="session-title" style="margin:0"></h2>
+            <div id="session-pool-info" style="font-size:12px;color:var(--ink3);margin-top:4px"></div>
           </div>
           <div class="timer" id="timer">00:00</div>
         </div>
@@ -109,9 +110,14 @@
             <div style="font-size:24px">🎉</div>
             <div style="font-weight:800;font-size:17px;font-family:var(--fh)" id="levelup-text"></div>
           </div>
+          <!-- Mastery progress -->
+          <div id="mastery-banner" style="display:none;background:var(--bg2);border-radius:var(--rad);padding:10px 16px;margin-bottom:12px;font-size:13px;color:var(--ink2);text-align:left">
+            <span id="mastery-text"></span>
+            <button onclick="resetProgress()" style="margin-left:12px;background:none;border:none;color:var(--acc);font-size:12px;cursor:pointer;text-decoration:underline">Reset progress</button>
+          </div>
           <div style="display:flex;gap:10px;justify-content:center">
             <button class="btn btn-ghost" onclick="showList()">← All Quizzes</button>
-            <button class="btn btn-primary" id="retry-btn">Retry Quiz</button>
+            <button class="btn btn-primary" id="retry-btn">Next Round →</button>
           </div>
         </div>
         <div class="card">
@@ -138,12 +144,25 @@ let timerSecs   = 0;
 let timerHandle = null;
 let startTime   = null;
 
+const SESSION_SIZE = 10; // questions per round
+
+function getDoneIds(quizId) {
+  return JSON.parse(localStorage.getItem('snq_done_' + quizId) || '[]');
+}
+function saveDoneIds(quizId, ids) {
+  localStorage.setItem('snq_done_' + quizId, JSON.stringify(ids));
+}
+
 // ── List ─────────────────────────────────────────────────────────────────────
 async function loadQuizzes() {
   quizzes = await api('GET', '/quizzes') || [];
   document.getElementById('quiz-grid').innerHTML = quizzes.length
     ? quizzes.map(q => {
-        const pct = q.attempt_count > 0 ? Math.round(q.best_score / q.best_total * 100) : null;
+        const pct      = q.attempt_count > 0 ? Math.round(q.best_score / q.best_total * 100) : null;
+        const doneIds  = getDoneIds(q.id);
+        const doneCount = doneIds.length;
+        const total    = q.question_count;
+        const allDone  = doneCount >= total && total > 0;
         return `
         <div class="course-card">
           <div class="course-thumb ${q.difficulty==='Easy'?'c1':q.difficulty==='Hard'?'c6':'c3'}" style="font-size:40px">
@@ -156,12 +175,17 @@ async function loadQuizzes() {
             <div class="course-subject">${q.subject}</div>
             <div class="course-title">${q.title}</div>
             <div class="course-meta">
-              <span>❓ ${q.question_count} questions</span>
+              <span>❓ ${total} questions</span>
               <span>⏱ ${q.duration_min} min</span>
-              ${q.attempt_count > 0 ? `<span>🏆 Best: ${pct}%</span>` : ''}
+              ${doneCount > 0 ? `<span>✅ ${doneCount}/${total} mastered</span>` : ''}
+              ${pct !== null ? `<span>🏆 Best: ${pct}%</span>` : ''}
             </div>
+            ${doneCount > 0 && !allDone ? `
+            <div style="margin-top:8px;background:var(--bg2);border-radius:100px;height:5px;overflow:hidden">
+              <div style="height:100%;background:var(--acc);border-radius:100px;width:${Math.round(doneCount/total*100)}%"></div>
+            </div>` : ''}
             <button class="btn btn-primary btn-full btn-sm" style="margin-top:12px" onclick="startQuiz(${q.id})">
-              ${q.attempt_count > 0 ? 'Retake Quiz' : 'Start Quiz'}
+              ${allDone ? '🔄 All Done! Restart' : doneCount > 0 ? `Continue (${total - doneCount} left)` : 'Start Quiz'}
             </button>
           </div>
         </div>`;
@@ -186,13 +210,30 @@ async function startQuiz(id) {
     return;
   }
 
-  questions = data.questions;
+  const allQuestions = data.questions; // already shuffled by ORDER BY RAND()
+  let doneIds = getDoneIds(id);
+
+  // Filter to unseen questions
+  let available = allQuestions.filter(q => !doneIds.includes(q.id));
+
+  // If all done, auto-reset and toast
+  if (available.length === 0) {
+    localStorage.removeItem('snq_done_' + id);
+    doneIds = [];
+    available = allQuestions;
+    toast('🎉 You\'ve mastered all questions! Starting fresh.', 'success');
+  }
+
+  // Pick up to SESSION_SIZE unseen questions
+  questions = available.slice(0, SESSION_SIZE);
   answers   = {};
   currentQ  = 0;
 
   document.getElementById('session-title').textContent   = data.title;
   document.getElementById('session-subject').textContent = data.subject;
   document.getElementById('topbar-title').textContent    = data.title;
+  document.getElementById('session-pool-info').textContent =
+    `Round: ${questions.length} questions  ·  ${doneIds.length} / ${allQuestions.length} mastered`;
 
   timerSecs   = (data.duration_min || 15) * 60;
   startTime   = Date.now();
@@ -264,13 +305,26 @@ async function submitQuiz() {
   const result = await api('POST', '/quizzes/' + activeQuiz.id + '/attempt', { answers, timeTaken });
   if (!result) return;
 
-  showResults(result);
+  // Mark answered question IDs as done in localStorage
+  const prevDone = getDoneIds(activeQuiz.id);
+  const newDone  = [...new Set([...prevDone, ...questions.map(q => q.id)])];
+  saveDoneIds(activeQuiz.id, newDone);
+
+  showResults(result, newDone);
+}
+
+function resetProgress() {
+  if (!activeQuiz) return;
+  localStorage.removeItem('snq_done_' + activeQuiz.id);
+  toast('Progress reset — all questions unlocked!', 'success');
+  document.getElementById('mastery-banner').style.display = 'none';
+  loadQuizzes();
 }
 
 const XP_LEVELS = [0,200,500,1000,2000,3500,5500,8500,12000,17000,23000,30000,40000,52000,67000,85000,106000,130000,158000,190000];
 
 // ── Results ───────────────────────────────────────────────────────────────────
-function showResults(result) {
+function showResults(result, doneIds = []) {
   const pct   = Math.round(result.score / result.total * 100);
   const pass  = pct >= 60;
   const grade = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
@@ -283,6 +337,16 @@ function showResults(result) {
     result.score + ' / ' + result.total + ' correct  ·  ' + (pass ? 'Passed' : 'Not passed');
   document.getElementById('topbar-title').textContent = 'Results';
   document.getElementById('retry-btn').onclick = () => startQuiz(activeQuiz.id);
+
+  // Mastery banner
+  const totalQs = activeQuiz ? (activeQuiz.question_count || 15) : 15;
+  const masteryBanner = document.getElementById('mastery-banner');
+  const masteryText   = document.getElementById('mastery-text');
+  const allMastered   = doneIds.length >= totalQs;
+  masteryBanner.style.display = doneIds.length > 0 ? 'block' : 'none';
+  masteryText.textContent = allMastered
+    ? `🎓 You've mastered all ${totalQs} questions in this quiz!`
+    : `✅ ${doneIds.length} / ${totalQs} questions mastered — ${totalQs - doneIds.length} remaining`;
 
   // XP banner
   if (result.xpEarned !== undefined) {

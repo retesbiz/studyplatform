@@ -44,7 +44,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!quiz) return res.status(404).json({ message: 'Quiz not found.' });
 
     const [questions] = await pool.query(
-      'SELECT id, question, option_a, option_b, option_c, option_d, sort_order FROM quiz_questions WHERE quiz_id = ? ORDER BY sort_order',
+      'SELECT id, question, option_a, option_b, option_c, option_d, sort_order FROM quiz_questions WHERE quiz_id = ? ORDER BY RAND()',
       [req.params.id]
     );
     res.json({ ...quiz, questions });
