@@ -36,7 +36,8 @@ app.use('/api/courses',   require('./routes/courses'));
 app.use('/api/notes',     require('./routes/notes'));
 app.use('/api/quizzes',   require('./routes/quizzes'));
 app.use('/api/dashboard',    require('./routes/dashboard'));
-app.use('/api/discussions', require('./routes/discussions'));
+app.use('/api/discussions',  require('./routes/discussions'));
+app.use('/api/leaderboard', require('./routes/leaderboard'));
 
 // Temporary admin boost — sets the caller to level 10 + inserts demo quiz history
 app.post('/api/admin/boost-me', async (req, res) => {

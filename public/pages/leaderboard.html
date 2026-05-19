@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>Leaderboard — StudyNest</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .podium { display:flex; align-items:flex-end; justify-content:center; gap:16px; margin:32px 0 40px; }
+  .podium-slot { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .podium-avatar { width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid transparent;flex-shrink:0; }
+  .podium-slot.first  .podium-avatar { width:80px;height:80px;font-size:36px;border-color:#f5c518;background:rgba(245,197,24,.15); }
+  .podium-slot.second .podium-avatar { border-color:#b0b8c1;background:rgba(176,184,193,.15); }
+  .podium-slot.third  .podium-avatar { border-color:#cd7f32;background:rgba(205,127,50,.15); }
+  .podium-crown { font-size:20px;line-height:1; }
+  .podium-name { font-size:13px;font-weight:700;color:var(--ink);text-align:center;max-width:90px; }
+  .podium-level { font-size:11px;color:var(--ink3);text-align:center; }
+  .podium-xp { font-family:var(--fh);font-size:15px;font-weight:800;color:var(--acc); }
+  .podium-block { border-radius:var(--rad) var(--rad) 0 0;width:90px;display:flex;align-items:center;justify-content:center; }
+  .podium-slot.first  .podium-block { height:90px;background:linear-gradient(180deg,#f5c518,#e0a800); }
+  .podium-slot.second .podium-block { height:65px;background:linear-gradient(180deg,#c8d0d8,#9ba5b0); }
+  .podium-slot.third  .podium-block { height:48px;background:linear-gradient(180deg,#d4935a,#b87030); }
+  .podium-rank { font-family:var(--fh);font-size:26px;font-weight:900;color:#fff;opacity:.9; }
+
+  .lb-table { width:100%;border-collapse:collapse; }
+  .lb-table th { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);padding:10px 16px;text-align:left;border-bottom:2px solid var(--border); }
+  .lb-table td { padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px; }
+  .lb-table tr:last-child td { border:none; }
+  .lb-table tr.me td { background:var(--acc-lt); }
+  .lb-table tr:hover td { background:var(--bg2); }
+  .lb-table tr.me:hover td { background:var(--acc-lt); }
+  .rank-num { font-family:var(--fh);font-size:15px;font-weight:800;color:var(--ink3);width:40px; }
+  .rank-num.gold   { color:#d4a017; }
+  .rank-num.silver { color:#8a9bb0; }
+  .rank-num.bronze { color:#a0622a; }
+  .lb-user { display:flex;align-items:center;gap:10px; }
+  .lb-avatar { width:36px;height:36px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+  .lb-uname { font-weight:600;color:var(--ink); }
+  .lb-ulevel { font-size:12px;color:var(--ink3); }
+  .xp-col { font-family:var(--fh);font-weight:700;color:var(--acc); }
+  .me-badge { display:inline-block;font-size:10px;font-weight:700;background:var(--acc);color:#fff;border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle; }
+  .filter-bar { display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-mark">📚</div><span class="sidebar-logo-text">StudyNest</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a class="sidebar-link" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="sidebar-link" href="courses.html"><span class="nav-icon">🎓</span> Courses</a>
+      <a class="sidebar-link" href="notes.html"><span class="nav-icon">📝</span> My Notes</a>
+      <a class="sidebar-link" href="quiz.html"><span class="nav-icon">🧠</span> Quizzes</a>
+      <a class="sidebar-link" href="discussions.html"><span class="nav-icon">💬</span> Community</a>
+      <a class="sidebar-link active" href="leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <div class="sidebar-section-label">Account</div>
+      <a class="sidebar-link" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sb-avatar">?</div>
+      <div><div class="sidebar-user-name" id="sb-name">Loading…</div><div class="sidebar-user-role">Student</div></div>
+      <button class="sidebar-user-logout" onclick="logout()" title="Log out">↩</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title">Leaderboard</span>
+      <div class="topbar-actions" style="margin-left:auto">
+        <div class="avatar-placeholder avatar-sm" id="topbar-avatar" style="cursor:pointer" onclick="location.href='profile.html'">?</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-hero">
+        <h1>🏆 Leaderboard</h1>
+        <p>Top students ranked by XP. Keep quizzing to climb the ranks!</p>
+      </div>
+
+      <!-- Podium (top 3) -->
+      <div id="podium-wrap" class="podium" style="display:none"></div>
+
+      <!-- Full table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Rankings</div>
+        </div>
+        <div id="lb-body">
+          <div class="empty-state" style="padding:40px"><div class="empty-state-icon">⏳</div><h4>Loading…</h4></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+initPage();
+
+async function loadLeaderboard() {
+  const data = await api('GET', '/leaderboard?limit=50');
+  if (!data || !data.length) {
+    document.getElementById('lb-body').innerHTML =
+      '<div class="empty-state" style="padding:40px"><div class="empty-state-icon">🏆</div><h4>No rankings yet — complete a quiz to appear!</h4></div>';
+    return;
+  }
+
+  // Podium (top 3)
+  const top3 = data.slice(0, 3);
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean); // 2nd, 1st, 3rd
+  const slotClass  = ['second','first','third'];
+  const crowns     = ['🥈','🥇','🥉'];
+  const blockRanks = ['2','1','3'];
+
+  document.getElementById('podium-wrap').style.display = 'flex';
+  document.getElementById('podium-wrap').innerHTML = podiumOrder.map((u, i) => {
+    const initials = ((u.firstName||'?')[0]+(u.lastName||'')[0]).toUpperCase();
+    return `
+    <div class="podium-slot ${slotClass[i]}">
+      <div class="podium-crown">${crowns[i]}</div>
+      <div class="podium-avatar">${u.avatar || initials}</div>
+      <div class="podium-name">${u.firstName} ${u.lastName}${u.isMe ? ' <span style="color:var(--acc)">(You)</span>' : ''}</div>
+      <div class="podium-level">Lv.${u.level} ${u.levelName}</div>
+      <div class="podium-xp">${u.xp.toLocaleString()} XP</div>
+      <div class="podium-block"><div class="podium-rank">${blockRanks[i]}</div></div>
+    </div>`;
+  }).join('');
+
+  // Full table
+  const rankClass = r => r === 1 ? 'gold' : r === 2 ? 'silver' : r === 3 ? 'bronze' : '';
+  document.getElementById('lb-body').innerHTML = `
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th style="width:50px">#</th>
+          <th>Student</th>
+          <th>Level</th>
+          <th>XP</th>
+          <th>Quizzes</th>
+          <th>Best Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(u => {
+          const initials = ((u.firstName||'?')[0]+(u.lastName||'')[0]).toUpperCase();
+          return `<tr class="${u.isMe ? 'me' : ''}">
+            <td><div class="rank-num ${rankClass(u.rank)}">${u.rank}</div></td>
+            <td>
+              <div class="lb-user">
+                <div class="lb-avatar">${u.avatar || initials}</div>
+                <div>
+                  <div class="lb-uname">${u.firstName} ${u.lastName}${u.isMe ? '<span class="me-badge">YOU</span>' : ''}</div>
+                  <div class="lb-ulevel">${u.levelName}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-green">Lv.${u.level}</span></td>
+            <td class="xp-col">${u.xp.toLocaleString()}</td>
+            <td>${u.quizzesCompleted}</td>
+            <td>${u.bestScore > 0 ? u.bestScore + '%' : '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+loadLeaderboard();
+</script>
+</body>
+</html>
