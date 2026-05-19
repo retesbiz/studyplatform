@@ -155,8 +155,19 @@ async function loadQuizzes() {
 // ── Start ─────────────────────────────────────────────────────────────────────
 async function startQuiz(id) {
   activeQuiz = quizzes.find(q => q.id === id);
-  const data = await api('GET', '/quizzes/' + id);
-  if (!data) return;
+
+  let data;
+  try {
+    data = await api('GET', '/quizzes/' + id);
+  } catch(e) {
+    toast('Failed to load quiz. Please try again.', 'error');
+    return;
+  }
+
+  if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {
+    toast('No questions found for this quiz.', 'error');
+    return;
+  }
 
   questions = data.questions;
   answers   = {};
@@ -166,7 +177,7 @@ async function startQuiz(id) {
   document.getElementById('session-subject').textContent = data.subject;
   document.getElementById('topbar-title').textContent    = data.title;
 
-  timerSecs   = data.duration_min * 60;
+  timerSecs   = (data.duration_min || 15) * 60;
   startTime   = Date.now();
   startTimer();
 
@@ -192,8 +203,16 @@ function startTimer() {
 function renderQuestion() {
   const q   = questions[currentQ];
   const tot = questions.length;
-  document.getElementById('session-progress').style.width = ((currentQ) / tot * 100) + '%';
+
+  if (!q) {
+    document.getElementById('question-area').innerHTML =
+      '<div style="color:var(--red);padding:20px">Error loading question. Please retry the quiz.</div>';
+    return;
+  }
+
+  document.getElementById('session-progress').style.width = (currentQ / tot * 100) + '%';
   document.getElementById('next-btn').disabled = !answers[q.id];
+  document.getElementById('next-btn').textContent = currentQ >= tot - 1 ? 'Submit ✓' : 'Next →';
 
   document.getElementById('question-area').innerHTML = `
     <div class="q-number">Question ${currentQ + 1} of ${tot}</div>
@@ -201,7 +220,7 @@ function renderQuestion() {
     ${['A','B','C','D'].map(k => `
       <div class="quiz-option ${answers[q.id] === k ? 'selected' : ''}" onclick="selectAnswer('${k}')">
         <span class="quiz-key">${k}</span>
-        ${q['option_' + k.toLowerCase()]}
+        <span>${q['option_' + k.toLowerCase()] || ''}</span>
       </div>`).join('')}`;
 }
 
@@ -218,7 +237,6 @@ function nextQuestion() {
   } else {
     submitQuiz();
   }
-  document.getElementById('next-btn').textContent = currentQ >= questions.length - 1 ? 'Submit ✓' : 'Next →';
 }
 
 // ── Submit ─────────────────────────────────────────────────────────────────────
