@@ -3,8 +3,8 @@ const bcrypt      = require('bcryptjs');
 const pool        = require('../db/connection');
 const requireAuth = require('../middleware/auth');
 
-const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8500, 12000, 20000];
-const LEVEL_NAMES = ['','Novice','Apprentice','Scholar','Adept','Expert','Master','Grandmaster','Legend','Mythic','Transcendent'];
+const XP_LEVELS = [0,200,500,1000,2000,3500,5500,8500,12000,17000,23000,30000,40000,52000,67000,85000,106000,130000,158000,190000];
+const LEVEL_NAMES = ['','Novice','Apprentice','Scholar','Adept','Expert','Veteran','Master','Grandmaster','Elite','Legend','Mythic','Transcendent','Ascendant','Immortal','Divine','Celestial','Cosmic','Eternal','Infinite','Omniscient'];
 
 function publicUser(row) {
   const xp    = row.xp    || 0;

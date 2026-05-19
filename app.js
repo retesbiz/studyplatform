@@ -50,7 +50,7 @@ app.post('/api/admin/boost-me', async (req, res) => {
     try { await pool.query(`ALTER TABLE users ADD COLUMN xp INT NOT NULL DEFAULT 0`); } catch(e) {}
     try { await pool.query(`ALTER TABLE users ADD COLUMN level INT NOT NULL DEFAULT 1`); } catch(e) {}
 
-    await pool.query('UPDATE users SET xp = 20000, level = 10 WHERE id = ?', [id]);
+    await pool.query('UPDATE users SET xp = 30000, level = 12 WHERE id = ?', [id]);
     await pool.query('DELETE FROM quiz_attempts WHERE user_id = ?', [id]);
 
     const attempts = [
