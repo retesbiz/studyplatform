@@ -38,6 +38,33 @@ app.use('/api/quizzes',   require('./routes/quizzes'));
 app.use('/api/dashboard',    require('./routes/dashboard'));
 app.use('/api/discussions', require('./routes/discussions'));
 
+// Temporary admin boost — sets the caller to level 10 + inserts demo quiz history
+app.post('/api/admin/boost-me', async (req, res) => {
+  const jwt  = require('jsonwebtoken');
+  const pool = require('./db/connection');
+  try {
+    const auth = (req.headers.authorization || '').replace('Bearer ', '');
+    const { id } = jwt.verify(auth, process.env.JWT_SECRET);
+
+    await pool.query('UPDATE users SET xp = 20000, level = 10 WHERE id = ?', [id]);
+    await pool.query('DELETE FROM quiz_attempts WHERE user_id = ?', [id]);
+
+    const attempts = [
+      [id,1,9,10,480],[id,2,8,10,520],[id,3,7,10,610],
+      [id,4,10,10,390],[id,5,8,10,450],[id,6,9,10,500],
+      [id,7,7,10,580],[id,8,10,10,420],[id,9,6,10,660],
+    ];
+    for (const a of attempts) {
+      await pool.query(
+        'INSERT INTO quiz_attempts (user_id, quiz_id, score, total, time_taken) VALUES (?,?,?,?,?)', a
+      );
+    }
+    res.json({ ok: true, message: 'Boosted to level 10 with quiz history.' });
+  } catch (e) {
+    res.status(400).json({ ok: false, error: e.message });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
