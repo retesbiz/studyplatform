@@ -152,7 +152,7 @@
   .module-content code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
 
   /* ── Expandable terms ── */
-  .xterm { border-bottom:2px dashed var(--acc);cursor:pointer;padding:1px 2px;border-radius:2px;transition:background .15s; }
+  .xterm { border-bottom:2px dashed var(--acc);cursor:pointer;padding:1px 3px;border-radius:3px;transition:background .15s,color .15s;color:var(--acc); }
   .xterm:hover { background:var(--acc-lt); }
 
   /* ── Highlights ── */
@@ -378,16 +378,20 @@ function initModuleContent(moduleId) {
   const mc = body.querySelector('.module-content');
   if (!mc) return;
 
-  // ── 1. Collect key terms first ────────────────────────────────────────────
+  // ── 1. Wire ALL bold terms in the content ────────────────────────────────
   const terms = [];
-  mc.querySelectorAll('.content-list li').forEach(li => {
-    const strong = li.querySelector('strong');
-    if (!strong || strong.dataset.wired) return;
+  mc.querySelectorAll('strong').forEach(strong => {
+    if (strong.dataset.wired) return;
     strong.dataset.wired = '1';
-    strong.classList.add('xterm');
     const term = strong.textContent.replace(/:$/, '').trim();
-    terms.push({ term, li });
-    strong.addEventListener('click', e => { e.stopPropagation(); openTermDetail(term, li, moduleId); });
+    if (!term || term.length < 2) return;
+    strong.classList.add('xterm');
+
+    // Context element: prefer parent <li>, then parent <p>
+    const ctx = strong.closest('li') || strong.closest('p');
+    strong.addEventListener('click', e => { e.stopPropagation(); openTermDetail(term, ctx, moduleId); });
+
+    if (!terms.find(t => t.term === term)) terms.push({ term, ctx });
   });
 
   // ── 2. Wrap in collapsible container ──────────────────────────────────────
@@ -410,7 +414,7 @@ function initModuleContent(moduleId) {
   };
   wrap.after(toggleBtn);
 
-  // ── 3. Phrase chips — always visible, click to open popup ─────────────────
+  // ── 3. Phrase chips — always visible below the collapsed area ─────────────
   if (terms.length) {
     const chipsWrap = document.createElement('div');
     chipsWrap.className = 'phrase-chips';
@@ -419,11 +423,11 @@ function initModuleContent(moduleId) {
     label.textContent = '🔑 Key concepts — click to explore:';
     const row = document.createElement('div');
     row.className = 'phrase-chips-row';
-    terms.forEach(({ term, li }) => {
+    terms.forEach(({ term, ctx }) => {
       const chip = document.createElement('button');
       chip.className = 'phrase-chip';
       chip.textContent = term;
-      chip.onclick = () => openTermDetail(term, li, moduleId);
+      chip.onclick = () => openTermDetail(term, ctx, moduleId);
       row.appendChild(chip);
     });
     chipsWrap.appendChild(label);
@@ -435,23 +439,27 @@ function initModuleContent(moduleId) {
   restoreHighlights(moduleId, mc);
 }
 
-function openTermDetail(term, li, moduleId) {
-  const clone = li.cloneNode(true);
-  clone.querySelectorAll('strong').forEach(s => {
-    const m = document.createElement('strong');
-    m.style.color = 'var(--ink)';
-    m.textContent = s.textContent;
-    s.replaceWith(m);
-  });
-  const fullText = clone.textContent.replace(term + ':', '').replace(term, '').trim();
+function openTermDetail(term, ctx, moduleId) {
+  let description = '';
+  if (ctx) {
+    // Get plain text of the context element, strip the term itself from the start
+    const clone = ctx.cloneNode(true);
+    const text = clone.textContent.trim();
+    // Remove leading "Term:" or "Term —" pattern
+    description = text.replace(new RegExp('^' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[:\\s—–-]*', 'i'), '').trim();
+    if (!description) description = text;
+  }
 
   let extra = '';
   if (typeof FLASHCARDS !== 'undefined' && FLASHCARDS[moduleId]) {
-    const card = FLASHCARDS[moduleId].find(c => c.q.toLowerCase().includes(term.toLowerCase().slice(0, 8)));
-    if (card) extra = `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);margin-bottom:6px">📇 Related Flashcard</div><div style="font-size:13px;color:var(--ink2)">${card.a}</div></div>`;
+    const tLower = term.toLowerCase();
+    const card = FLASHCARDS[moduleId].find(c =>
+      c.q.toLowerCase().includes(tLower) || tLower.includes(c.q.toLowerCase().split(' ')[0])
+    );
+    if (card) extra = `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);margin-bottom:6px">📇 Related Flashcard</div><div style="font-size:13px;color:var(--ink2);line-height:1.7">${card.a}</div></div>`;
   }
 
-  showTermPopup(term, `<p>${fullText || 'See full notes for more detail on this concept.'}</p>${extra}`);
+  showTermPopup(term, `<p style="line-height:1.8;color:var(--ink2)">${description || 'Expand the full notes below to read more about this concept.'}</p>${extra}`);
 }
 
 // ── Term popup ────────────────────────────────────────────────────────────────
