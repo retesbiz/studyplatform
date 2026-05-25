@@ -103,7 +103,8 @@ const COURSE_CONTENT = {
 </ul>`,
 
   3: `
-<p>Symmetric encryption is fast and strong, but it has a fundamental problem: how do two parties share the secret key before they can start communicating? If you send the key over the internet unprotected, an attacker intercepts it. If you meet in person to exchange keys, that does not scale to billions of internet users. This is the <strong>key distribution problem</strong>, and asymmetric cryptography solves it elegantly.</p>
+<p>Symmetric encryption is fast and powerful, but it has one unsolvable problem: both parties need the same secret key before they can communicate. If you send it over the internet unprotected, an attacker intercepts it. If you meet in person to exchange keys, that does not scale to billions of internet users connecting to millions of servers. This is the <strong>key distribution problem</strong> — and asymmetric cryptography solves it so elegantly that it underpins every secure connection on the internet.</p>
+<p>Every time you see a padlock in your browser, asymmetric cryptography has already quietly run in the background to establish a secure channel. Understanding how it works gives you insight into the foundation of all modern internet security.</p>
 
 <h5 class="content-heading">Public-Key Cryptography — The Core Idea</h5>
 <p>In 1976, Whitfield Diffie and Martin Hellman proposed a revolutionary concept: what if each party had two mathematically linked keys — a <strong>public key</strong> they share openly with the world, and a <strong>private key</strong> they keep completely secret? The mathematical relationship between the keys must have a crucial property: it must be easy to compute in one direction, but computationally infeasible to reverse. This is called a <strong>trapdoor one-way function</strong>.</p>
@@ -155,10 +156,23 @@ const COURSE_CONTENT = {
 <li><strong>Perfect Forward Secrecy (PFS):</strong> Property ensuring past session keys cannot be recovered even if the long-term private key is later compromised.</li>
 <li><strong>Hybrid encryption:</strong> Asymmetric crypto establishes a key; symmetric crypto encrypts the data — used in TLS, PGP, and all practical systems.</li>
 <li><strong>RSA-2048 vs ECC-256:</strong> Both provide ~112–128 bit security. ECC-256 keys are 8× smaller and 10-40× faster for the same security level.</li>
-</ul>`,
+</ul>
+
+<h5 class="content-heading">How a Real HTTPS Connection is Established</h5>
+<p>When your browser connects to https://bank.com, here is exactly what happens using asymmetric cryptography:</p>
+<p><strong>Step 1 — ClientHello:</strong> Your browser sends a list of supported cipher suites, including ones like <code>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</code>. This tells the server what algorithms the browser knows.</p>
+<p><strong>Step 2 — ServerHello + Certificate:</strong> The server picks the best cipher suite, sends its X.509 certificate (containing its public key), and generates its own ECDHE ephemeral key pair, sending its public component.</p>
+<p><strong>Step 3 — Authentication:</strong> Your browser checks: Is the certificate signed by a trusted CA? Is it valid today? Does the domain name match? If any check fails, you see a red warning.</p>
+<p><strong>Step 4 — Key Exchange:</strong> Your browser generates its own ECDHE ephemeral key pair. Both sides now independently compute the same shared secret using ECDH math — without ever transmitting that secret.</p>
+<p><strong>Step 5 — Symmetric keys derived:</strong> Both sides derive identical AES-256-GCM session keys from the shared secret. From this point, all data is encrypted symmetrically. The asymmetric operations are done — they existed only to securely establish the symmetric key.</p>
+<p>The entire handshake takes roughly one round trip (TLS 1.3) and typically completes in under 100ms. This is the real-world performance of applied asymmetric cryptography at scale.</p>
+
+<h5 class="content-heading">Common Implementation Mistakes to Avoid</h5>
+<p>Asymmetric cryptography is frequently misused even by experienced developers. The most common mistakes: (1) Using RSA to directly encrypt large data — RSA can only encrypt data smaller than its key size; use hybrid encryption. (2) Using raw RSA without OAEP padding — textbook RSA is deterministic and malleable. (3) RSA-1024 bit keys — factored by well-funded attackers, use 2048 minimum. (4) Forgetting to validate certificates in code — many early TLS libraries defaulted to no certificate verification, making HTTPS equivalent to unencrypted HTTP. Always verify the full certificate chain. (5) Reusing ECDSA nonces — like Sony's PS3 mistake, this directly exposes the private key.</p>`,
 
   4: `
-<p>A <strong>cryptographic hash function</strong> takes an input (message) of any size — a single byte or a terabyte file — and produces a fixed-size output called a <strong>digest</strong> or <strong>hash</strong>. The function is deterministic (same input → same output), one-way (you cannot reverse it to recover the input), and produces dramatically different output for even the tiniest change in input. Hash functions are used in digital signatures, password storage, file integrity, blockchains, and data structures like Merkle trees.</p>
+<p>A <strong>cryptographic hash function</strong> takes an input of any size — a single byte or a terabyte file — and produces a fixed-size output called a <strong>digest</strong> or <strong>hash</strong>. The function is deterministic (same input always gives the same output), one-way (you cannot reverse it), and produces dramatically different output for even the tiniest change in input (the avalanche effect). Hash functions appear in almost every part of modern computing security: digital signatures, password storage, file integrity checks, blockchains, data structures, and version control.</p>
+<p>Understanding hash functions is essential because they are one of the most misused primitives in software development. Using the wrong hash function, or using a correct one incorrectly (e.g., SHA-256 for password storage), creates critical vulnerabilities while appearing secure on the surface.</p>
 
 <h5 class="content-heading">The Three Security Properties of a Hash Function</h5>
 <p><strong>1. Pre-image resistance (one-way):</strong> Given a hash value H, it must be computationally infeasible to find any input M such that hash(M) = H. If this fails, you can forge messages that hash to any desired value.</p>
@@ -212,10 +226,23 @@ const COURSE_CONTENT = {
 <li><strong>bcrypt:</strong> Slow, salt-generating password hash with tunable cost factor. Minimum recommended cost: 12.</li>
 <li><strong>Argon2id:</strong> Current best-practice password hashing — memory-hard, time-hard, side-channel resistant.</li>
 <li><strong>Merkle tree:</strong> A hash tree where the root commits to the entire dataset; enables efficient proofs of inclusion.</li>
-</ul>`,
+</ul>
+
+<h5 class="content-heading">Password Storage — The Right Way in Code</h5>
+<p>Here is the correct pattern for storing and verifying passwords in a Node.js application:</p>
+<p><strong>Registration:</strong> <code>const hash = await bcrypt.hash(password, 12);</code> — bcrypt automatically generates a random salt and embeds it in the hash string. Store the entire hash string in your database.</p>
+<p><strong>Login verification:</strong> <code>const match = await bcrypt.compare(inputPassword, storedHash);</code> — bcrypt extracts the salt from the stored hash, re-hashes the input with the same salt, and compares in constant time.</p>
+<p>The resulting hash looks like: <code>$2b$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW</code> — the <code>$2b$</code> identifies the algorithm, <code>$12$</code> is the cost factor (2¹² iterations), followed by 22 characters of base64-encoded salt and 31 characters of the hash. Everything needed to verify the password is in that one string.</p>
+<p><strong>Never do this:</strong> <code>const hash = crypto.createHash('sha256').update(password).digest('hex');</code> — Even with a manual salt appended, SHA-256 is too fast. A modern GPU can compute 10 billion SHA-256 hashes per second, making brute-force practical for any common password.</p>
+
+<h5 class="content-heading">Where Hashes Appear in Real Systems</h5>
+<p><strong>Git version control:</strong> Every commit, tree, blob, and tag object in a Git repository is identified by its SHA-1 hash (being migrated to SHA-256). The commit hash is essentially a fingerprint of the entire project history at that point — any change to any file in history changes all subsequent commit hashes.</p>
+<p><strong>Bitcoin blockchain:</strong> Each block header contains the SHA-256 hash of the previous block, creating a chain. Mining requires finding a nonce that makes the block header hash start with a certain number of zeros — this is "proof of work". The difficulty of this task is what secures the blockchain.</p>
+<p><strong>Software distribution:</strong> When you download a package from npm, pip, or apt, the package manager verifies its SHA-256 hash against the registry's expected value before installation — ensuring the package was not tampered with in transit or on the mirror server.</p>`,
 
   5: `
-<p>A <strong>digital signature</strong> is the cryptographic equivalent of a handwritten signature — but far more secure. It proves two things simultaneously: (1) the message came from the claimed sender (authentication), and (2) the message has not been altered since it was signed (integrity). Unlike a handwritten signature, a digital signature is mathematically tied to the exact content of the document — changing a single character completely invalidates it.</p>
+<p>A <strong>digital signature</strong> is the cryptographic equivalent of a handwritten signature — but mathematically stronger and impossible to forge without the private key. It proves two things simultaneously: (1) the message came from the claimed sender (authentication), and (2) the message has not been altered since it was signed (integrity). Unlike a handwritten signature that looks the same regardless of what document it is on, a digital signature is cryptographically bound to the exact bytes of the signed content — change a single character and the signature is immediately invalid.</p>
+<p>Digital signatures are everywhere: TLS certificates are digitally signed by Certificate Authorities. Every npm package is signed. Every Git commit can be GPG-signed. Software updates are signed so your OS only installs authentic updates. DocuSign and legal e-signature platforms use them. Understanding how they work lets you use them correctly and understand what trust guarantees they actually provide.</p>
 
 <h5 class="content-heading">How Digital Signatures Work — Step by Step</h5>
 <p><strong>Signing (done by the sender):</strong></p>
@@ -290,10 +317,23 @@ const COURSE_CONTENT = {
 <li><strong>OCSP Stapling:</strong> Server includes its own OCSP response in the TLS handshake — no client CA query needed.</li>
 <li><strong>Certificate Transparency:</strong> Mandatory public logging of all TLS certs — enables detection of mis-issuance.</li>
 <li><strong>PKI:</strong> The full ecosystem managing digital certificates and public keys at scale.</li>
-</ul>`,
+</ul>
+
+<h5 class="content-heading">How to Read a Real Certificate</h5>
+<p>You can inspect any HTTPS certificate right now. In Chrome, click the padlock → "Connection is secure" → "Certificate is valid". Here is what you will see for a typical site:</p>
+<p><strong>Subject:</strong> The domain this cert was issued for (e.g., <code>CN=*.google.com</code>). The <code>*</code> is a wildcard — covers all immediate subdomains (mail.google.com, maps.google.com) but not sub-subdomains (a.b.google.com).</p>
+<p><strong>Issued by:</strong> The intermediate CA that signed it (e.g., <code>GTS CA 1C3</code>). Further up the chain: <code>GTS Root R1</code> — Google's root CA, which is in your browser's built-in trust store.</p>
+<p><strong>Valid from / to:</strong> Modern certs are typically 90 days (Let's Encrypt) to 1 year. Shorter validity means compromised certs expire sooner. Let's Encrypt's 90-day policy, with automated ACME renewal, is now considered best practice.</p>
+<p><strong>Subject Alternative Names:</strong> Lists every domain this cert is valid for — typically dozens of subdomains for large sites like Google.</p>
+<p><strong>Signature algorithm:</strong> Should be <code>SHA256withRSA</code> or <code>ecdsa-with-SHA256</code>. If you see MD5 or SHA1, the cert is dangerously outdated.</p>
+<p>Try this yourself on any HTTPS website — reading real certificates solidifies understanding of PKI concepts far better than any description.</p>
+
+<h5 class="content-heading">Why Certificate Transparency Changed Everything</h5>
+<p>Before Certificate Transparency (CT), Certificate Authorities could secretly issue certificates for any domain — and this happened. In 2011, the Dutch CA DigiNotar was compromised and issued fraudulent certificates for google.com, yahoo.com, and CIA.gov. Iran used these to intercept traffic from 300,000 Iranian users. Google only discovered it because Chrome had hardcoded pins for Google's certificates. CT logs, now mandatory, mean every certificate issued anywhere is publicly logged within hours — any mis-issuance is detectable by the domain owner monitoring their own CT log entries.</p>`,
 
   6: `
-<p><strong>TLS (Transport Layer Security)</strong> is the cryptographic protocol that secures HTTPS connections, email (SMTP/IMAP over TLS), VoIP, and many other application protocols. Every time you see a padlock in your browser, TLS is protecting that connection. TLS combines asymmetric cryptography (for key exchange), symmetric cryptography (for bulk data), and hash functions (for integrity) — it is applied cryptography in action.</p>
+<p><strong>TLS (Transport Layer Security)</strong> is the protocol that secures HTTPS, email over SMTP/IMAP, database connections, VoIP, and most other sensitive network communications. Every padlock in your browser represents a TLS session. TLS is not just one algorithm — it is a framework that combines asymmetric cryptography (to establish a shared key), symmetric cryptography (to encrypt the actual data), and hash functions (for integrity). Understanding TLS means understanding how all the cryptographic concepts from previous modules come together in one protocol that billions of people use every day.</p>
+<p>TLS has a troubled history of vulnerabilities — BEAST, CRIME, POODLE, Heartbleed, ROBOT — each teaching the security community important lessons about protocol design. TLS 1.3 represents the distilled wisdom of these lessons: every weakness from previous versions has been removed, and the result is both faster and more secure.</p>
 
 <h5 class="content-heading">TLS 1.2 Handshake — How It Works</h5>
 <p>TLS 1.2 (2008) requires 2 round trips before the first byte of application data can flow:</p>
