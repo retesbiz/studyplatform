@@ -698,64 +698,273 @@ const COURSE_CONTENT = {
 </ul>`,
 
   // ── Course 3: Advanced SQL & Databases ───────────────────────────────
-  13: `<p>The database query planner decides how to execute your SQL — whether to use an index, which table to scan first, and how to join tables. Understanding the planner lets you write queries that run in milliseconds instead of minutes. The EXPLAIN command reveals the execution plan the database chose and exactly where time is being spent.</p>
-<p>The N+1 query problem is the most common performance killer in web apps: fetching a list of 100 users and then running a separate query for each user's posts results in 101 queries instead of 1. Always fetch related data in a single JOIN query or use eager loading in your ORM.</p>
+  13: `<p>Query performance is one of the most impactful skills a backend developer can develop. A poorly written query that runs in 8 seconds on a table of 100,000 rows will run in 80 seconds on a table of 1 million rows — linearly worse as your data grows. The difference between a fast and slow application often comes down to a handful of slow database queries. Understanding how the <strong>query planner</strong> thinks, reading execution plans, and knowing when and how to add indexes separates developers who can build scalable applications from those who cannot.</p>
+<p>The query planner is the database's internal optimizer — it receives your SQL, considers dozens of possible execution strategies, estimates the cost of each, and chooses the cheapest. It does not always choose correctly (especially with stale statistics or unusual data distributions), and understanding its decisions lets you guide it to better choices.</p>
+
+<h5 class="content-heading">Reading EXPLAIN ANALYZE — The Developer's Superpower</h5>
+<p><code>EXPLAIN</code> shows the execution plan the planner would choose. <code>EXPLAIN ANALYZE</code> actually executes the query and shows both the estimated and actual costs — the discrepancy between the two reveals when the planner's estimates are wrong.</p>
+<p>Key things to look for in an EXPLAIN output:</p>
+<ul class="content-list">
+<li><strong>Seq Scan (Sequential/Full Table Scan):</strong> The database reads every row. On a table with 10 million rows this means reading potentially gigabytes of data. Look for Seq Scans on large tables in the inner loop of a join — that is almost always a missing index.</li>
+<li><strong>Index Scan:</strong> The database walks the B-Tree index to find matching rows, then fetches them from the heap (the actual table). Fast for queries returning a small percentage of rows. The index is a sorted list of key → row location pointers.</li>
+<li><strong>Index Only Scan:</strong> The database satisfies the entire query from the index without touching the table at all — the fastest possible scan. This only works when the index contains all columns the query needs (a <strong>covering index</strong>).</li>
+<li><strong>Bitmap Heap Scan:</strong> Used for queries returning a moderate number of rows. First builds a bitmap of matching row locations from the index, then fetches all matching rows in heap (disk) order — reduces random I/O vs. a plain index scan.</li>
+<li><strong>Nested Loop Join:</strong> For each row in the outer table, look up matching rows in the inner table. Efficient when the inner table lookup uses an index and the number of outer rows is small. Catastrophic when the inner table requires a full scan for each outer row.</li>
+<li><strong>Hash Join:</strong> Builds a hash table from the smaller table, then probes it with rows from the larger table. Efficient for large joins with no useful index. Memory-intensive — if the hash table spills to disk, performance degrades sharply.</li>
+<li><strong>rows= estimate vs. actual:</strong> When the planner's row estimate is wildly off (e.g. estimates 10, actually 100,000), the wrong join algorithm is usually chosen. Run <code>ANALYZE tablename</code> to refresh table statistics and help the planner estimate more accurately.</li>
+</ul>
+
+<h5 class="content-heading">The N+1 Query Problem — The Most Common Performance Killer</h5>
+<p>N+1 occurs whenever you fetch a list of N items and then execute an additional query for each item to fetch related data. The result is N+1 total queries where one well-written query would suffice. On a list of 1,000 orders, N+1 means 1,001 round-trips to the database — at 1ms per query, that is 1 second just in database latency, not counting network and processing overhead. At 10,000 orders it is 10 seconds.</p>
+<p>Classic N+1 in an ORM (using Sequelize/Hibernate style lazy loading): fetching all users, then inside a loop accessing <code>user.posts</code> triggers a new query for each user. The fix is eager loading — tell the ORM to JOIN and fetch related data in the initial query: <code>User.findAll({ include: [{ model: Post }] })</code>. This generates a single SQL query with a JOIN, returning all users and their posts in one database round-trip.</p>
+<p>Detecting N+1: enable SQL query logging in development and count queries per page load. Anything above ~10 queries for a single page is a red flag. Tools like Django Debug Toolbar, Bullet (Rails), or Hibernate's statistics logging make N+1 immediately visible.</p>
+
+<h5 class="content-heading">Query Optimisation Techniques</h5>
+<p><strong>Select only what you need</strong>: <code>SELECT *</code> fetches every column, including large text fields, JSON blobs, and binary data you do not need. Always specify the columns you actually use: <code>SELECT id, name, email FROM users</code>. This reduces the amount of data transferred from the database to your application and can enable index-only scans.</p>
+<p><strong>Filter early, join late</strong>: Apply WHERE conditions before joining where possible. A subquery or CTE (Common Table Expression) that filters down to a small result set before joining a large table is often dramatically faster than joining first and filtering after.</p>
+<p><strong>Avoid functions on indexed columns in WHERE clauses</strong>: <code>WHERE LOWER(email) = 'user@example.com'</code> prevents the index on <code>email</code> from being used — the database must apply LOWER() to every row, forcing a full scan. Instead, store emails lowercased or use a functional index: <code>CREATE INDEX ON users (LOWER(email))</code>.</p>
+<p><strong>Use LIMIT for pagination</strong>: Keyset pagination (cursor-based) using <code>WHERE id > last_seen_id LIMIT 20</code> is far more efficient than offset pagination (<code>LIMIT 20 OFFSET 10000</code>). With offset pagination, the database must scan and discard the first 10,000 rows on every page load — gets slower with every page.</p>
+
+<h5 class="content-heading">Understanding Query Statistics</h5>
+<p>PostgreSQL's <code>pg_stat_statements</code> extension tracks every query executed — total execution time, average execution time, number of calls, and rows returned. This is the fastest way to find the most expensive queries in your application: <code>SELECT query, total_exec_time, calls, mean_exec_time FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 20;</code> — the top 20 slowest queries by total time (not just individual call time) are almost always your biggest optimisation opportunities.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>EXPLAIN:</strong> Shows the query execution plan — look for full table scans on large tables.</li>
-<li><strong>Index scan:</strong> The database walks the index to find matching rows — fast on high-cardinality columns.</li>
-<li><strong>Full table scan:</strong> Every row is read — acceptable for small tables, catastrophic for large ones.</li>
-<li><strong>Covering index:</strong> An index that contains all columns needed by a query, avoiding the table entirely.</li>
+<li><strong>Query planner:</strong> The database's internal optimiser that chooses the execution strategy — estimates row counts and costs to select the most efficient plan.</li>
+<li><strong>EXPLAIN ANALYZE:</strong> Executes the query and shows both estimated and actual costs — essential for identifying plan estimation errors and slow operations.</li>
+<li><strong>Sequential scan:</strong> Reading every row in a table — fast for full-table reads, catastrophic in joins on large tables with no matching index.</li>
+<li><strong>Index scan:</strong> B-Tree traversal to find matching rows — fast when returning a small fraction of table rows.</li>
+<li><strong>Index only scan:</strong> Query satisfied entirely from the index without touching the table — requires a covering index and is the fastest scan type.</li>
+<li><strong>Covering index:</strong> An index that includes all columns needed by the query — enables index-only scans, eliminating table access entirely.</li>
+<li><strong>N+1 problem:</strong> Fetching N items then making one additional query per item — results in N+1 round-trips instead of 1. Fix with eager loading or JOINs.</li>
+<li><strong>Eager loading:</strong> Fetching related data in the same query (via JOIN) rather than lazily loading it per item in application code.</li>
+<li><strong>Hash join:</strong> Join algorithm that builds a hash table of the smaller table and probes with the larger — efficient for large, unindexed joins.</li>
+<li><strong>Nested loop join:</strong> For each outer row, look up inner rows — efficient with small outer sets and indexed inner lookups; catastrophic otherwise.</li>
+<li><strong>Keyset pagination:</strong> Using <code>WHERE id > cursor LIMIT n</code> for consistent O(log n) performance regardless of page depth — superior to offset pagination.</li>
+<li><strong>pg_stat_statements:</strong> PostgreSQL extension tracking query performance statistics — use to identify the most expensive queries in production.</li>
 </ul>`,
 
-  14: `<p>SQL joins combine rows from two or more tables based on a related column. INNER JOIN returns only rows with a match in both tables. LEFT JOIN returns all rows from the left table and matched rows from the right (with NULLs where there is no match). Choosing the wrong join type is a very common source of incorrect query results.</p>
-<p>Self-joins allow you to join a table to itself — useful for hierarchical data like employee/manager relationships or finding pairs within the same table. The join order chosen by the query planner significantly affects performance; on large tables, always verify the plan with EXPLAIN and add indexes where needed.</p>
+  14: `<p>SQL joins are the mechanism that makes relational databases powerful — they allow you to combine data from multiple normalised tables into meaningful, complete result sets. Choosing the correct join type is not just a syntactic concern; the wrong join silently returns incorrect data with no error message. A misplaced INNER JOIN instead of a LEFT JOIN drops rows you needed, a missing join condition creates a Cartesian product, and a poorly ordered multi-table join can multiply your query time by orders of magnitude.</p>
+<p>Understanding joins at a conceptual level — not just memorising syntax — lets you reason about what rows will appear in the result, what NULLs mean, and how to debug unexpected result counts.</p>
+
+<h5 class="content-heading">The Join Types — Visual and Conceptual</h5>
+<p>Think of two tables as overlapping circles in a Venn diagram. The join type defines which part of the diagram appears in the result.</p>
+<p><strong>INNER JOIN</strong> — Returns only rows where the join condition matches in <em>both</em> tables. Rows that exist in one table but not the other are completely excluded. Use case: "Get all orders with their corresponding customer names" — you only want orders that have a valid customer. If any order has a NULL customer_id or a customer_id that does not exist in the customers table, it disappears from the result. This is a common source of "missing data" bugs when referential integrity is not enforced.</p>
+<p><strong>LEFT JOIN (LEFT OUTER JOIN)</strong> — Returns all rows from the left table regardless of whether a match exists in the right table. Where no match exists, right-table columns are NULL. Use case: "Get all customers and their orders, including customers who have never ordered" — a LEFT JOIN from customers to orders. Customers with no orders appear with NULLs in all order columns. This is the most commonly needed join type in application development.</p>
+<p><strong>RIGHT JOIN</strong> — The mirror of LEFT JOIN: all rows from the right table are preserved. In practice, RIGHT JOIN is rare — any RIGHT JOIN can be rewritten as a LEFT JOIN by swapping the table order, which is usually clearer. Most style guides recommend always using LEFT JOIN and reordering tables instead.</p>
+<p><strong>FULL OUTER JOIN</strong> — All rows from both tables are returned. Where no match exists on either side, NULLs fill in. Use case: "Compare two datasets and find records that exist in one but not the other" — e.g. finding discrepancies between an expected list and an actual list. Less common in application development, very useful in data reconciliation.</p>
+<p><strong>CROSS JOIN</strong> — The Cartesian product: every row in the left table paired with every row in the right table. If left has 1,000 rows and right has 1,000 rows, the result has 1,000,000 rows. Almost never intentional in an application — an accidental CROSS JOIN (joining two tables with no ON condition) is a catastrophic bug that can crash a database server.</p>
+
+<h5 class="content-heading">Self-Joins — Querying Hierarchies</h5>
+<p>A self-join is a table joined to itself using aliases. The canonical use case is a hierarchical table: an <code>employees</code> table where each row has a <code>manager_id</code> column referencing another row in the same table. To list each employee alongside their manager's name:</p>
+<p><code>SELECT e.name AS employee, m.name AS manager FROM employees e LEFT JOIN employees m ON e.manager_id = m.id</code></p>
+<p>The LEFT JOIN ensures top-level employees (CEO with no manager, manager_id IS NULL) still appear in the result. An INNER JOIN would exclude them. Self-joins are also used for finding all pairs within a table: <code>SELECT a.name, b.name FROM users a JOIN users b ON a.id &lt; b.id</code> — the <code>a.id &lt; b.id</code> prevents duplicate pairs and self-pairing.</p>
+
+<h5 class="content-heading">CTEs — Common Table Expressions for Readable Complex Queries</h5>
+<p>A <strong>CTE</strong> (Common Table Expression) defined with the <code>WITH</code> keyword creates a named temporary result set that can be referenced multiple times in the main query. CTEs dramatically improve readability for complex multi-step queries:</p>
+<p><code>WITH monthly_revenue AS (SELECT DATE_TRUNC('month', created_at) AS month, SUM(amount) AS revenue FROM orders GROUP BY 1), ranked AS (SELECT *, RANK() OVER (ORDER BY revenue DESC) AS rank FROM monthly_revenue) SELECT * FROM ranked WHERE rank &lt;= 3;</code></p>
+<p>This finds the top 3 revenue months. Without a CTE, this would require nested subqueries that are much harder to read and debug. In PostgreSQL, CTEs are materialised by default (computed once, stored as a temp table), which can be faster or slower than inlining depending on the query — use <code>WITH ... AS MATERIALIZED</code> or <code>NOT MATERIALIZED</code> to override.</p>
+<p><strong>Recursive CTEs</strong> enable walking hierarchical data (like org charts or category trees) to arbitrary depth:</p>
+<p><code>WITH RECURSIVE subordinates AS (SELECT id, name, manager_id FROM employees WHERE id = 1 UNION ALL SELECT e.id, e.name, e.manager_id FROM employees e JOIN subordinates s ON e.manager_id = s.id) SELECT * FROM subordinates;</code></p>
+<p>This retrieves an employee and all direct and indirect reports, no matter how deep the hierarchy. Without recursive CTEs, this would require multiple queries or application-level tree traversal.</p>
+
+<h5 class="content-heading">Subqueries vs Joins — When to Use Each</h5>
+<p>A subquery in a WHERE clause (<code>WHERE id IN (SELECT ...)</code>) is often less efficient than a JOIN because the optimizer has less flexibility to choose the best execution strategy. In PostgreSQL and MySQL modern versions, the optimizer usually rewrites IN subqueries as joins automatically, but explicit JOINs give you more control and transparency. Use subqueries when the logic is clearer expressed that way (e.g. EXISTS checks), and JOINs when you need columns from both tables or need to control the join order.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>INNER JOIN:</strong> Returns only rows where the join condition matches in both tables.</li>
-<li><strong>LEFT JOIN:</strong> All rows from the left table; NULL for columns from the right where there is no match.</li>
-<li><strong>FULL OUTER JOIN:</strong> All rows from both tables with NULLs where either side has no match.</li>
-<li><strong>Self-join:</strong> A table joined to itself using aliases — great for hierarchical or comparative queries.</li>
+<li><strong>INNER JOIN:</strong> Returns only matched rows from both tables — unmatched rows are excluded. Most restrictive join type.</li>
+<li><strong>LEFT JOIN:</strong> All rows from the left table; NULLs for unmatched right-table columns. Use when you need to preserve all left-table rows regardless of match.</li>
+<li><strong>FULL OUTER JOIN:</strong> All rows from both tables with NULLs where unmatched — useful for data reconciliation and finding discrepancies between datasets.</li>
+<li><strong>CROSS JOIN:</strong> Cartesian product of both tables — almost always accidental; an unguarded cross join on large tables can crash a database.</li>
+<li><strong>Self-join:</strong> A table joined to an alias of itself — essential for hierarchical data (employee/manager, category/parent) and pair-finding queries.</li>
+<li><strong>CTE (Common Table Expression):</strong> Named temporary result set defined with WITH — improves readability of complex multi-step queries; can be referenced multiple times.</li>
+<li><strong>Recursive CTE:</strong> CTE that references itself to traverse hierarchical data to arbitrary depth — eliminates the need for multiple queries or application-level tree walking.</li>
+<li><strong>JOIN condition:</strong> The ON clause defining how rows match — a missing or wrong condition produces incorrect results with no error message.</li>
+<li><strong>Cartesian product:</strong> The result of joining without a condition — N × M rows, almost always unintentional and catastrophic on large tables.</li>
+<li><strong>NULL in joins:</strong> Unmatched rows in outer joins appear with NULLs — important to handle in WHERE clauses (use IS NULL / IS NOT NULL, not = NULL).</li>
+<li><strong>EXISTS subquery:</strong> More efficient than IN for checking existence of related rows — stops scanning as soon as the first match is found.</li>
 </ul>`,
 
-  15: `<p>Window functions perform calculations across a set of rows related to the current row without collapsing them into a single output row. Unlike GROUP BY aggregations, you keep every row and gain the ability to see rankings, running totals, moving averages, and comparisons to previous rows — all in a single query.</p>
-<p>The OVER() clause defines the window. PARTITION BY divides rows into groups (like GROUP BY but without collapsing). ORDER BY within OVER defines the order for cumulative calculations. ROW_NUMBER(), RANK(), LAG(), and LEAD() are the most frequently used window functions in data analysis and reporting queries.</p>
+  15: `<p><strong>Window functions</strong> are one of the most powerful features in SQL — and one of the most under-used by developers who learned SQL from tutorials. They allow you to compute values across a set of rows related to the current row, without collapsing those rows into a single aggregate output. The transformation that would require a self-join and a subquery without window functions can often be expressed as a single, readable SELECT statement with window functions.</p>
+<p>Once you understand window functions, you will reach for them constantly: ranking records within groups, calculating running totals, finding previous/next values, computing moving averages, detecting gaps in sequences, and numbering rows within partitions. Every senior SQL developer uses them fluently.</p>
+
+<h5 class="content-heading">The Anatomy of a Window Function</h5>
+<p>All window functions share the same structure: <code>FUNCTION_NAME(expression) OVER (PARTITION BY ... ORDER BY ... ROWS/RANGE ...)</code></p>
+<p><strong>OVER()</strong> is what makes it a window function. Without OVER, the function would be a regular aggregate. OVER() with no arguments applies the function across all rows in the result set.</p>
+<p><strong>PARTITION BY</strong> divides rows into groups — the function is computed independently within each partition. Like GROUP BY but without collapsing rows. Example: <code>RANK() OVER (PARTITION BY department ORDER BY salary DESC)</code> ranks employees within their own department rather than globally.</p>
+<p><strong>ORDER BY within OVER</strong> defines the ordering for functions that care about sequence — running totals, rankings, LAG/LEAD. Note: ORDER BY inside OVER is completely separate from the ORDER BY at the end of your query that sorts the final output.</p>
+<p><strong>ROWS / RANGE frame clause</strong>: For aggregate window functions like SUM and AVG, you can define exactly which rows around the current row to include in the calculation. <code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code> creates a 7-day rolling window. <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> creates a cumulative sum.</p>
+
+<h5 class="content-heading">Ranking Functions</h5>
+<p><strong>ROW_NUMBER()</strong> assigns a unique sequential integer starting from 1 within each partition. Every row gets a distinct number — no ties. Use case: pagination with window functions, deduplication (keep only the first row per group using a CTE + WHERE row_num = 1).</p>
+<p><strong>RANK()</strong> assigns the same rank to tied rows, then skips ranks. If two rows tie for rank 2, the next rank is 4 (not 3). Mirrors how sports rankings work — "joint second place, then fourth".</p>
+<p><strong>DENSE_RANK()</strong> also ties but does not skip — two rows at rank 2 are followed by rank 3. Use case: "Top N results" where you want a consistent number of distinct rank levels regardless of ties.</p>
+<p><strong>NTILE(n)</strong> divides rows into n roughly equal buckets. <code>NTILE(4) OVER (ORDER BY score DESC)</code> assigns rows to quartiles 1-4. Useful for percentile-based analysis.</p>
+<p><strong>PERCENT_RANK()</strong> and <strong>CUME_DIST()</strong> calculate relative rank as a fraction between 0 and 1 — useful for finding what percentage of rows a given row beats.</p>
+
+<h5 class="content-heading">LAG and LEAD — Accessing Adjacent Rows</h5>
+<p><strong>LAG(column, offset, default)</strong> returns the value from a row <em>before</em> the current row within the partition. <strong>LEAD(column, offset, default)</strong> returns the value from a row <em>after</em>. Both eliminate the need for self-joins to compare a row to its predecessor or successor.</p>
+<p>Classic use case: calculating day-over-day revenue change: <code>SELECT date, revenue, revenue - LAG(revenue) OVER (ORDER BY date) AS daily_change FROM daily_revenue;</code> — for every day, you instantly see how revenue changed from the previous day. Without LAG, this requires a self-join on dates.</p>
+<p>Finding gaps in a sequence: <code>SELECT id, id - LAG(id) OVER (ORDER BY id) AS gap FROM events WHERE id - LAG(id) OVER (ORDER BY id) > 1</code> — returns all rows where there is a gap in the id sequence. Essential for audit trail verification.</p>
+
+<h5 class="content-heading">Aggregate Window Functions</h5>
+<p>Standard aggregates (SUM, COUNT, AVG, MIN, MAX) can be used as window functions with OVER(). This is how you compute running totals and moving averages without self-joins:</p>
+<p><strong>Running total</strong>: <code>SELECT date, amount, SUM(amount) OVER (ORDER BY date ROWS UNBOUNDED PRECEDING) AS running_total FROM payments;</code></p>
+<p><strong>7-day moving average</strong>: <code>SELECT date, revenue, AVG(revenue) OVER (ORDER BY date ROWS 6 PRECEDING) AS moving_avg_7d FROM daily_revenue;</code></p>
+<p><strong>Percentage of total within group</strong>: <code>SELECT dept, name, salary, salary / SUM(salary) OVER (PARTITION BY dept) * 100 AS pct_of_dept FROM employees;</code> — shows each employee's salary as a percentage of their department's total, in one query.</p>
+
+<h5 class="content-heading">FIRST_VALUE, LAST_VALUE, NTH_VALUE</h5>
+<p><strong>FIRST_VALUE(column)</strong> returns the first value in the window frame. Useful for "how does this row compare to the best in its group?": <code>salary - FIRST_VALUE(salary) OVER (PARTITION BY dept ORDER BY salary DESC)</code> shows how far each employee's salary is below the top earner in their department.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>OVER():</strong> Defines the window (set of rows) the function operates on.</li>
-<li><strong>PARTITION BY:</strong> Divides rows into groups within the window without collapsing them.</li>
-<li><strong>LAG / LEAD:</strong> Access the value from the previous or next row in the window.</li>
-<li><strong>ROW_NUMBER():</strong> Assigns a unique sequential number to each row within the partition.</li>
+<li><strong>Window function:</strong> Computes a value across related rows without collapsing them — the OVER() clause is what makes it a window function.</li>
+<li><strong>OVER():</strong> Defines the window — optional PARTITION BY, ORDER BY, and frame clause (ROWS/RANGE) control exactly which rows are included.</li>
+<li><strong>PARTITION BY:</strong> Divides rows into independent groups for the function — like GROUP BY but keeps all rows visible.</li>
+<li><strong>ROW_NUMBER():</strong> Unique sequential integer per row within partition — no ties. Use for deduplication and pagination.</li>
+<li><strong>RANK():</strong> Ties get the same rank, then the next rank is skipped. DENSE_RANK() ties but never skips ranks.</li>
+<li><strong>LAG(col, n):</strong> Returns the value from n rows before the current row in the window — eliminates self-joins for sequential comparisons.</li>
+<li><strong>LEAD(col, n):</strong> Returns the value from n rows after the current row — useful for comparing a row to its future successor.</li>
+<li><strong>ROWS UNBOUNDED PRECEDING:</strong> Frame clause for cumulative aggregation — includes all rows from the start of the partition to the current row.</li>
+<li><strong>ROWS n PRECEDING:</strong> Rolling window frame — includes only the last n rows, enabling moving averages.</li>
+<li><strong>NTILE(n):</strong> Distributes rows into n equal buckets — use for quartile, decile, or percentile analysis.</li>
+<li><strong>FIRST_VALUE / LAST_VALUE:</strong> Return the first or last value in the window frame — useful for within-group comparisons against the best or worst value.</li>
 </ul>`,
 
-  16: `<p>A transaction is a group of SQL statements that either all succeed or all fail together — there is no partial success. This is critical for financial operations: transferring money requires debiting one account AND crediting another. If either step fails, the entire transaction rolls back so you never end up in an inconsistent state.</p>
-<p>ACID stands for Atomicity (all or nothing), Consistency (data always valid), Isolation (concurrent transactions do not interfere), and Durability (committed data survives crashes). Isolation levels trade performance for safety — READ UNCOMMITTED is fastest but allows dirty reads; SERIALIZABLE is safest but has the highest contention.</p>
+  16: `<p><strong>Transactions</strong> are the mechanism that ensures your database remains in a consistent, correct state even when multiple things can go wrong simultaneously — your application crashes mid-operation, two users modify the same data at the same time, a network error interrupts a multi-step update. Without transactions, any failure leaves your data in a partial, corrupted state. With transactions, either all changes succeed and are committed, or none of them are applied — the database reverts cleanly to the state before the transaction began.</p>
+<p>This guarantee is not just for financial applications. Any operation that modifies more than one row or more than one table needs to be wrapped in a transaction to be correct. A blog post creation that inserts the post AND updates a counter is a transaction. An order fulfilment that decrements inventory AND creates an order record is a transaction.</p>
+
+<h5 class="content-heading">ACID — The Four Guarantees</h5>
+<p><strong>Atomicity</strong> — "All or nothing." The entire transaction is treated as a single atomic unit. If the transaction contains 10 SQL statements and the 8th fails, the database rolls back all 7 previous changes automatically. There is no such thing as a "partial" committed transaction. In PostgreSQL: <code>BEGIN; UPDATE accounts SET balance = balance - 100 WHERE id = 1; UPDATE accounts SET balance = balance + 100 WHERE id = 2; COMMIT;</code> — if either UPDATE fails, a ROLLBACK occurs automatically and both accounts retain their original balances.</p>
+<p><strong>Consistency</strong> — The transaction brings the database from one valid state to another valid state. Database constraints (NOT NULL, UNIQUE, CHECK, FOREIGN KEY) are enforced at transaction commit time. If the transaction violates any constraint, it is rolled back and the database remains consistent. The application developer's job is to ensure that each transaction, if it completes, leaves business logic invariants intact (e.g. total money in the system stays constant after a transfer).</p>
+<p><strong>Isolation</strong> — Concurrent transactions should not interfere with each other. Without isolation, Transaction A could read data that Transaction B has modified but not yet committed (a "dirty read") — and if B then rolls back, A has operated on data that never actually existed. Isolation levels define the exact guarantees provided; stronger isolation means fewer anomalies but more contention and lower throughput.</p>
+<p><strong>Durability</strong> — Once a transaction is committed, its changes are permanent even if the server crashes immediately after. Modern databases achieve this via a Write-Ahead Log (WAL) — changes are written to a sequential log file before being applied to data files. On recovery, the database replays the WAL to restore all committed transactions. This is why <code>fsync</code> must be enabled in production (though it has a performance cost).</p>
+
+<h5 class="content-heading">Isolation Levels — Trading Safety for Performance</h5>
+<p>SQL defines four isolation levels, each preventing a different class of anomaly. From weakest to strongest:</p>
+<ul class="content-list">
+<li><strong>READ UNCOMMITTED:</strong> The weakest level. A transaction can read changes made by other transactions that have not yet been committed — "dirty reads." If the other transaction rolls back, you have read data that never existed. Almost never used in practice; no major database recommends it.</li>
+<li><strong>READ COMMITTED:</strong> The default in PostgreSQL and Oracle. A transaction only sees data committed before each of its individual statements. No dirty reads, but <strong>non-repeatable reads</strong> are possible: if you SELECT the same row twice in the same transaction, another transaction might have modified and committed it between your two reads — you get different values.</li>
+<li><strong>REPEATABLE READ:</strong> The default in MySQL/InnoDB. A transaction sees a consistent snapshot of the database as of its first read. The same SELECT returns the same rows throughout the transaction. Prevents dirty reads and non-repeatable reads. However, <strong>phantom reads</strong> are possible: a query that counts rows might return different counts if another transaction inserts rows matching your WHERE clause between your two counts (though InnoDB prevents phantoms even at this level via gap locking).</li>
+<li><strong>SERIALIZABLE:</strong> The strongest level. Transactions execute as if they were completely sequential — as if no other transaction ran at the same time. All anomalies (dirty reads, non-repeatable reads, phantoms) are prevented. Achieved via predicate locking or optimistic concurrency control with conflict detection. Significant performance overhead — only use when correctness is absolutely critical (e.g. financial ledgers, inventory management).</li>
+</ul>
+
+<h5 class="content-heading">Locking, Deadlocks, and How to Avoid Them</h5>
+<p>Databases use locks to enforce isolation. <strong>Row-level locks</strong> protect individual rows during modification. <strong>Table-level locks</strong> protect entire tables (used during DDL operations like ALTER TABLE — be careful about running these on live production tables with active traffic).</p>
+<p>A <strong>deadlock</strong> occurs when two transactions each hold a lock and are waiting for the other's lock: Transaction A locks row 1, then tries to lock row 2; Transaction B locks row 2, then tries to lock row 1. Neither can proceed. The database detects the cycle (usually within a second) and kills one transaction with a deadlock error — the application must catch this and retry.</p>
+<p>Preventing deadlocks: always acquire locks in the same order across transactions. If your application always locks resources in ascending ID order, deadlocks become impossible. Use <code>SELECT ... FOR UPDATE</code> to explicitly lock rows you intend to modify, acquiring all needed locks upfront rather than incrementally.</p>
+<p><strong>Optimistic locking</strong> (no database locks): add a <code>version</code> column to your table. When updating a row, include the version in the WHERE clause and increment it: <code>UPDATE orders SET status='shipped', version=version+1 WHERE id=123 AND version=5</code>. If another transaction modified the row first, the version will have changed and your update affects 0 rows — the application detects this and retries. Excellent for low-contention scenarios; avoids lock overhead entirely.</p>
+<p><strong>SELECT ... FOR UPDATE</strong>: Locks selected rows for the duration of the transaction. Use when you need to read-then-update and cannot tolerate concurrent modification between the read and update (the "check-then-act" pattern in concurrent systems).</p>
+
+<h5 class="content-heading">Savepoints</h5>
+<p>Savepoints allow partial rollbacks within a transaction. <code>SAVEPOINT my_point;</code> marks a point; <code>ROLLBACK TO my_point;</code> undoes everything since the savepoint without aborting the whole transaction. Useful for complex multi-step transactions where you want to retry a sub-operation without discarding all prior work.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>ACID:</strong> Atomicity, Consistency, Isolation, Durability — the four guarantees of a reliable transaction.</li>
-<li><strong>ROLLBACK:</strong> Undoes all changes made in the current transaction.</li>
-<li><strong>Deadlock:</strong> Two transactions each waiting for a lock held by the other — the DB detects and kills one.</li>
-<li><strong>Isolation level:</strong> Controls how visible one transaction's uncommitted changes are to others.</li>
+<li><strong>Transaction:</strong> A group of SQL statements that succeed or fail atomically — the foundation of data integrity in relational databases.</li>
+<li><strong>ACID:</strong> Atomicity, Consistency, Isolation, Durability — the four guarantees that define a reliable transaction.</li>
+<li><strong>Atomicity:</strong> All-or-nothing — partial transactions do not exist. Failure rolls back all changes automatically.</li>
+<li><strong>Isolation:</strong> Concurrent transactions do not see each other's partial work — the degree of protection is controlled by the isolation level.</li>
+<li><strong>Durability:</strong> Committed data survives crashes — achieved via Write-Ahead Logging (WAL).</li>
+<li><strong>READ COMMITTED:</strong> Default in PostgreSQL — transactions only see committed data, but repeated reads of the same row may return different values.</li>
+<li><strong>SERIALIZABLE:</strong> Strongest isolation — transactions appear to execute sequentially. Required for financial accuracy; high overhead.</li>
+<li><strong>Deadlock:</strong> Two transactions each waiting for the other's lock — the database kills one; the application must catch and retry. Prevent by acquiring locks in consistent order.</li>
+<li><strong>SELECT FOR UPDATE:</strong> Explicitly locks rows within a transaction — use for read-modify-write patterns that must not be interrupted by concurrent updates.</li>
+<li><strong>Optimistic locking:</strong> Version-column approach to concurrency — no database locks; detects conflicts at write time via version mismatch.</li>
+<li><strong>Dirty read:</strong> Reading uncommitted data from another transaction — prevented by all levels except READ UNCOMMITTED.</li>
+<li><strong>Write-Ahead Log (WAL):</strong> Sequential log written before data files — enables crash recovery and replication.</li>
 </ul>`,
 
-  17: `<p>Indexes are data structures (usually B-Trees) that allow the database to find rows without scanning every record. Without an index on a WHERE clause column, the database reads every row — a full table scan that grows linearly with data size. A well-placed index can turn a 10-second query into one that completes in milliseconds.</p>
-<p>Indexes have a cost: they consume disk space and slow down INSERT, UPDATE, and DELETE operations because the index must also be updated. Over-indexing is as harmful as under-indexing. Composite indexes (multiple columns) are powerful but only help queries that use the leftmost columns of the index first.</p>
+  17: `<p>Indexes are the single most impactful performance optimisation available in SQL databases. A well-placed index can turn a query that takes 30 seconds into one that completes in 2 milliseconds — a 15,000× improvement. No amount of application-level caching compensates for a missing index that causes the database to scan millions of rows for every request. Yet indexes are also frequently misunderstood, misused, and over-applied — leading to write performance degradation and wasted storage without any read benefit.</p>
+<p>Understanding how indexes work internally — not just how to create them — is what allows you to reason about <em>which</em> queries they will speed up, <em>when</em> the query planner will use them, and <em>what</em> trade-offs you are making for every index you add.</p>
+
+<h5 class="content-heading">How B-Tree Indexes Work Internally</h5>
+<p>The default index type in all major databases (PostgreSQL, MySQL, SQL Server, Oracle) is the <strong>B-Tree</strong> (Balanced Tree). A B-Tree index is a sorted tree structure where each node contains key values and pointers to child nodes. To find a row with <code>email = 'alice@example.com'</code>, the database traverses the tree from root to a leaf node in O(log n) time — for a table of 100 million rows, this is about 27 comparisons instead of 100 million. The leaf nodes contain the key values and pointers (page + offset) to the actual row locations in the heap (the physical table storage).</p>
+<p>B-Tree indexes support: equality lookups (<code>WHERE id = 5</code>), range queries (<code>WHERE created_at BETWEEN ... AND ...</code>), prefix matching (<code>WHERE name LIKE 'Al%'</code>), and ORDER BY on indexed columns (the index is already sorted). They do NOT support: suffix/middle matching (<code>WHERE name LIKE '%Smith'</code> — requires a full index scan), or most function applications on the column (<code>WHERE LOWER(name) = 'alice'</code> — unless you create a functional index).</p>
+
+<h5 class="content-heading">Other Index Types</h5>
+<p><strong>Hash indexes</strong> store a hash of the indexed value — O(1) lookup for exact equality matches, but useless for range queries or sorting. In PostgreSQL, hash indexes are now WAL-logged (crash-safe), but B-Tree still outperforms them for most workloads. Use hash indexes only on very high-cardinality columns with pure equality lookups.</p>
+<p><strong>GiST and SP-GiST indexes</strong> support geometric data, full-text search, and range types. PostGIS geographic queries require GiST indexes. Full-text search in PostgreSQL uses GiST or GIN indexes on tsvector columns.</p>
+<p><strong>GIN (Generalised Inverted Index)</strong> is optimal for columns containing multiple values — arrays, JSONB fields, and full-text search. If you store tags as an array and want to find rows containing a specific tag, a GIN index on the array column is required for performance.</p>
+<p><strong>BRIN (Block Range Index)</strong> stores min/max values for ranges of physically adjacent disk pages. Extremely small (a few kilobytes for a billion-row table) but only effective when the data is physically sorted by the indexed column — e.g. an append-only events table where newer rows always have higher timestamps. A BRIN index on a timestamp column in such a table can eliminate most block reads with negligible storage cost.</p>
+<p><strong>Partial indexes</strong> — An index with a WHERE clause that only indexes a subset of rows: <code>CREATE INDEX ON orders(created_at) WHERE status = 'pending'</code>. Smaller, faster, and only used for queries with the same condition. Ideal when most queries focus on a specific subset (e.g. active records, unprocessed jobs).</p>
+<p><strong>Functional indexes</strong> — Index the result of a function: <code>CREATE INDEX ON users (LOWER(email))</code>. Now queries with <code>WHERE LOWER(email) = ?</code> use the index. Essential for case-insensitive lookups without normalising data at write time.</p>
+
+<h5 class="content-heading">Composite Indexes and Column Order</h5>
+<p>A composite (multi-column) index on <code>(a, b, c)</code> can satisfy queries on <code>a</code>, on <code>(a, b)</code>, or on <code>(a, b, c)</code> — but NOT on <code>b</code> alone or <code>c</code> alone. This is the <strong>leftmost prefix rule</strong>. The index is sorted by <code>a</code> first, then <code>b</code> within each <code>a</code> value, then <code>c</code>. Without knowing the leading column, the database cannot use the sort order.</p>
+<p>Column order in a composite index matters enormously. Put equality-filtered columns first (highest selectivity), then range-filtered columns, then columns only in ORDER BY. Example: for a query <code>WHERE user_id = ? AND status = 'active' ORDER BY created_at</code>, the optimal index is <code>(user_id, status, created_at)</code> — filters by user_id first (most selective equality), then status, then uses the index order for the sort, avoiding a sort operation entirely.</p>
+
+<h5 class="content-heading">The Write Performance Trade-off</h5>
+<p>Every index must be updated on every INSERT, UPDATE (of an indexed column), and DELETE. A table with 8 indexes requires 9 writes per row insert (1 heap + 8 index updates). On write-heavy tables, excessive indexes are a genuine performance problem. Index maintenance also causes index bloat over time (dead index entries from UPDATEs and DELETEs) — run <code>REINDEX</code> or <code>VACUUM</code> periodically.</p>
+<p>Never add an index "just in case." Add indexes only when: you have a slow query you have identified with EXPLAIN ANALYZE, the query accesses a large table, and the WHERE/JOIN/ORDER BY columns are not already covered by an existing index.</p>
+
+<h5 class="content-heading">Finding Missing Indexes in Production</h5>
+<p>PostgreSQL's <code>pg_stat_user_tables</code> shows seq_scan counts — a table with many sequential scans and large row counts is a strong candidate for new indexes. Combined with <code>pg_stat_statements</code> for slow queries and EXPLAIN ANALYZE for query-specific analysis, you have all the tools needed to identify and fix missing indexes methodically.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>B-Tree index:</strong> The default index type — efficient for equality, range, and ORDER BY queries.</li>
-<li><strong>Composite index:</strong> An index on multiple columns; most effective when the query filters on leading columns.</li>
-<li><strong>Cardinality:</strong> The number of unique values in a column — high cardinality makes indexes most effective.</li>
-<li><strong>Slow query log:</strong> A database feature that records queries exceeding a time threshold for later analysis.</li>
+<li><strong>B-Tree index:</strong> Default balanced-tree index — efficient for equality, range, prefix, and ORDER BY. Traverses in O(log n) to find matching rows.</li>
+<li><strong>Covering index:</strong> Contains all columns referenced by a query — enables index-only scans with no table access. The fastest possible read path.</li>
+<li><strong>Composite index:</strong> Multi-column index obeying the leftmost prefix rule — only useful for queries that filter on leading columns.</li>
+<li><strong>Partial index:</strong> Index with a WHERE clause — smaller and faster, ideal for queries targeting a specific subset of rows.</li>
+<li><strong>Functional index:</strong> Index on the result of a function — enables index use on expressions like LOWER(email) in WHERE clauses.</li>
+<li><strong>GIN index:</strong> Optimal for arrays, JSONB, and full-text search — indexes individual elements within multi-value columns.</li>
+<li><strong>BRIN index:</strong> Tiny block-range index for naturally ordered data — extremely storage-efficient for append-only time-series tables.</li>
+<li><strong>Leftmost prefix rule:</strong> A composite index on (a, b, c) helps queries on a, (a,b), or (a,b,c) but not b or c alone.</li>
+<li><strong>Cardinality:</strong> Number of unique values in a column — high cardinality means each index entry points to few rows, making the index very selective and effective.</li>
+<li><strong>Index bloat:</strong> Dead index entries from UPDATEs and DELETEs that inflate index size — mitigated by regular VACUUM / REINDEX.</li>
+<li><strong>Write amplification:</strong> Each INSERT/UPDATE/DELETE must update all indexes on the table — over-indexing degrades write performance proportionally.</li>
+<li><strong>pg_stat_user_tables:</strong> PostgreSQL system view showing sequential scan counts per table — high seq_scan on large tables indicates missing indexes.</li>
 </ul>`,
 
-  18: `<p>Database normalisation is the process of organising a schema to reduce data redundancy and improve data integrity. The normal forms (1NF through BCNF) provide a step-by-step framework: each table should represent one entity, every non-key attribute should depend on the whole key, and there should be no transitive dependencies.</p>
-<p>Denormalisation (intentionally introducing some redundancy) is sometimes the right trade-off for read-heavy systems where the cost of joins outweighs the storage overhead. Understanding both normalised and denormalised designs allows you to make informed decisions about when to prioritise consistency versus query performance.</p>
+  18: `<p><strong>Database normalisation</strong> is the art and science of designing relational schemas that are correct by construction — schemas where data redundancy is minimised, update anomalies are impossible, and the meaning of each piece of data is unambiguous. A poorly normalised schema is one where the same fact is stored in multiple places: when one copy is updated without the others, your database contains contradictory data. This is called an <strong>update anomaly</strong> and is a fundamental integrity failure.</p>
+<p>The normal forms (1NF through BCNF and beyond) are a progressive series of rules, each eliminating a specific class of anomaly. Most real-world production databases target 3NF or BCNF. Understanding the theory behind each form lets you make informed decisions rather than just following rules mechanically.</p>
+
+<h5 class="content-heading">Why Normalisation Matters — The Anomalies It Prevents</h5>
+<p>Consider a denormalised <code>orders</code> table with columns: <code>order_id, customer_name, customer_email, product_name, product_price, quantity</code>. If customer Alice changes her email address, you must update every row with her name. If you miss one, your database now contains two different emails for Alice — which is correct? This is an <strong>update anomaly</strong>. If you delete the last order for a product, you lose the product's price history — this is a <strong>delete anomaly</strong>. You cannot store a new product without creating a fake order — this is an <strong>insert anomaly</strong>. Normalisation eliminates all three.</p>
+
+<h5 class="content-heading">First Normal Form (1NF)</h5>
+<p><strong>Rule</strong>: Every column must hold atomic (indivisible) values. No repeating groups. Each row must be uniquely identifiable (have a primary key).</p>
+<p><strong>Violation</strong>: A <code>phone_numbers</code> column containing "555-1234, 555-5678" (multiple values in one cell). Or a table with columns <code>tag1, tag2, tag3</code> (repeating groups).</p>
+<p><strong>Fix</strong>: Create a separate <code>phone_numbers</code> table with a foreign key back to the parent. Each phone number gets its own row. 1NF is the foundational requirement — tables violating 1NF cannot be queried efficiently in standard SQL.</p>
+
+<h5 class="content-heading">Second Normal Form (2NF)</h5>
+<p><strong>Rule</strong>: Must be in 1NF, and every non-key attribute must depend on the <em>entire</em> primary key (no partial dependency). Only relevant for tables with composite primary keys.</p>
+<p><strong>Violation</strong>: An <code>order_items</code> table with primary key <code>(order_id, product_id)</code> that also stores <code>product_name</code> and <code>product_category</code>. These columns depend only on <code>product_id</code>, not on the full composite key. If the product's name changes, you must update every order_items row — an update anomaly.</p>
+<p><strong>Fix</strong>: Move <code>product_name</code> and <code>product_category</code> to a separate <code>products</code> table keyed by <code>product_id</code>. The <code>order_items</code> table keeps only <code>order_id</code>, <code>product_id</code>, <code>quantity</code>, and the price at time of purchase (a deliberate denormalisation — historical prices should not change when the product price changes).</p>
+
+<h5 class="content-heading">Third Normal Form (3NF)</h5>
+<p><strong>Rule</strong>: Must be in 2NF, and no non-key attribute may depend on another non-key attribute (no transitive dependency).</p>
+<p><strong>Violation</strong>: A <code>users</code> table with <code>user_id, zip_code, city, state</code>. The city and state depend on the zip_code, not directly on the user_id. If zip code 94102 is always San Francisco, CA, and you change the city in one row without others, you create inconsistency.</p>
+<p><strong>Fix</strong>: Create a <code>zip_codes</code> table with <code>zip_code, city, state</code>. The users table keeps only <code>zip_code</code> as a foreign key. Now city and state are stored exactly once — updating it is a single-row change. This is Codd's original definition of "the key, the whole key, and nothing but the key."</p>
+
+<h5 class="content-heading">Boyce-Codd Normal Form (BCNF)</h5>
+<p>BCNF is a slightly stronger version of 3NF. A table is in BCNF if, for every functional dependency X → Y, X is a superkey (a key or superset of a key). BCNF violations are rare in practice but occur in tables with multiple overlapping candidate keys. Most schemas in 3NF are also in BCNF.</p>
+
+<h5 class="content-heading">When to Denormalise — The Performance Trade-off</h5>
+<p>Normalisation is correct for data integrity, but joins have a cost. In read-heavy systems (reporting dashboards, analytics, product catalogues) where data changes infrequently, strategic denormalisation can dramatically improve query performance by eliminating expensive joins.</p>
+<p><strong>Precomputed aggregates</strong>: Storing <code>order_count</code> and <code>total_spend</code> on the users table avoids a GROUP BY join on every page load. The trade-off: this column must be updated every time an order is created, modified, or deleted. Use database triggers or application-level logic consistently — a missed update creates inconsistency.</p>
+<p><strong>Materialised views</strong>: A better alternative to manual denormalisation. A materialised view pre-computes and stores the result of a complex query. In PostgreSQL: <code>CREATE MATERIALIZED VIEW monthly_revenue AS SELECT ... FROM orders GROUP BY ...;</code>. Refresh with <code>REFRESH MATERIALIZED VIEW monthly_revenue;</code> — either on a schedule or triggered by changes. Unlike a manual denormalised column, the source of truth remains normalised; the materialised view is just a cache that can be fully rebuilt.</p>
+<p><strong>Document stores for read models</strong>: In event-sourced and CQRS architectures, the "read model" (what users query) is deliberately denormalised into a document structure (JSON) for fast reads, while the "write model" (events) remains normalised. This is a deliberate architectural trade-off for systems with extreme read/write asymmetry.</p>
+
+<h5 class="content-heading">Referential Integrity and Foreign Keys</h5>
+<p>Foreign key constraints enforce that a referencing column always points to a valid row in the referenced table. Without them, you can have "orphaned" records — order items with no parent order, comments with no parent post. Always define foreign key constraints unless you have a specific performance reason not to (FK checks have a small overhead on INSERT/UPDATE/DELETE).</p>
+<p>ON DELETE actions: <strong>RESTRICT</strong> (default — prevents deletion of parent if children exist), <strong>CASCADE</strong> (deletes children automatically — use carefully), <strong>SET NULL</strong> (nulls out the foreign key — requires the column to be nullable), <strong>SET DEFAULT</strong> (sets foreign key to its default value). Choose based on your business logic: deleting a user probably cascades to their sessions but restricts if they have financial records.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>1NF:</strong> Each column holds atomic values; no repeating groups.</li>
-<li><strong>2NF:</strong> Every non-key attribute depends on the entire primary key, not just part of it.</li>
-<li><strong>3NF:</strong> No transitive dependencies — non-key attributes depend only on the key.</li>
-<li><strong>Foreign key:</strong> A column that references the primary key of another table, enforcing referential integrity.</li>
+<li><strong>Normalisation:</strong> Organising a schema to eliminate data redundancy and prevent update, insert, and delete anomalies.</li>
+<li><strong>Update anomaly:</strong> When the same fact is stored multiple times and one copy gets updated without the others — produces contradictory data.</li>
+<li><strong>1NF:</strong> Atomic column values, no repeating groups, unique rows. The foundational requirement for all relational tables.</li>
+<li><strong>2NF:</strong> No partial dependencies — non-key attributes must depend on the whole composite key, not just part of it.</li>
+<li><strong>3NF:</strong> No transitive dependencies — non-key attributes depend only on the primary key, not on other non-key attributes. "The key, the whole key, nothing but the key."</li>
+<li><strong>BCNF:</strong> Stronger 3NF — every determinant in a functional dependency must be a superkey. Rarely violated in typical OLTP schemas.</li>
+<li><strong>Foreign key:</strong> Column referencing another table's primary key — enforces referential integrity, preventing orphaned records.</li>
+<li><strong>Referential integrity:</strong> The guarantee that all foreign key values point to valid existing rows — enforced by FK constraints at the database level.</li>
+<li><strong>Denormalisation:</strong> Intentional redundancy for read performance — precomputed aggregates, duplicated columns to avoid joins. Introduces consistency risk; use materialised views instead where possible.</li>
+<li><strong>Materialised view:</strong> Pre-computed stored query result — provides denormalisation's read performance with the source data remaining normalised. Refreshed on schedule or on demand.</li>
+<li><strong>ON DELETE CASCADE:</strong> Automatically deletes child rows when the parent is deleted — use carefully, as it can trigger large cascading deletes.</li>
 </ul>`,
 
   // ── Course 4: Machine Learning Fundamentals ───────────────────────────
