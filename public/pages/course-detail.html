@@ -123,6 +123,24 @@
   </div>
 </div>
 
+<!-- Floating highlight toolbar -->
+<div id="hl-toolbar" class="hidden">
+  <div class="hl-dot" style="background:#fef08a" title="Yellow" onclick="applyHighlight('yellow')"></div>
+  <div class="hl-dot" style="background:#bbf7d0" title="Green"  onclick="applyHighlight('green')"></div>
+  <div class="hl-dot" style="background:#fecdd3" title="Pink"   onclick="applyHighlight('pink')"></div>
+  <div class="hl-sep"></div>
+  <div class="hl-erase" onclick="eraseHighlight()">✕ Remove</div>
+</div>
+
+<!-- Term definition popup -->
+<div id="term-overlay" class="hidden" onclick="closeTermPopup(event)">
+  <div id="term-popup">
+    <button class="tp-close" onclick="closeTermPopup()">✕</button>
+    <div id="term-popup-title"></div>
+    <div id="term-popup-body"></div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 <style>
   .content-heading { font-size: 14px; font-weight: 700; color: var(--ink); margin: 16px 0 8px; }
@@ -132,6 +150,44 @@
   .module-content p { margin-bottom: 10px; }
   .module-content strong { color: var(--ink); }
   .module-content code { background: var(--bg2); padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: monospace; }
+
+  /* ── Expandable terms ── */
+  .xterm { border-bottom:2px dashed var(--acc);cursor:pointer;padding:1px 2px;border-radius:2px;transition:background .15s; }
+  .xterm:hover { background:var(--acc-lt); }
+
+  /* ── Highlights ── */
+  mark.hl { border-radius:3px;padding:1px 0; }
+  mark.hl-yellow { background:#fef08a; color:#713f12; }
+  mark.hl-green  { background:#bbf7d0; color:#14532d; }
+  mark.hl-pink   { background:#fecdd3; color:#881337; }
+
+  /* ── Floating highlight toolbar ── */
+  #hl-toolbar { position:fixed;z-index:9999;background:#1e293b;border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:all;transition:opacity .15s; }
+  #hl-toolbar.hidden { display:none; }
+  .hl-dot { width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid rgba(255,255,255,.5);transition:transform .15s; }
+  .hl-dot:hover { transform:scale(1.3); }
+  .hl-sep { width:1px;height:18px;background:rgba(255,255,255,.2); }
+  .hl-erase { color:#fff;font-size:12px;cursor:pointer;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.15);transition:background .15s;white-space:nowrap; }
+  .hl-erase:hover { background:rgba(255,255,255,.3); }
+
+  /* ── Term popup ── */
+  #term-overlay { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;display:flex;align-items:flex-end;justify-content:center;padding:0 0 0 0; }
+  #term-overlay.hidden { display:none; }
+  #term-popup { background:var(--surface);border-radius:var(--rad-xl) var(--rad-xl) 0 0;padding:28px 28px 36px;max-width:580px;width:100%;max-height:75vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.2);animation:slideUp .25s ease; }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  #term-popup-title { font-family:var(--fh);font-size:21px;font-weight:800;color:var(--ink);margin-bottom:14px;padding-right:36px; }
+  #term-popup-body { font-size:14px;color:var(--ink2);line-height:1.8; }
+  #term-popup-body p { margin-bottom:10px; }
+  .tp-close { position:absolute;top:16px;right:16px;background:var(--bg2);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center; }
+  #term-popup { position:relative; }
+
+  /* ── Content collapse ── */
+  .content-wrap { position:relative; }
+  .content-wrap.collapsed .module-content { max-height:180px;overflow:hidden; }
+  .content-fade { position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,var(--surface));pointer-events:none; }
+  .content-wrap.expanded .content-fade { display:none; }
+  .content-toggle { background:none;border:1.5px solid var(--border);border-radius:var(--rad);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;padding:6px 14px;margin-top:8px;transition:all .15s; }
+  .content-toggle:hover { background:var(--acc-lt);border-color:var(--acc); }
 
   /* ── Flashcards ── */
   .fc-section { margin-bottom: 20px; }
@@ -281,6 +337,7 @@ function toggleAccordion(id) {
   const isOpen = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   header.classList.toggle('open', !isOpen);
+  if (!isOpen) initModuleContent(id);
 }
 
 async function enrol() {
@@ -298,6 +355,179 @@ async function updateProgress(progress) {
 }
 
 loadCourse();
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  MODULE CONTENT ENHANCEMENTS
+// ══════════════════════════════════════════════════════════════════════════════
+
+const _initDone = new Set();
+
+function initModuleContent(moduleId) {
+  if (_initDone.has(moduleId)) return;
+  _initDone.add(moduleId);
+
+  const body = document.getElementById('body-' + moduleId);
+  if (!body) return;
+  const mc = body.querySelector('.module-content');
+  if (!mc) return;
+
+  // ── 1. Wrap in collapsible container ──────────────────────────────────────
+  const wrap = document.createElement('div');
+  wrap.className = 'content-wrap collapsed';
+  mc.parentNode.insertBefore(wrap, mc);
+  wrap.appendChild(mc);
+
+  const fade = document.createElement('div');
+  fade.className = 'content-fade';
+  wrap.appendChild(fade);
+
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'content-toggle';
+  toggleBtn.textContent = '↓ Show full notes';
+  toggleBtn.onclick = () => {
+    const collapsed = wrap.classList.toggle('collapsed');
+    wrap.classList.toggle('expanded', !collapsed);
+    toggleBtn.textContent = collapsed ? '↓ Show full notes' : '↑ Collapse';
+  };
+  wrap.after(toggleBtn);
+
+  // ── 2. Make bold terms in key-concept lists clickable ─────────────────────
+  mc.querySelectorAll('.content-list li').forEach(li => {
+    const strong = li.querySelector('strong');
+    if (!strong || strong.dataset.wired) return;
+    strong.dataset.wired = '1';
+    strong.classList.add('xterm');
+
+    strong.addEventListener('click', e => {
+      e.stopPropagation();
+      const term = strong.textContent.replace(/:$/, '').trim();
+      // Description = everything in the li except the strong element
+      const clone = li.cloneNode(true);
+      clone.querySelectorAll('strong').forEach(s => {
+        const marker = document.createElement('strong');
+        marker.style.color = 'var(--ink)';
+        marker.textContent = s.textContent;
+        s.replaceWith(marker);
+      });
+      const fullText = clone.textContent.replace(term + ':', '').replace(term, '').trim();
+
+      // Look for matching flashcard for extra context
+      let extra = '';
+      if (typeof FLASHCARDS !== 'undefined' && FLASHCARDS[moduleId]) {
+        const card = FLASHCARDS[moduleId].find(c => c.q.toLowerCase().includes(term.toLowerCase().slice(0, 10)));
+        if (card) extra = `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);margin-bottom:6px">📇 Related Flashcard</div><div style="font-size:13px;color:var(--ink2)">${card.a}</div></div>`;
+      }
+
+      showTermPopup(term, `<p>${fullText}</p>${extra}`);
+    });
+  });
+
+  // ── 3. Restore saved highlights ──────────────────────────────────────────
+  restoreHighlights(moduleId, mc);
+}
+
+// ── Term popup ────────────────────────────────────────────────────────────────
+function showTermPopup(term, bodyHtml) {
+  document.getElementById('term-popup-title').textContent = term;
+  document.getElementById('term-popup-body').innerHTML   = bodyHtml;
+  document.getElementById('term-overlay').classList.remove('hidden');
+}
+function closeTermPopup(e) {
+  if (e && e.target !== document.getElementById('term-overlay')) return;
+  document.getElementById('term-overlay').classList.add('hidden');
+}
+
+// ── Highlighting ──────────────────────────────────────────────────────────────
+let _hlText = '', _hlModId = null;
+
+document.addEventListener('mouseup', () => {
+  setTimeout(() => {
+    const sel = window.getSelection();
+    const txt = sel && sel.toString().trim();
+    if (!txt || txt.length < 2) { hideHlBar(); return; }
+
+    const range = sel.getRangeAt(0);
+    let node = range.commonAncestorContainer;
+    if (node.nodeType === 3) node = node.parentElement;
+    const mc = node.closest('.module-content');
+    if (!mc) { hideHlBar(); return; }
+
+    const bodyEl = mc.closest('[id^="body-"]');
+    _hlModId = bodyEl ? bodyEl.id.replace('body-', '') : null;
+    _hlText  = txt;
+
+    const rect = range.getBoundingClientRect();
+    const tb   = document.getElementById('hl-toolbar');
+    tb.classList.remove('hidden');
+    // Position above selection, centred
+    const tbW = tb.offsetWidth || 180;
+    tb.style.left = Math.max(8, rect.left + rect.width / 2 - tbW / 2) + 'px';
+    tb.style.top  = (rect.top + window.scrollY - 52) + 'px';
+  }, 10);
+});
+
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('#hl-toolbar')) hideHlBar();
+});
+
+function hideHlBar() { document.getElementById('hl-toolbar').classList.add('hidden'); _hlText = ''; }
+
+function applyHighlight(color) {
+  if (!_hlText || !_hlModId) return;
+  const mc = document.getElementById('body-' + _hlModId)?.querySelector('.module-content');
+  if (!mc) return;
+
+  const key = 'hl_' + _hlModId;
+  const hls = JSON.parse(localStorage.getItem(key) || '[]');
+  const idx = hls.findIndex(h => h.text === _hlText);
+  if (idx >= 0) hls[idx].color = color; else hls.push({ text: _hlText, color });
+  localStorage.setItem(key, JSON.stringify(hls));
+
+  wrapTextInMark(mc, _hlText, color);
+  hideHlBar();
+  window.getSelection()?.removeAllRanges();
+  toast('Highlighted!', 'success');
+}
+
+function eraseHighlight() {
+  if (!_hlText || !_hlModId) return;
+  const key = 'hl_' + _hlModId;
+  const hls = JSON.parse(localStorage.getItem(key) || '[]').filter(h => h.text !== _hlText);
+  localStorage.setItem(key, JSON.stringify(hls));
+  const mc = document.getElementById('body-' + _hlModId)?.querySelector('.module-content');
+  if (mc) { restoreHighlights(_hlModId, mc); }
+  hideHlBar();
+  window.getSelection()?.removeAllRanges();
+}
+
+function wrapTextInMark(container, text, color) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+  for (const tn of nodes) {
+    const i = tn.textContent.indexOf(text);
+    if (i === -1) continue;
+    if (tn.parentElement.tagName === 'MARK') continue; // already wrapped
+    const before = document.createTextNode(tn.textContent.slice(0, i));
+    const mark   = document.createElement('mark');
+    mark.className = 'hl hl-' + color;
+    mark.textContent = text;
+    const after = document.createTextNode(tn.textContent.slice(i + text.length));
+    tn.replaceWith(before, mark, after);
+    break;
+  }
+}
+
+function restoreHighlights(moduleId, container) {
+  const hls = JSON.parse(localStorage.getItem('hl_' + moduleId) || '[]');
+  if (!hls.length) return;
+  const mc = container || document.getElementById('body-' + moduleId)?.querySelector('.module-content');
+  if (!mc) return;
+  // Strip existing marks first
+  mc.querySelectorAll('mark.hl').forEach(m => m.replaceWith(m.textContent));
+  hls.forEach(({ text, color }) => wrapTextInMark(mc, text, color));
+}
 
 // ── Flashcard state (per module) ──────────────────────────────────────────────
 const fcState = {};
