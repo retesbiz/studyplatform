@@ -231,12 +231,14 @@ initPage();
 const courseId = new URLSearchParams(location.search).get('id');
 if (!courseId) location.href = 'courses.html';
 
-async function loadCourse() {
+async function loadCourse(attempt) {
+  attempt = attempt || 1;
   let c;
   try {
     c = await api('GET', '/courses/' + courseId);
   } catch(e) {
-    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Failed to load course</h4><p style="color:var(--ink3);margin-top:8px">Check your connection and <a href="" onclick="location.reload()">try again</a>.</p></div>`;
+    if (attempt < 3) { setTimeout(() => loadCourse(attempt + 1), 2000); return; }
+    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Could not reach the server</h4><p style="color:var(--ink3);margin-top:8px">${e.message} — <a href="" onclick="location.reload();return false;">Reload page</a></p></div>`;
     return;
   }
   if (!c || c.message) {

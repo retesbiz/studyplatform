@@ -93,7 +93,15 @@ async function api(method, path, body) {
   const opts = { method, headers: authHeaders() };
   if (body) opts.body = JSON.stringify(body);
   let res;
-  try { res = await fetch('/api' + path, opts); } catch(e) { throw new Error('Network error: ' + e.message); }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    opts.signal = controller.signal;
+    res = await fetch('/api' + path, opts);
+    clearTimeout(timer);
+  } catch(e) {
+    throw new Error(e.name === 'AbortError' ? 'Request timed out' : 'Network error: ' + e.message);
+  }
   if (res.status === 401) { logout(); return null; }
   const text = await res.text();
   try { return JSON.parse(text); } catch(e) { throw new Error('Server error (' + res.status + ')'); }
