@@ -221,43 +221,26 @@
   .fc-btn:disabled { opacity:.35; cursor:not-allowed; }
   .fc-shuffle { margin-left:auto; font-size:12px; }
 </style>
-<script src="../js/app.js?v=2"></script>
-<script src="../js/course-content.js?v=2"></script>
-<script src="../js/flashcards.js?v=2"></script>
-<script src="../js/term-definitions.js?v=2"></script>
+<script src="../js/app.js?v=3"></script>
+<script src="../js/courses-static.js?v=1"></script>
+<script src="../js/course-content.js?v=3"></script>
+<script src="../js/flashcards.js?v=3"></script>
+<script src="../js/term-definitions.js?v=3"></script>
 <script>
 initPage();
 
-const courseId = new URLSearchParams(location.search).get('id');
+const courseId = parseInt(new URLSearchParams(location.search).get('id'));
 if (!courseId) { location.href = 'courses.html'; }
 
-// Fallback: if loadCourse never resolves after 15s, show error
-setTimeout(() => {
-  const pb = document.getElementById('page-body');
-  if (pb && pb.querySelector('.empty-state')?.textContent.includes('Loading')) {
-    pb.innerHTML = '<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Server is not responding</h4><p style="color:var(--ink3);margin-top:8px">The API did not reply within 15 seconds. <a href="" onclick="location.reload();return false;">Reload</a> or <a href="courses.html">go back</a>.</p></div>';
-  }
-}, 15000);
-
-async function loadCourse(attempt) {
-  attempt = attempt || 1;
-  let c;
-  try {
-    c = await api('GET', '/courses/' + courseId);
-  } catch(e) {
-    if (attempt < 3) { setTimeout(() => loadCourse(attempt + 1), 2000); return; }
-    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Could not reach the server</h4><p style="color:var(--ink3);margin-top:8px">${e.message} — <a href="" onclick="location.reload();return false;">Reload page</a></p></div>`;
-    return;
-  }
-  if (!c || c.message) {
-    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>${(c && c.message) || 'Course not found'}</h4><p style="color:var(--ink3);margin-top:8px"><a href="courses.html">← Back to Courses</a></p></div>`;
-    return;
-  }
-
+// ── Render from static data immediately — no API needed ──────────────────────
+function renderCourse(c) {
+  if (!c) return;
   document.title = c.title + ' — StudyNest';
 
   const levelClass = c.level === 'Beginner' ? 'badge-green' : c.level === 'Advanced' ? 'badge-red' : 'badge-amber';
-  const allTopics  = (c.moduleList || []).flatMap(m => m.topicList || []).slice(0, 12);
+  // Support both topicList (array) from API and topics (comma string) from static data
+  const getTopics = m => m.topicList || (m.topics ? m.topics.split(',').map(t=>t.trim()) : []);
+  const allTopics = (c.moduleList || []).flatMap(m => getTopics(m)).slice(0, 12);
 
   document.getElementById('page-body').innerHTML = `
     <div class="course-hero">
@@ -351,9 +334,9 @@ async function loadCourse(attempt) {
             ${(typeof COURSE_CONTENT !== 'undefined' && COURSE_CONTENT[m.id])
               ? `<div class="module-content">${COURSE_CONTENT[m.id]}</div>`
               : `<div class="accordion-desc">${m.description || ''}</div>`}
-            ${m.topicList && m.topicList.length ? `
+            ${getTopics(m).length ? `
             <div class="topic-chips">
-              ${m.topicList.map(t => `<span class="topic-chip">${t}</span>`).join('')}
+              ${getTopics(m).map(t => `<span class="topic-chip">${t}</span>`).join('')}
             </div>` : ''}
           </div>
         </div>`).join('')}
@@ -373,18 +356,68 @@ function toggleAccordion(id) {
 async function enrol() {
   const btn = document.getElementById('enrol-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Enrolling…'; }
-  const res = await api('POST', '/courses/' + courseId + '/enroll');
-  if (res) { toast('Enrolled! 🎉', 'success'); loadCourse(); }
-  else if (btn) { btn.disabled = false; btn.textContent = 'Enrol Free →'; }
+  try {
+    const res = await api('POST', '/courses/' + courseId + '/enroll');
+    if (res) { toast('Enrolled! 🎉', 'success'); loadEnrollment(); }
+    else if (btn) { btn.disabled = false; btn.textContent = 'Enrol Free →'; }
+  } catch(e) { if (btn) { btn.disabled = false; btn.textContent = 'Enrol Free →'; } }
 }
 
 async function updateProgress(progress) {
-  await api('PATCH', '/courses/' + courseId + '/progress', { progress });
-  toast(progress >= 100 ? 'Course completed! 🎉' : 'Progress saved!', 'success');
-  loadCourse();
+  try {
+    await api('PATCH', '/courses/' + courseId + '/progress', { progress });
+    toast(progress >= 100 ? 'Course completed! 🎉' : 'Progress saved!', 'success');
+    loadEnrollment();
+  } catch(e) { toast('Could not save progress', 'error'); }
 }
 
-loadCourse();
+// Load page instantly from static data
+const staticCourse = COURSES_STATIC && COURSES_STATIC[courseId];
+if (!staticCourse) {
+  document.getElementById('page-body').innerHTML = '<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Course not found</h4><p><a href="courses.html">← Back</a></p></div>';
+} else {
+  renderCourse(staticCourse);
+  loadEnrollment(); // fetch progress/enrolment status from API in background
+}
+
+// Fetch only enrolment/progress from API — doesn't block page render
+async function loadEnrollment() {
+  try {
+    const data = await api('GET', '/courses/' + courseId);
+    if (!data || data.message) return;
+    // Update action bar with live enrolment state
+    const bar = document.querySelector('.course-action-bar');
+    if (!bar) return;
+    const prog = data.progress || 0;
+    bar.innerHTML = `
+      <div>
+        <div style="font-weight:600;font-size:15px">${data.enrolled ? (data.completed ? 'Course Completed' : 'Continue Learning') : 'Start Learning Today'}</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:2px">${data.enrolled ? (data.completed ? 'Great work! Review anytime.' : 'Keep going!') : 'Free to enrol — no credit card required.'}</div>
+      </div>
+      ${data.enrolled
+        ? (data.completed
+          ? '<button class="btn btn-ghost" disabled>✅ Completed</button>'
+          : '<button class="btn btn-primary" onclick="updateProgress(' + Math.min(100, prog + 10) + ')">▶ Continue (+10%)</button>')
+        : '<button class="btn btn-primary" id="enrol-btn" onclick="enrol()">Enrol Free →</button>'}
+    `;
+    // Update progress bar if enrolled
+    if (data.enrolled && !data.completed) {
+      const existing = document.querySelector('.progress-section');
+      if (existing) {
+        existing.querySelector('.progress-fill').style.width = prog + '%';
+        existing.querySelector('[style*="font-weight:700"]').textContent = prog + '%';
+      } else {
+        const hero = document.querySelector('.course-hero');
+        if (hero) {
+          const ps = document.createElement('div');
+          ps.className = 'progress-section';
+          ps.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:600;font-size:15px">Your Progress</div><div style="font-weight:700;color:var(--acc)">' + prog + '%</div></div><div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:' + prog + '%"></div></div>';
+          hero.after(ps);
+        }
+      }
+    }
+  } catch(e) { /* API offline — static content still shows */ }
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  MODULE CONTENT ENHANCEMENTS
