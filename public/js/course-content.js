@@ -1229,297 +1229,1366 @@ const COURSE_CONTENT = {
 </ul>`,
 
   // ── Course 5: Full Stack Web Development ─────────────────────────────
-  25: `<p>HTML5 is the markup language that structures every web page. Semantic elements like <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, and <code>&lt;footer&gt;</code> describe the meaning of content rather than just its appearance. This benefits accessibility tools (screen readers) and search engines that parse your page structure to understand its content.</p>
-<p>Web accessibility means building sites that work for everyone, including users with disabilities. Using proper heading hierarchy (<code>h1</code> to <code>h6</code>), alt text on images, labels on form fields, and sufficient colour contrast are foundational requirements. The WCAG 2.1 guidelines provide the international standard for accessible web content.</p>
+  25: `<p><strong>HTML5</strong> is the language of the web — every page on the internet is an HTML document. But HTML5 is not just about tags; it introduced a philosophy shift toward <strong>semantic markup</strong>: using elements that describe meaning, not just appearance. A <code>&lt;nav&gt;</code> tells browsers, search engines, and screen readers "this is navigation." A <code>&lt;main&gt;</code> says "this is the primary content of the page." A <code>&lt;article&gt;</code> means "this is standalone, distributable content." Compare this to a <code>&lt;div class="nav"&gt;</code> — machines see only a generic box with a name. Semantic HTML is the foundation of accessibility and SEO.</p>
+<p>HTML5 also brought powerful browser APIs that used to require plugins: <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> without Flash, the Canvas API for 2D graphics, the Web Storage API (<code>localStorage</code> and <code>sessionStorage</code>), the Geolocation API, the Fetch API, Web Workers, WebSockets, and the File API. Understanding what the browser can do natively — without any framework — makes you a more capable developer.</p>
+
+<h5 class="content-heading">Semantic Elements and Why They Matter</h5>
+<p>HTML5 introduced a full set of semantic sectioning elements. Use them consistently and your document becomes a machine-readable outline:</p>
+<ul class="content-list">
+<li><strong>&lt;header&gt;:</strong> Introductory content — site logo, page title, top navigation. Can appear inside <code>&lt;article&gt;</code> and <code>&lt;section&gt;</code> too, not just at the page level.</li>
+<li><strong>&lt;nav&gt;:</strong> A major navigation block. Screen readers expose it as a navigation landmark — users can jump directly to it or skip it. Use for primary navigation, breadcrumbs, and page-level table of contents.</li>
+<li><strong>&lt;main&gt;:</strong> The dominant content of the page — unique per page, only one per document. Screen reader users navigate directly here via landmark navigation.</li>
+<li><strong>&lt;article&gt;:</strong> Self-contained, independently distributable content — a blog post, news article, comment, product card. Could be extracted from the page and still make sense on its own.</li>
+<li><strong>&lt;section&gt;:</strong> A thematic grouping of content with a heading. Use when there is no more specific element; do not use it as a generic container (that is what <code>&lt;div&gt;</code> is for).</li>
+<li><strong>&lt;aside&gt;:</strong> Content tangentially related to the surrounding content — sidebars, pull quotes, advertising, related links.</li>
+<li><strong>&lt;footer&gt;:</strong> Footer of its nearest sectioning ancestor — copyright, author info, related links. Not restricted to the page bottom.</li>
+<li><strong>&lt;figure&gt; / &lt;figcaption&gt;:</strong> Self-contained content (image, chart, code snippet) with an optional caption — properly associates caption with content for accessibility.</li>
+<li><strong>&lt;time datetime=""&gt;:</strong> Human-readable date/time with a machine-readable <code>datetime</code> attribute — enables calendar applications and search engines to understand dates.</li>
+</ul>
+
+<h5 class="content-heading">Forms — The Most Underused HTML Feature</h5>
+<p>HTML5 dramatically improved forms with new input types that trigger the right keyboard on mobile, validate natively without JavaScript, and provide semantic meaning: <code>type="email"</code> validates email format, <code>type="tel"</code> opens a phone keypad, <code>type="number"</code> shows a numeric keyboard, <code>type="date"</code> shows a date picker, <code>type="search"</code> adds a clear button. The <code>required</code>, <code>minlength</code>, <code>maxlength</code>, <code>min</code>, <code>max</code>, and <code>pattern</code> attributes provide basic validation with no JavaScript. Always use <code>&lt;label&gt;</code> elements explicitly associated with inputs — <code>&lt;label for="email"&gt;Email&lt;/label&gt;&lt;input id="email"&gt;</code> — for accessibility. Without labels, screen readers cannot tell users what a field is for.</p>
+
+<h5 class="content-heading">Web Accessibility (a11y)</h5>
+<p>Accessibility (abbreviated a11y — "a" + 11 letters + "y") means building for everyone, including the 1.3 billion people worldwide with a disability. Blind users navigate with screen readers (NVDA, JAWS, VoiceOver) that announce elements by their HTML role and label. Deaf users need captions on video. Motor-impaired users may navigate entirely by keyboard — every interactive element must be reachable and operable via Tab and Enter/Space.</p>
+<p>The <strong>WCAG 2.1</strong> (Web Content Accessibility Guidelines) is the international standard, organised into four principles (POUR): <strong>Perceivable</strong> (all content can be perceived by sight or sound), <strong>Operable</strong> (all functions work with a keyboard), <strong>Understandable</strong> (language and UI are clear), <strong>Robust</strong> (works with current and future assistive technologies). Level AA compliance is the legal requirement in most jurisdictions.</p>
+<p>Practical checklist: all images have descriptive <code>alt</code> text (or <code>alt=""</code> for decorative images), all interactive elements are focusable and keyboard-operable, colour contrast ratio is at least 4.5:1 for normal text, headings form a proper hierarchy (one <code>&lt;h1&gt;</code>, then <code>&lt;h2&gt;</code>, etc.), forms have associated labels, videos have captions.</p>
+<p><strong>ARIA (Accessible Rich Internet Applications)</strong> attributes bridge gaps where HTML semantics are insufficient. <code>role="button"</code> makes a <code>&lt;div&gt;</code> act as a button for screen readers. <code>aria-label="Close dialog"</code> gives a button with only an icon (×) a meaningful accessible name. <code>aria-expanded="true/false"</code> communicates accordion/dropdown state. <code>aria-live="polite"</code> announces dynamic content updates. The first rule of ARIA: do not use ARIA if you can use semantic HTML instead. <code>&lt;button&gt;</code> is always better than <code>&lt;div role="button"&gt;</code>.</p>
+
+<h5 class="content-heading">HTML5 Browser APIs</h5>
+<p><strong>Web Storage</strong>: <code>localStorage</code> persists data across sessions (until explicitly cleared). <code>sessionStorage</code> persists only for the current browser tab session. Both are key-value stores limited to ~5MB per origin. Never store sensitive data (tokens, PII) in localStorage — it is accessible by any JavaScript on the page.</p>
+<p><strong>Fetch API</strong>: The modern replacement for XMLHttpRequest. <code>fetch(url)</code> returns a Promise — cleaner than callbacks, works with async/await: <code>const data = await fetch('/api/users').then(r => r.json())</code>.</p>
+<p><strong>Canvas API</strong>: 2D drawing API for dynamic graphics, charts, image manipulation, and games. Draw paths, shapes, text, and images programmatically.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Semantic HTML:</strong> Using tags that convey meaning (<code>&lt;nav&gt;</code>, <code>&lt;article&gt;</code>) rather than generic <code>&lt;div&gt;</code> tags.</li>
-<li><strong>ARIA attributes:</strong> Provide accessibility information to assistive technologies when HTML semantics are not enough.</li>
-<li><strong>Viewport meta tag:</strong> <code>&lt;meta name="viewport"&gt;</code> ensures correct rendering on mobile devices.</li>
-<li><strong>LocalStorage API:</strong> Stores key-value pairs in the browser that persist across sessions.</li>
+<li><strong>Semantic HTML:</strong> Using elements that convey meaning (&lt;nav&gt;, &lt;article&gt;, &lt;main&gt;) rather than generic &lt;div&gt; — enables accessibility, SEO, and machine-readable structure.</li>
+<li><strong>ARIA attributes:</strong> Supplement HTML semantics for screen readers — role, aria-label, aria-expanded, aria-live. First rule: prefer semantic HTML over ARIA.</li>
+<li><strong>WCAG 2.1:</strong> The international accessibility standard — POUR principles, Level AA compliance is the legal requirement in most jurisdictions.</li>
+<li><strong>Viewport meta tag:</strong> &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt; — essential for correct mobile rendering without this tag mobile browsers zoom out to desktop width.</li>
+<li><strong>HTML5 input types:</strong> email/tel/number/date/search — trigger correct mobile keyboard, provide native validation, convey semantic meaning.</li>
+<li><strong>Form labels:</strong> Every input must have an associated &lt;label&gt; — critical for screen readers. Use for="" / id="" or wrap input inside label element.</li>
+<li><strong>LocalStorage:</strong> Persistent browser key-value store (~5MB) — data survives page closes. Never store tokens or sensitive data here.</li>
+<li><strong>sessionStorage:</strong> Same API as localStorage but data clears when the tab closes — appropriate for temporary session data.</li>
+<li><strong>Fetch API:</strong> Promise-based HTTP requests replacing XMLHttpRequest — works with async/await for clean asynchronous code.</li>
+<li><strong>Alt text:</strong> Describes images for screen readers and search engines — use descriptive text for informative images, empty alt="" for decorative ones.</li>
+<li><strong>Keyboard navigation:</strong> Every interactive element must be reachable via Tab and operable via Enter/Space — tested by navigating your entire site without a mouse.</li>
 </ul>`,
 
-  26: `<p>CSS Flexbox and Grid are the two modern layout systems. Flexbox excels at one-dimensional layouts — aligning items in a row or column. Grid handles two-dimensional layouts — rows and columns simultaneously. Together they replace the old float-based and table-based layouts that were fragile and hard to maintain.</p>
-<p>Responsive design means your layout adapts gracefully to any screen size — from a 320px phone to a 4K monitor. Mobile-first design starts with the smallest screen styles and uses <code>min-width</code> media queries to add complexity for larger screens. CSS custom properties (variables) make maintaining a consistent design system across a large codebase much easier.</p>
+  26: `<p>CSS layout has been one of the most frustrating aspects of web development for most of the internet's history. Float-based layouts were hacks — floats were designed for text wrapping around images, not for full page layouts. Table-based layouts were semantically wrong. Both required intricate workarounds for vertical centering, equal-height columns, and responsive behaviour. <strong>Flexbox</strong> and <strong>CSS Grid</strong>, now supported in all modern browsers, finally give CSS a proper layout model. Together they can handle virtually any layout challenge cleanly and predictably.</p>
+<p>The key to using them effectively: <strong>Flexbox is for one dimension</strong> (a row or column of items), <strong>Grid is for two dimensions</strong> (rows AND columns simultaneously). Use Flexbox for navbars, button groups, card content alignment. Use Grid for page layouts, card grids, and any two-dimensional arrangement.</p>
+
+<h5 class="content-heading">Flexbox Deep Dive</h5>
+<p>Apply <code>display: flex</code> to a container to make it a flex container. Its direct children become flex items. Key properties:</p>
+<ul class="content-list">
+<li><strong>flex-direction:</strong> <code>row</code> (default, left-to-right) or <code>column</code> (top-to-bottom). Determines the <em>main axis</em> — alignment and sizing properties reference this axis.</li>
+<li><strong>justify-content:</strong> Aligns items along the main axis. <code>flex-start</code>, <code>center</code>, <code>flex-end</code>, <code>space-between</code> (equal gaps between items), <code>space-around</code> (gaps around items), <code>space-evenly</code> (equal gaps including edges).</li>
+<li><strong>align-items:</strong> Aligns items on the cross axis (perpendicular to main). <code>stretch</code> (default — fills cross axis), <code>center</code> (vertically centre in a row), <code>flex-start</code>, <code>flex-end</code>, <code>baseline</code>.</li>
+<li><strong>flex-wrap: wrap:</strong> Allows items to wrap to the next line instead of shrinking — essential for responsive grids made with Flexbox.</li>
+<li><strong>gap:</strong> Sets spacing between flex items — cleaner than margins on individual items.</li>
+<li><strong>flex: 1:</strong> On an item — makes it grow to fill available space. <code>flex: 0 0 200px</code> — fixed 200px, does not grow or shrink. Understanding flex-grow, flex-shrink, flex-basis unlocks responsive sizing.</li>
+</ul>
+<p>Classic vertical centering: <code>display: flex; align-items: center; justify-content: center;</code> on the container — the single cleanest way to vertically and horizontally centre any element in CSS.</p>
+
+<h5 class="content-heading">CSS Grid Deep Dive</h5>
+<p>CSS Grid turns a container into a two-dimensional grid. You define columns and rows, then place items into grid areas.</p>
+<ul class="content-list">
+<li><strong>grid-template-columns:</strong> Defines column widths. <code>repeat(3, 1fr)</code> creates three equal-width columns. <code>200px 1fr 200px</code> creates a sidebar/main/sidebar layout. The <code>fr</code> unit means "fraction of available space."</li>
+<li><strong>grid-template-rows:</strong> Defines row heights — often set to <code>auto</code> for content-driven row sizing.</li>
+<li><strong>gap:</strong> Spacing between cells — sets both row-gap and column-gap.</li>
+<li><strong>grid-column / grid-row:</strong> On an item — spans: <code>grid-column: 1 / 3</code> makes the item span from column line 1 to 3 (occupying 2 columns). <code>grid-column: 1 / -1</code> spans the full width.</li>
+<li><strong>grid-template-areas:</strong> Named areas for readable layout definition — assign names to zones, then place items with <code>grid-area</code>.</li>
+<li><strong>minmax():</strong> <code>repeat(auto-fill, minmax(200px, 1fr))</code> — creates as many 200px+ columns as fit, then distributes remaining space equally. The one-liner responsive grid that needs no media queries.</li>
+</ul>
+
+<h5 class="content-heading">Responsive Design and Mobile-First</h5>
+<p><strong>Mobile-first</strong> means writing your base CSS for the smallest screen, then using <code>min-width</code> media queries to add complexity for larger screens. This results in leaner CSS: mobile styles are simpler, and you progressively enhance them. The alternative (desktop-first with <code>max-width</code> queries) tends to produce more complex "undo" CSS for smaller screens.</p>
+<p>Standard breakpoints (Tailwind CSS uses these as a reference): 640px (sm), 768px (md), 1024px (lg), 1280px (xl). The exact values matter less than consistency — pick a system and use it everywhere. Always test on real devices — the browser dev tools device emulator is useful but not a substitute for actual hardware testing.</p>
+<p>Modern responsive without media queries: <code>clamp()</code> scales a value fluidly between a minimum and maximum: <code>font-size: clamp(1rem, 2.5vw, 2rem)</code> — never smaller than 1rem, never larger than 2rem, scales with viewport width between. Container queries (<code>@container</code>) let a component respond to its parent container's size rather than the viewport — essential for truly reusable components.</p>
+
+<h5 class="content-heading">CSS Custom Properties (Variables)</h5>
+<p>CSS custom properties (defined with <code>--</code> prefix) are the foundation of maintainable CSS at scale: <code>:root { --color-primary: #3b82f6; --spacing-md: 1rem; --font-heading: 'Inter', sans-serif; }</code>. Use them via <code>var(--color-primary)</code>. Unlike preprocessor variables (Sass/Less), CSS custom properties are dynamic — they can be changed at runtime with JavaScript, respond to media queries, and cascade like normal CSS properties. Changing <code>--color-primary</code> in a dark mode override updates every element using that variable throughout the page.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Flexbox:</strong> One-dimensional layout; use for rows or columns of items.</li>
-<li><strong>CSS Grid:</strong> Two-dimensional layout; use for full page layouts and complex component grids.</li>
-<li><strong>Media query:</strong> Applies CSS rules conditionally based on screen width, height, or device type.</li>
-<li><strong>CSS variables:</strong> <code>--primary-color: #3d6b1e</code> — reusable values that make global changes easy.</li>
+<li><strong>Flexbox:</strong> One-dimensional layout (row or column) — use for navbars, button groups, card content, and single-axis alignment.</li>
+<li><strong>justify-content:</strong> Aligns flex items along the main axis — space-between, center, space-evenly etc.</li>
+<li><strong>align-items:</strong> Aligns flex items on the cross axis — center enables vertical centering.</li>
+<li><strong>CSS Grid:</strong> Two-dimensional layout (rows AND columns) — use for page layouts and card grids.</li>
+<li><strong>fr unit:</strong> Fraction of available grid space — repeat(3, 1fr) creates three equal columns.</li>
+<li><strong>minmax():</strong> Combined with auto-fill creates a responsive grid with no media queries needed.</li>
+<li><strong>Mobile-first design:</strong> Write base styles for smallest screens, add complexity with min-width media queries — produces leaner CSS than desktop-first.</li>
+<li><strong>Media query:</strong> @media (min-width: 768px) { } — applies CSS rules only at specified viewport sizes.</li>
+<li><strong>clamp():</strong> Fluid scaling between min and max values — eliminates many breakpoint-specific font/spacing rules.</li>
+<li><strong>Container queries:</strong> Component responds to its parent's size rather than viewport — truly portable, reusable components.</li>
+<li><strong>CSS custom properties:</strong> --variable-name defined on :root, consumed with var() — dynamic, cascading, runtime-changeable unlike preprocessor variables.</li>
 </ul>`,
 
-  27: `<p>JavaScript is the only programming language that runs natively in the browser, making it essential for any web developer. Understanding the event loop is critical: JavaScript is single-threaded, so asynchronous operations (fetching data, reading files) use callbacks, Promises, or async/await to avoid blocking the UI while waiting.</p>
-<p>ES6+ introduced features that transformed how JavaScript is written: arrow functions, destructuring, template literals, modules, spread/rest operators, and async/await. Closures — functions that remember the scope they were created in — are the foundation of many JavaScript patterns including event handlers, factory functions, and module patterns.</p>
+  27: `<p>JavaScript is the only language that runs natively in every web browser, making it the one unavoidable language for any web developer. But JavaScript's design is unusual — it is <strong>single-threaded</strong> (one thing happens at a time) yet handles concurrent operations like network requests, timers, and user input without blocking. Understanding <em>how</em> it achieves this — the event loop — is the key to writing non-freezing, responsive web applications. Get this wrong and your UI locks up while fetching data; get it right and your app feels instant.</p>
+<p>Modern JavaScript (ES6+, ES2017, ES2020+) is a dramatically more expressive language than the JavaScript of 2010. Arrow functions, destructuring, Promises, async/await, modules, optional chaining, and nullish coalescing together eliminate enormous amounts of boilerplate and make code dramatically more readable. A developer who only knows pre-ES6 JavaScript is working with the wrong tool.</p>
+
+<h5 class="content-heading">The Event Loop — JavaScript's Concurrency Model</h5>
+<p>JavaScript runs on a single thread — there is one <strong>call stack</strong> and at any moment only one piece of code is executing. When you call a function, it is pushed onto the stack; when it returns, it is popped. This means: if any function takes a long time (a heavy computation, a synchronous network call), everything else — including UI updates — is blocked until it finishes. The browser appears frozen.</p>
+<p>Asynchronous operations (setTimeout, fetch, DOM events) are handled through the <strong>event loop</strong>. When you call <code>fetch(url)</code>, the browser sends the HTTP request, immediately returns a Promise, and continues executing. When the response arrives (perhaps 200ms later), the browser puts a callback in the <strong>task queue</strong>. The event loop continuously checks: "is the call stack empty?" — if yes, it moves the next callback from the task queue onto the stack for execution.</p>
+<p><strong>Microtasks vs macrotasks</strong>: Promise callbacks go into the <strong>microtask queue</strong>, which is drained completely before any macrotask (setTimeout callbacks, event handlers). This means a long chain of Promise resolutions can delay timer callbacks. Understanding this order matters for debugging subtle timing issues.</p>
+<p><strong>Why this matters in practice</strong>: Never block the main thread with long synchronous operations — use Web Workers for CPU-intensive computation, use async/await for I/O. A 200ms synchronous loop causes a visible frame drop. Even if a function "looks synchronous" to you, if it takes more than 16ms (one frame at 60fps) it will cause jank.</p>
+
+<h5 class="content-heading">Asynchronous JavaScript: Callbacks → Promises → async/await</h5>
+<p><strong>Callbacks</strong> (the original approach): Pass a function to be called when the async operation completes. Simple for one level, but multiple nested async operations create "callback hell" — deeply indented, hard-to-read, hard-to-error-handle code pyramids.</p>
+<p><strong>Promises</strong>: An object representing an eventual value — in one of three states: pending, fulfilled (resolved with a value), or rejected (with an error). Chain operations with <code>.then(onFulfilled)</code> and <code>.catch(onRejected)</code>. Flattens callback hell into a readable chain. Key: <code>Promise.all([p1, p2, p3])</code> runs multiple promises in parallel and resolves when all complete — far faster than awaiting them sequentially. <code>Promise.allSettled()</code> resolves when all complete regardless of success or failure.</p>
+<p><strong>async/await</strong>: Syntactic sugar over Promises that makes async code read like synchronous code. An <code>async</code> function always returns a Promise; <code>await</code> pauses execution of the async function until the Promise resolves. Wrap in try/catch to handle errors. Critical mistake: <code>await</code>ing Promises sequentially when they could run in parallel doubles your latency — use <code>await Promise.all([fetch(url1), fetch(url2)])</code> to run both requests concurrently.</p>
+
+<h5 class="content-heading">Closures — The Most Important JavaScript Concept</h5>
+<p>A <strong>closure</strong> is a function that "closes over" — captures and remembers — variables from its containing scope, even after that scope has finished executing. Every JavaScript function is a closure. Event handlers close over the variables in scope when they were defined; React useState updaters close over the state value at render time; factory functions return closures that maintain private state.</p>
+<p>Classic example: <code>function makeCounter() { let count = 0; return () => ++count; }</code> — the returned function closes over <code>count</code>. Each call to the returned function increments the same <code>count</code> variable. From outside, <code>count</code> is inaccessible — this is the module pattern for private state in plain JavaScript.</p>
+<p>Common bug with closures and loops: using <code>var</code> in a for loop creates one shared variable in the function scope — all event handlers in the loop close over the same final value. Fix: use <code>let</code> (block-scoped, creates a new binding per iteration) or an IIFE.</p>
+
+<h5 class="content-heading">ES6+ Essential Features</h5>
+<p><strong>Destructuring</strong>: Extract values from objects and arrays concisely — <code>const { name, age = 25 } = user</code> (with default), <code>const [first, ...rest] = array</code>. In function parameters: <code>function greet({ name, role }) { }</code> — self-documenting, avoids repetitive <code>options.name</code> access.</p>
+<p><strong>Spread/Rest</strong>: <code>...arr</code> spreads an array/object. <code>const merged = { ...defaults, ...overrides }</code> creates a new object with overrides winning. In function params: <code>function sum(...nums)</code> collects all arguments into an array.</p>
+<p><strong>Template literals</strong>: <code>`Hello, ${name}! You have ${count} messages.`</code> — multiline strings, embedded expressions, no string concatenation.</p>
+<p><strong>Modules</strong>: <code>export</code> / <code>import</code> — explicit dependencies, tree-shakeable by bundlers. Named exports: <code>export function add() { }</code>. Default export: <code>export default class App { }</code>. Dynamic import: <code>const mod = await import('./heavy-module.js')</code> — loads code on demand for code splitting.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Event loop:</strong> How JavaScript handles async operations without blocking — the call stack, task queue, and microtask queue.</li>
-<li><strong>Closure:</strong> A function that captures and remembers variables from its surrounding scope.</li>
-<li><strong>Promise:</strong> An object representing a value that will be available in the future (pending, fulfilled, or rejected).</li>
-<li><strong>async/await:</strong> Syntactic sugar over Promises that makes asynchronous code look and behave like synchronous code.</li>
+<li><strong>Event loop:</strong> Continuously checks if the call stack is empty and moves the next queued callback onto it — enables non-blocking async code on a single thread.</li>
+<li><strong>Call stack:</strong> LIFO stack tracking which function is currently executing — only one frame runs at a time.</li>
+<li><strong>Microtask queue:</strong> Promise callbacks — always drained completely before the next macrotask (setTimeout, DOM events).</li>
+<li><strong>Closure:</strong> A function that captures variables from its containing scope — the foundation of private state, factory functions, and event handlers in JavaScript.</li>
+<li><strong>Promise:</strong> Represents an eventual value (pending/fulfilled/rejected) — chainable with .then()/.catch(), parallelisable with Promise.all().</li>
+<li><strong>async/await:</strong> Syntactic sugar over Promises — makes async code read synchronously. Use Promise.all() for parallel operations.</li>
+<li><strong>Destructuring:</strong> Extract values from objects/arrays concisely, with defaults and renaming — reduces boilerplate.</li>
+<li><strong>Spread operator:</strong> Expands arrays/objects — use for shallow copies, merging objects, spreading arguments.</li>
+<li><strong>Template literals:</strong> Backtick strings with ${} expression interpolation and multiline support.</li>
+<li><strong>ES Modules:</strong> import/export for explicit dependencies — enables tree-shaking and dynamic code splitting.</li>
+<li><strong>Optional chaining (?.):</strong> Access nested properties safely — returns undefined instead of throwing if an intermediate value is null/undefined.</li>
+<li><strong>Nullish coalescing (??):</strong> Returns the right side only if the left is null or undefined — unlike ||, does not short-circuit on 0 or empty string.</li>
 </ul>`,
 
-  28: `<p>Node.js lets you run JavaScript on the server, using the same language for both front and back end. Express.js is a minimal web framework that provides routing and middleware on top of Node's HTTP module. Middleware functions are the backbone of Express — they intercept requests, process them (logging, parsing, authentication), and pass them to the next handler.</p>
-<p>REST API design uses HTTP methods and status codes semantically: GET retrieves, POST creates, PUT/PATCH updates, DELETE removes. A well-designed API is predictable and consistent — resources are nouns in the URL path, verbs live in the HTTP method, and responses use standard status codes (200, 201, 400, 401, 404, 500).</p>
+  28: `<p><strong>Node.js</strong> is a JavaScript runtime built on Chrome's V8 engine — it lets you run JavaScript outside the browser, on a server, in a terminal, or anywhere you need a fast, I/O-efficient backend. Its key architectural feature is the same event loop model you learned in the browser: non-blocking I/O lets a single Node process handle thousands of concurrent connections efficiently. Compare this to traditional thread-per-request servers (Java, Ruby, PHP) where each connection consumes a thread — Node's model uses far less memory for I/O-bound workloads like APIs that query databases and call external services.</p>
+<p>Node.js unified web development: the same language, the same async patterns, and many of the same libraries work on both front and back end. This reduces context switching and allows code sharing (validation logic, types, utility functions) between client and server.</p>
+
+<h5 class="content-heading">Express.js — The Minimal Web Framework</h5>
+<p>Express is deliberately un-opinionated — it provides routing, middleware, and response helpers without forcing a project structure on you. This is a strength (flexibility) and a responsibility (you must architect it well yourself).</p>
+<p>A minimal Express server: <code>const app = express(); app.get('/users', (req, res) => res.json(users)); app.listen(3000);</code></p>
+<p><strong>Middleware</strong> is the central pattern in Express. A middleware function has the signature <code>(req, res, next)</code>. It can: read/modify the request, send a response (ending the chain), or call <code>next()</code> to pass control to the next middleware. The middleware stack runs in the order you register it with <code>app.use()</code>.</p>
+<p>Essential middleware layers in a production Express app (in order): 1) CORS headers, 2) Request body parsing (<code>express.json()</code>), 3) Rate limiting, 4) Security headers (helmet), 5) Request logging (morgan), 6) Authentication, 7) Routes, 8) Error handling middleware (4 params: err, req, res, next).</p>
+<p><strong>Error-handling middleware</strong> is special — it has four parameters: <code>(err, req, res, next)</code>. Register it last. When any middleware calls <code>next(err)</code> or throws in an async route (with try/catch), Express skips to the error handler. Always have a catch-all error handler that returns a structured JSON error and an appropriate HTTP status code rather than letting Express send an HTML error page.</p>
+<p><strong>Express Router</strong>: For any non-trivial app, split routes into separate router files: <code>const router = express.Router(); router.get('/', getUsers); module.exports = router;</code>. In your main app: <code>app.use('/api/users', usersRouter)</code>. This creates clean, testable, modular route files.</p>
+
+<h5 class="content-heading">REST API Design Principles</h5>
+<p>A well-designed REST API is self-describing — a developer who has never seen it can make correct guesses about its structure.</p>
+<p><strong>HTTP methods</strong>: GET (read — never has a request body, must be idempotent and safe), POST (create — returns 201 Created with the new resource), PUT (full replace — idempotent), PATCH (partial update — only the provided fields), DELETE (remove — returns 204 No Content on success).</p>
+<p><strong>URL structure</strong>: Resources are nouns (plural): <code>/users</code>, <code>/orders</code>, <code>/products/:id/reviews</code>. Never verbs in URLs (<code>/getUsers</code>, <code>/createOrder</code>) — the HTTP method is already the verb. Nesting: <code>/users/:userId/orders</code> — but limit nesting to two levels maximum to avoid unwieldy URLs.</p>
+<p><strong>HTTP status codes</strong> — use them correctly: 200 OK (success), 201 Created (new resource created), 204 No Content (success with no response body), 400 Bad Request (client sent invalid data — include validation errors in the response body), 401 Unauthorized (not authenticated), 403 Forbidden (authenticated but not authorised), 404 Not Found (resource does not exist), 409 Conflict (e.g. duplicate email on registration), 422 Unprocessable Entity (semantically invalid request), 429 Too Many Requests, 500 Internal Server Error (never expose stack traces).</p>
+<p><strong>API versioning</strong>: Version in the URL path (<code>/api/v1/users</code>) or an Accept header. Versioning allows breaking changes without breaking existing clients — never change the shape of an existing response without a new version.</p>
+<p><strong>Consistent error responses</strong>: Always return structured JSON errors: <code>{ "error": { "code": "VALIDATION_ERROR", "message": "Email is required", "details": [...] } }</code>. Frontend developers can programmatically handle error types, display user-friendly messages, and log the details.</p>
+
+<h5 class="content-heading">Environment Variables and Configuration</h5>
+<p>Configuration values that change between environments (development, staging, production) — database URLs, API keys, JWT secrets, feature flags — must never be hardcoded in source code. Use environment variables: <code>process.env.DATABASE_URL</code>. In development, use a <code>.env</code> file loaded by the <code>dotenv</code> package. The <code>.env</code> file must be in <code>.gitignore</code> — committing credentials to a public repository is one of the most common and costly developer security mistakes.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Middleware:</strong> A function that receives (req, res, next) and can modify the request, send a response, or call next().</li>
-<li><strong>Route handler:</strong> A function mapped to a specific HTTP method and URL path.</li>
-<li><strong>Environment variables:</strong> Configuration values (DB credentials, API keys) stored outside the codebase in .env files.</li>
-<li><strong>Express Router:</strong> Organises routes into separate files for a cleaner, modular project structure.</li>
+<li><strong>Node.js:</strong> JavaScript runtime with non-blocking I/O — handles thousands of concurrent connections efficiently on a single thread.</li>
+<li><strong>Express middleware:</strong> Function with (req, res, next) signature — runs in order, can modify the request, respond, or pass to next.</li>
+<li><strong>Middleware stack:</strong> The ordered pipeline of middleware functions — CORS → body parsing → rate limiting → auth → routes → error handler.</li>
+<li><strong>Error-handling middleware:</strong> Four-parameter function (err, req, res, next) — catches errors from any previous middleware or route handler.</li>
+<li><strong>Express Router:</strong> Modular route grouping — split routes by resource into separate files, mounted at a path prefix.</li>
+<li><strong>HTTP methods:</strong> GET (read), POST (create → 201), PUT (full replace), PATCH (partial update), DELETE (remove → 204) — the verb lives in the method, not the URL.</li>
+<li><strong>HTTP status codes:</strong> 200/201/204 success, 400 bad request, 401 unauthenticated, 403 forbidden, 404 not found, 422 validation error, 429 rate limited, 500 server error.</li>
+<li><strong>Resource-based URLs:</strong> Nouns (plural), nested up to two levels — /users/:id/orders is good, /getUser is not.</li>
+<li><strong>API versioning:</strong> /api/v1/ prefix allows breaking changes without breaking existing clients.</li>
+<li><strong>Environment variables:</strong> Externalize all config from code — never commit .env files or hardcode secrets in source.</li>
+<li><strong>dotenv:</strong> Loads .env file variables into process.env in development — use a secrets manager (AWS Secrets Manager, Vault) in production.</li>
 </ul>`,
 
-  29: `<p>MySQL is a relational database that stores data in tables with rows and columns. The <code>mysql2</code> npm package provides a Promise-based connection pool — a pool keeps several connections open and reuses them, avoiding the overhead of opening a new connection for every request. Always use parameterised queries to prevent SQL injection.</p>
-<p>JWT (JSON Web Token) is a compact, self-contained token for transmitting authentication data. After login, the server signs a token containing the user's ID and role using a secret key. The client stores this token and sends it with every subsequent request. The server verifies the signature — no database lookup needed — making JWTs stateless and scalable.</p>
+  29: `<p>Authentication and database integration are the two most critical backend concerns in any real web application. Get either wrong and you either lose user data or expose user accounts. This module covers the complete authentication flow — registration, password hashing, login, JWT issuance, and protected route middleware — alongside database connection best practices with MySQL/PostgreSQL.</p>
+<p>Every production web application handles passwords. The most common, most catastrophic mistake is storing them in plaintext — in 2019, Facebook admitted storing hundreds of millions of Instagram passwords in plaintext in internal logs. The second most common mistake is using a fast hash (MD5, SHA-1, SHA-256) — these can be cracked at billions of guesses per second on modern GPUs. The correct approach is a purposely slow, salted password hashing algorithm.</p>
+
+<h5 class="content-heading">Password Hashing with bcrypt</h5>
+<p><strong>bcrypt</strong> is the industry standard for password hashing. It is intentionally slow — designed to require significant computation — making brute-force attacks impractical. Key properties:</p>
+<ul class="content-list">
+<li><strong>Automatic salting:</strong> bcrypt automatically generates a unique random salt for each password and incorporates it into the hash. Two users with the same password get completely different hashes — rainbow table attacks are impossible.</li>
+<li><strong>Configurable cost factor:</strong> The "rounds" parameter (typically 10-12) controls how slow hashing is. bcrypt(password, 10) performs 2¹⁰ = 1024 iterations. On current hardware, cost 12 takes ~250ms — acceptable for login (happens once per session) but makes brute-force at scale impractical.</li>
+<li><strong>Self-contained:</strong> The stored hash includes the algorithm version, cost factor, and salt — everything needed to verify a password is in the hash string itself.</li>
+</ul>
+<p>Registration: <code>const hash = await bcrypt.hash(plainPassword, 12); // store hash in DB</code></p>
+<p>Login verification: <code>const match = await bcrypt.compare(plainPassword, storedHash); // returns boolean</code></p>
+<p>Never decrypt passwords — you cannot, and should not need to. Authentication works by hashing the attempt and comparing hashes.</p>
+
+<h5 class="content-heading">JWT Authentication Flow</h5>
+<p>A JWT (JSON Web Token) is a compact, self-contained token containing claims (assertions) about a user, signed by the server. Structure: three base64url-encoded sections separated by dots — <code>header.payload.signature</code>.</p>
+<p>The <strong>header</strong> specifies the algorithm: <code>{ "alg": "HS256", "typ": "JWT" }</code>. The <strong>payload</strong> contains claims: <code>{ "sub": "user_id_123", "role": "admin", "iat": 1716000000, "exp": 1716003600 }</code>. The <strong>signature</strong> is <code>HMAC-SHA256(base64(header) + "." + base64(payload), secretKey)</code> — only the server with the secret key can produce a valid signature.</p>
+<p>Complete authentication flow:</p>
+<ul class="content-list">
+<li><strong>Registration:</strong> Hash password with bcrypt, store user in database, return 201.</li>
+<li><strong>Login:</strong> Fetch user by email, compare password with bcrypt, sign a JWT (HS256 with server secret, 15min expiry for access token), issue a refresh token (longer-lived, stored HttpOnly cookie), return access token.</li>
+<li><strong>Protected request:</strong> Client sends <code>Authorization: Bearer &lt;access_token&gt;</code> header. Auth middleware extracts and verifies the token: <code>const decoded = jwt.verify(token, SECRET)</code>. If valid, attaches <code>req.user = decoded</code> and calls <code>next()</code>. If invalid or expired, returns 401.</li>
+<li><strong>Token refresh:</strong> When access token expires, client sends refresh token (from HttpOnly cookie). Server validates refresh token, issues new access token. This keeps sessions alive without requiring re-login while limiting the window of a compromised access token to 15 minutes.</li>
+</ul>
+<p>Security rules: store access tokens in memory (not localStorage — XSS risk), store refresh tokens in HttpOnly cookies (not accessible by JavaScript). Use a strong secret: <code>require('crypto').randomBytes(64).toString('hex')</code> — never a dictionary word.</p>
+
+<h5 class="content-heading">Database Connection Pooling</h5>
+<p>Opening a database connection takes time — TCP handshake, authentication, SSL negotiation — typically 20-100ms. On a high-traffic server handling 100 requests/second, opening a new connection per request is unacceptable. A <strong>connection pool</strong> maintains a set of pre-opened connections, lending them to requests and returning them to the pool when the request completes.</p>
+<p>With <code>mysql2</code>: <code>const pool = mysql.createPool({ host, user, password, database, connectionLimit: 10 })</code>. With <code>pg</code> (PostgreSQL): <code>const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10 })</code>. The pool's <code>max</code> setting is important — set it below your database's <code>max_connections</code> limit divided by the number of application server instances. Always release connections back to the pool by using <code>pool.query()</code> rather than <code>pool.getConnection()</code> manually.</p>
+<p>Always use <strong>parameterised queries</strong>: <code>pool.query('SELECT * FROM users WHERE id = ?', [userId])</code> (mysql2) or <code>pool.query('SELECT * FROM users WHERE id = $1', [userId])</code> (pg). The database driver separates the query structure from the data, making SQL injection impossible regardless of what <code>userId</code> contains.</p>
+
+<h5 class="content-heading">Input Validation</h5>
+<p>Never trust data from the client. Validate every field before processing: required fields are present, strings are within length limits, emails match the email format, numbers are within range. Use a validation library like <strong>Zod</strong> or <strong>Joi</strong> for structured, composable schemas: <code>const schema = z.object({ email: z.string().email(), password: z.string().min(8) }); const result = schema.safeParse(req.body);</code>. Return 400 with detailed validation errors — the client needs to know specifically what is wrong, not just "bad request."</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Connection pool:</strong> A cache of reusable database connections — avoids the overhead of new connections per request.</li>
-<li><strong>bcrypt:</strong> A slow, salt-generating password hashing function designed to be resistant to brute-force attacks.</li>
-<li><strong>JWT:</strong> Three base64-encoded parts: header (algorithm), payload (claims), signature (verification).</li>
-<li><strong>Auth middleware:</strong> Verifies the JWT on protected routes before the handler function runs.</li>
+<li><strong>bcrypt:</strong> Purposely slow, automatically salted password hashing — cost factor 12 makes brute-force impractical while login takes ~250ms.</li>
+<li><strong>Salt:</strong> Random value added to each password before hashing — makes identical passwords hash differently, defeats rainbow tables.</li>
+<li><strong>JWT structure:</strong> header.payload.signature — base64url-encoded, signed but NOT encrypted (payload is readable by anyone).</li>
+<li><strong>Access token:</strong> Short-lived JWT (15min) sent in Authorization header — stored in memory, not localStorage.</li>
+<li><strong>Refresh token:</strong> Long-lived token stored in HttpOnly cookie — used to obtain new access tokens without re-login.</li>
+<li><strong>Auth middleware:</strong> Verifies JWT on protected routes before the handler runs — attaches decoded payload to req.user.</li>
+<li><strong>Connection pool:</strong> Pre-opened reusable DB connections — eliminates per-request connection overhead.</li>
+<li><strong>Parameterised query:</strong> Separates SQL structure from user data — the only reliable SQL injection prevention.</li>
+<li><strong>Input validation:</strong> Validates all client-provided data before processing — return 400 with specific field-level errors.</li>
+<li><strong>Zod:</strong> TypeScript-first schema validation library — composable schemas, type inference, safe parse results.</li>
+<li><strong>HttpOnly cookie:</strong> Cookie inaccessible to JavaScript — the correct storage location for refresh tokens.</li>
 </ul>`,
 
-  30: `<p>React is a JavaScript library for building user interfaces from reusable components. Each component is a function that takes props (input data) and returns JSX (HTML-like syntax that compiles to JavaScript). When state changes, React efficiently re-renders only the affected parts of the DOM using its virtual DOM diffing algorithm.</p>
-<p>Deployment is the process of making your application accessible on the internet. Services like Railway, Render, and Vercel connect to your GitHub repository and automatically build and deploy on every push. Environment variables on the hosting platform replace your local .env file, keeping secrets out of version control.</p>
+  30: `<p>Bringing a full-stack application to production involves more than writing code — it requires understanding the build process, deployment infrastructure, monitoring, environment management, and continuous integration. This is the "last mile" that many developers underestimate. A working local app and a production-ready system are very different things.</p>
+<p>The modern deployment landscape has dramatically simplified what was once a complex sysadmin concern. Services like <strong>Railway</strong>, <strong>Render</strong>, <strong>Fly.io</strong>, and <strong>Vercel</strong> allow developers to deploy full-stack applications from a GitHub repository in minutes. Understanding what happens under the hood — how builds work, how environment variables flow, how health checks and rolling deploys work — makes you effective at debugging and optimising these deployments.</p>
+
+<h5 class="content-heading">The Build Process</h5>
+<p>A React application written in JSX and ES modules cannot be served directly to a browser — it must be <strong>bundled</strong> and <strong>transpiled</strong>. The build tool (Vite, webpack) does several things: transpiles JSX to <code>React.createElement()</code> calls, transpiles modern JavaScript to browser-compatible JavaScript (via Babel or esbuild), bundles all imports into a few files, minifies (removes whitespace and renames variables to short names), and performs <strong>tree-shaking</strong> (removes unused exports). The result is a <code>dist/</code> or <code>build/</code> folder of static HTML, CSS, and JavaScript files that any web server can serve.</p>
+<p><strong>Code splitting</strong> breaks the bundle into chunks loaded on demand. Instead of one 2MB JavaScript file, you get a small initial bundle with everything needed for the first screen, then load additional chunks as the user navigates. React's <code>React.lazy()</code> and <code>Suspense</code> handle this: <code>const Dashboard = React.lazy(() => import('./Dashboard'))</code>. Result: significantly faster initial page loads.</p>
+<p><strong>Vite</strong> is the modern build tool of choice. In development mode, Vite serves files as native ES modules — no bundling, instant server start, and only the modules you actually import are loaded. In production, it uses Rollup for highly optimised bundling. Compared to Create React App (which used webpack): Vite development server starts in under 300ms vs 30+ seconds for large apps.</p>
+
+<h5 class="content-heading">CI/CD — Continuous Integration and Deployment</h5>
+<p><strong>Continuous Integration (CI)</strong>: Automatically run tests, linting, and type checking on every pull request and push. Catches bugs before they reach the main branch. Tools: GitHub Actions, CircleCI, GitLab CI. A basic GitHub Actions workflow: on every push to main, install dependencies, run tests, run ESLint — block the merge if any step fails.</p>
+<p><strong>Continuous Deployment (CD)</strong>: Automatically deploy to production when CI passes. Every push to main that passes tests goes live — no manual deploy steps. This requires high test coverage and confidence — it is the pinnacle of development velocity. Many teams use <strong>continuous delivery</strong> instead: the app is always in a deployable state, but deployment requires a manual trigger.</p>
+<p><strong>Rolling deployments</strong>: On platforms like Railway or Render, new code is deployed as new containers while old containers still serve traffic. Health checks verify the new containers are responding correctly before traffic is switched — zero-downtime deployments.</p>
+
+<h5 class="content-heading">Environment Management</h5>
+<p>A properly configured application runs identically in development, staging, and production — only the environment variables change. The <strong>Twelve-Factor App methodology</strong> (influential guide for production-ready applications) mandates: store config in environment variables, never commit secrets, use the same build artifact across environments (only the variables differ).</p>
+<p>On deployment platforms: environment variables are set in a dashboard or CLI — they replace your local <code>.env</code> file. Never commit a <code>.env</code> file with real credentials. Use different values per environment: a development database URL, a staging database URL, and a production database URL, all stored as the same variable name (<code>DATABASE_URL</code>) with different values in each environment's configuration.</p>
+
+<h5 class="content-heading">Monitoring and Observability</h5>
+<p>Production applications require visibility into what is happening. The three pillars of observability:</p>
+<ul class="content-list">
+<li><strong>Logs:</strong> Structured JSON logs (not console.log with strings) sent to a log aggregation service (Datadog, Papertrail, Logtail). Include request ID, user ID, duration, and status code on every request. Never log passwords, tokens, or PII.</li>
+<li><strong>Metrics:</strong> Numerical measurements over time — request rate, error rate, response time percentiles (p50, p95, p99), database connection pool size, memory usage. Alert when metrics cross thresholds.</li>
+<li><strong>Traces:</strong> Distributed tracing follows a single request through all services — invaluable for debugging latency in microservices architectures.</li>
+</ul>
+<p><strong>Health check endpoints</strong>: A <code>GET /health</code> endpoint that returns 200 if the app is running correctly (database connected, external services reachable) or 503 if not. Load balancers and deployment platforms use this to route traffic only to healthy instances.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Component:</strong> A reusable, self-contained piece of UI — a function that returns JSX.</li>
-<li><strong>Props:</strong> Read-only data passed from a parent component to a child.</li>
-<li><strong>Virtual DOM:</strong> React's in-memory representation of the UI — used to calculate the minimum DOM updates needed.</li>
-<li><strong>CI/CD:</strong> Continuous Integration / Continuous Deployment — automatically test and deploy on every code push.</li>
+<li><strong>Build process:</strong> Transpiles JSX, bundles imports, minifies, tree-shakes — transforms dev code into optimised production assets.</li>
+<li><strong>Vite:</strong> Modern build tool — instant dev server via ES modules, Rollup-powered production builds. Faster than webpack/CRA.</li>
+<li><strong>Tree shaking:</strong> Removing unused exports from the bundle — reduces bundle size, improves load time.</li>
+<li><strong>Code splitting:</strong> Breaking the bundle into on-demand chunks — React.lazy() + Suspense enables route-level splitting.</li>
+<li><strong>CI/CD:</strong> Automated testing and deployment pipeline — every commit triggers tests; passing commits deploy automatically.</li>
+<li><strong>Rolling deployment:</strong> New containers deployed while old ones serve traffic — health checks gate traffic switch for zero downtime.</li>
+<li><strong>Twelve-Factor App:</strong> Methodology for production-ready apps — store config in env vars, stateless processes, explicit dependencies.</li>
+<li><strong>Health check endpoint:</strong> GET /health returning 200/503 — load balancers use it to route traffic only to healthy instances.</li>
+<li><strong>Structured logging:</strong> JSON log objects with consistent fields — machine-searchable, aggregatable, alertable.</li>
+<li><strong>Observability:</strong> Logs + metrics + traces — complete visibility into production application behaviour.</li>
+<li><strong>p99 latency:</strong> The 99th percentile response time — the slowest 1% of requests. Critical for user experience; average hides tail latency.</li>
 </ul>`,
 
   // ── Course 6: Network Security Essentials ────────────────────────────
-  31: `<p>The OSI model divides network communication into 7 abstract layers, from physical cables (Layer 1) up to application protocols like HTTP (Layer 7). Understanding which layer a security control operates at helps you choose the right tool — a firewall operates at Layer 3/4, TLS at Layer 4/5, and a WAF at Layer 7. The TCP/IP model is a practical 4-layer version used in the real internet.</p>
-<p>Wireshark is the industry-standard packet analyser. It captures raw network traffic and lets you inspect every packet at every layer. Mastering Wireshark is essential for network troubleshooting, security analysis, and understanding exactly how protocols work in practice.</p>
+  31: `<p>Network security starts with understanding networks. The OSI model and TCP/IP suite are not just academic frameworks — they are the conceptual tools that let you reason about where attacks happen, where defences go, and what each security control actually protects. A firewall that blocks at Layer 3 (IP) cannot inspect the content of an HTTP request. A WAF that inspects Layer 7 cannot protect against a SYN flood at Layer 4. Knowing which layer you are operating at is fundamental to choosing the right defence.</p>
+<p>The internet runs on <strong>TCP/IP</strong>. Understanding TCP's three-way handshake, IP addressing and routing, DNS resolution, and how data flows from your browser through multiple network hops to a server is the foundation for understanding virtually every network attack — from SYN floods to BGP hijacking to man-in-the-middle attacks.</p>
+
+<h5 class="content-heading">The OSI Model — Seven Layers of Network Communication</h5>
+<ul class="content-list">
+<li><strong>Layer 7 — Application:</strong> The protocol the application uses — HTTP, HTTPS, SMTP, DNS, FTP. This is where web application logic lives. Attacks at this layer: SQL injection, XSS, CSRF, SSRF. Defences: WAF, input validation, authentication.</li>
+<li><strong>Layer 6 — Presentation:</strong> Data formatting, encryption, compression. TLS operates here (or Layer 5, depending on the model). SSL stripping attacks target this layer.</li>
+<li><strong>Layer 5 — Session:</strong> Managing sessions between applications. TLS session resumption and renegotiation attacks.</li>
+<li><strong>Layer 4 — Transport:</strong> TCP (reliable, ordered, connection-oriented) and UDP (fast, connectionless, unreliable). SYN flood attacks overwhelm TCP connection queues. Port scanning operates at this layer. Defences: firewall port rules, rate limiting on SYN packets.</li>
+<li><strong>Layer 3 — Network:</strong> IP addressing and routing. IP spoofing, ICMP floods, BGP hijacking, DDoS amplification attacks. Defences: stateful firewalls, ingress/egress filtering, BGP security (RPKI).</li>
+<li><strong>Layer 2 — Data Link:</strong> MAC addresses, Ethernet frames, switches. ARP spoofing (poisoning the ARP cache to redirect traffic through an attacker's machine — a MITM technique on local networks). Defences: dynamic ARP inspection, 802.1X port authentication.</li>
+<li><strong>Layer 1 — Physical:</strong> Cables, radio waves, hardware. Physical access attacks, hardware key loggers, rogue hardware implants.</li>
+</ul>
+
+<h5 class="content-heading">TCP/IP — How the Internet Actually Works</h5>
+<p><strong>TCP three-way handshake</strong>: Establishing a TCP connection requires: (1) Client sends SYN (synchronise) packet, (2) Server responds SYN-ACK, (3) Client sends ACK. The connection is now established. A <strong>SYN flood attack</strong> sends thousands of SYN packets with spoofed source IPs — the server sends SYN-ACKs to non-existent hosts, keeps connection state in a queue, and the queue fills up, preventing legitimate connections. Mitigation: SYN cookies (server does not allocate state until the ACK arrives).</p>
+<p><strong>IP addressing</strong>: IPv4 addresses are 32-bit (e.g. 192.168.1.1). CIDR notation specifies a network range: 10.0.0.0/8 means the first 8 bits are fixed (10.x.x.x), giving 2²⁴ ≈ 16 million addresses. Private address ranges (RFC 1918): 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 — not routable on the public internet. IPv6 addresses are 128-bit, written in hexadecimal groups: 2001:db8::1.</p>
+<p><strong>DNS resolution</strong>: Translating <code>example.com</code> to an IP involves: browser cache → OS cache → resolving DNS server (your ISP or 8.8.8.8) → root nameserver → TLD nameserver (.com) → authoritative nameserver for example.com → IP address. Each hop can be a security concern — DNS cache poisoning can redirect any of these lookups to a malicious IP.</p>
+<p><strong>Ports and services</strong>: Well-known ports: 22 (SSH), 25 (SMTP), 53 (DNS), 80 (HTTP), 443 (HTTPS), 3306 (MySQL), 5432 (PostgreSQL), 6379 (Redis). Always close ports you are not using. Running a database on its default port accessible from the internet with a weak password is one of the most common causes of server compromise.</p>
+
+<h5 class="content-heading">Wireshark and Packet Analysis</h5>
+<p><strong>Wireshark</strong> is the de facto standard for network packet capture and analysis. It captures raw packets at the network interface and decodes them at every OSI layer. Key uses: debugging network protocols, verifying TLS is actually being used, analysing malware network behaviour, troubleshooting API connectivity, and learning how protocols work by watching them in action.</p>
+<p>Key Wireshark features: display filters (<code>http.request</code>, <code>tcp.port == 443</code>, <code>ip.addr == 192.168.1.1</code>) to focus on relevant traffic; "Follow TCP Stream" to reassemble a complete conversation; the protocol hierarchy statistics view to see what protocols are in use; the Expert Information panel which flags anomalies like TCP retransmissions, malformed packets, and TLS certificate errors.</p>
+<p><strong>tcpdump</strong> is the command-line alternative — critical for capturing on remote servers without a GUI. <code>tcpdump -i eth0 -w capture.pcap port 80</code> captures all HTTP traffic to a file for later analysis in Wireshark.</p>
+<p><strong>nmap</strong> is the industry-standard port scanner. <code>nmap -sV -O target</code> identifies open ports, running services, and operating system. Used by penetration testers to map attack surface and by defenders to audit what services are exposed. Always run nmap against your own infrastructure before attackers do.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>OSI model:</strong> 7-layer conceptual framework for network communication (Physical → Application).</li>
-<li><strong>TCP/IP:</strong> The actual protocol suite the internet runs on, with 4 layers.</li>
-<li><strong>Packet:</strong> A unit of data transmitted over a network, containing a header (addressing) and payload (content).</li>
-<li><strong>Port:</strong> A number (0–65535) that identifies a specific process or service on a host.</li>
+<li><strong>OSI model:</strong> 7-layer framework — each layer has specific protocols, attack types, and defences. Know which layer your security tool operates at.</li>
+<li><strong>Layer 7 (Application):</strong> HTTP, HTTPS, DNS — web attacks (SQLi, XSS, CSRF) and their WAF/input validation defences live here.</li>
+<li><strong>Layer 4 (Transport):</strong> TCP/UDP — SYN floods, port scanning, firewall rules.</li>
+<li><strong>Layer 3 (Network):</strong> IP routing — IP spoofing, DDoS amplification, BGP hijacking.</li>
+<li><strong>Layer 2 (Data Link):</strong> Ethernet/MAC — ARP spoofing enables MITM on local networks.</li>
+<li><strong>TCP three-way handshake:</strong> SYN → SYN-ACK → ACK — the mechanism for establishing reliable connections. SYN floods exploit the incomplete connection queue.</li>
+<li><strong>SYN flood / SYN cookies:</strong> DDoS attack filling the TCP connection queue — mitigated by stateless SYN cookie responses.</li>
+<li><strong>CIDR notation:</strong> IP range notation (10.0.0.0/8) — /8 = 16M addresses, /16 = 65K addresses, /24 = 256 addresses.</li>
+<li><strong>DNS resolution chain:</strong> Browser → OS → resolver → root → TLD → authoritative — each hop is a potential poisoning point.</li>
+<li><strong>Wireshark:</strong> Packet capture and protocol analysis tool — essential for network debugging, security analysis, and protocol learning.</li>
+<li><strong>nmap:</strong> Port scanner and service fingerprinter — maps attack surface; run against your own systems to audit what is exposed.</li>
+<li><strong>Well-known ports:</strong> 22 SSH, 53 DNS, 80 HTTP, 443 HTTPS, 3306 MySQL, 5432 PostgreSQL — never expose database ports to the internet.</li>
 </ul>`,
 
-  32: `<p>A firewall inspects network traffic and enforces rules about what is allowed and what is blocked. Stateless packet filters examine individual packets in isolation based on source IP, destination IP, and port. Stateful firewalls track the state of connections — they know whether a packet is part of an established TCP session, enabling smarter filtering decisions.</p>
-<p>A DMZ (Demilitarised Zone) is a network segment that sits between the public internet and the internal private network. Public-facing servers (web, email) live in the DMZ — they are accessible to the internet but isolated from the sensitive internal network. This limits the damage if a public server is compromised.</p>
+  32: `<p>Firewalls are the first line of network defence — they enforce a policy of "deny everything except what is explicitly permitted," dramatically reducing the attack surface of any networked system. Understanding how firewalls work at different levels (packet filter, stateful inspection, next-generation) and how to design a network topology (VPC, subnets, DMZ) that limits the blast radius of any compromise is fundamental to production security architecture.</p>
+<p>The principle of defence in depth applies to network architecture: a single firewall at the perimeter is not enough. Segment your network so that a compromised web server cannot directly reach your database server, cannot communicate with your corporate HR system, and cannot pivot to other internal hosts. Each boundary between segments is an opportunity to enforce access control.</p>
+
+<h5 class="content-heading">Firewall Types</h5>
+<p><strong>Stateless packet filter</strong>: Examines each packet in complete isolation — source IP, destination IP, source port, destination port, protocol. Simple, fast, but limited. Cannot distinguish a new connection attempt from a response packet. Cannot detect scans that exploit packet fragmentation. Cannot filter based on connection state or application content.</p>
+<p><strong>Stateful inspection firewall</strong> (the standard): Tracks the state of active TCP connections in a state table. When a legitimate outbound connection is established, the state table records it — inbound response packets matching that connection are automatically allowed. Packets that do not belong to any known connection (unsolicited inbound) are blocked. This prevents most port scanning and connection hijacking attacks.</p>
+<p><strong>Next-Generation Firewall (NGFW)</strong>: Adds application awareness (can identify Netflix, Zoom, BitTorrent traffic regardless of port), deep packet inspection, user identity integration (allow finance team to access payment systems), SSL/TLS inspection (decrypt and inspect HTTPS traffic), and integrated IPS. Tools: Palo Alto Networks, Fortinet, Cisco Firepower.</p>
+<p><strong>Web Application Firewall (WAF)</strong>: Operates exclusively at Layer 7. Understands HTTP/HTTPS and can inspect URLs, headers, cookies, and request bodies. Detects SQLi, XSS, CSRF, and other web attacks using signatures and anomaly detection. AWS WAF, Cloudflare WAF, ModSecurity. Critical caveat: WAFs should be defence-in-depth, not primary defences — a skilled attacker can often bypass WAF rules with obfuscated payloads.</p>
+<p><strong>Host-based firewall</strong>: Runs on individual servers (iptables/nftables on Linux, Windows Defender Firewall). Provides defence even if network-level firewalls are compromised or misconfigured. Every production server should have a host-based firewall allowing only necessary ports from necessary sources.</p>
+
+<h5 class="content-heading">Firewall Rules and ACLs</h5>
+<p>Firewall rules are evaluated in order, top to bottom, stopping at the first match (most implementations). The final rule is always an implicit or explicit "deny all." Rule design principles:</p>
+<ul class="content-list">
+<li><strong>Default deny:</strong> Block everything, then explicitly allow only what is needed — the security-correct approach. Default allow (permit everything, block known bad) is fragile and misses novel attacks.</li>
+<li><strong>Least privilege:</strong> Web server should accept 80/443 from any source, but only 22 (SSH) from your company's IP range. Database server should accept 5432 only from the web server's IP — not from any other host.</li>
+<li><strong>Implicit deny:</strong> The last rule in any ACL — blocks all traffic not matched by any earlier rule. Always assume it exists even if not explicitly written.</li>
+<li><strong>Egress filtering:</strong> Most organisations focus on inbound rules but neglect outbound. Restricting outbound traffic limits what a compromised server can do — it cannot beacon to a C2 server, exfiltrate data to an unknown external host, or download malware payloads. Whitelist only necessary outbound destinations.</li>
+</ul>
+
+<h5 class="content-heading">Network Architecture — VPCs, Subnets, and DMZs</h5>
+<p>In cloud environments (AWS/GCP/Azure), a <strong>VPC (Virtual Private Cloud)</strong> is a logically isolated network. Inside the VPC, you create <strong>subnets</strong> in different Availability Zones. Separate public and private subnets:</p>
+<p><strong>Public subnet</strong>: Has a route to the Internet Gateway. Instances here have public IPs and are directly reachable from the internet. Put here: load balancers, bastion hosts (jump servers). Never put databases here.</p>
+<p><strong>Private subnet</strong>: No direct route to the internet. Instances here are not directly reachable from outside the VPC. Put here: application servers, databases, caches. A <strong>NAT Gateway</strong> in the public subnet allows private instances to initiate outbound traffic (for updates, API calls) without being inbound-accessible.</p>
+<p>The <strong>DMZ (Demilitarised Zone)</strong> pattern places public-facing servers in a network segment with tightly controlled access to the internal network. A firewall between the internet and the DMZ blocks all traffic except what the public services need. A second, stricter firewall between the DMZ and the internal network limits what a compromised DMZ server can reach. Even if the web server is completely compromised, the attacker faces a second firewall before reaching internal systems.</p>
+
+<h5 class="content-heading">NAT and Private Addressing</h5>
+<p><strong>NAT (Network Address Translation)</strong> translates multiple private IP addresses (10.x.x.x, 192.168.x.x) to one (or a few) public IP addresses. This solved IPv4 address exhaustion and provides implicit security — internal hosts are not directly addressable from the internet. Port Address Translation (PAT) — the most common form — also maps per-connection source ports, allowing many internal hosts to share one public IP simultaneously.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Stateful inspection:</strong> Tracks TCP connection state to allow only legitimate response packets.</li>
-<li><strong>ACL (Access Control List):</strong> An ordered list of rules specifying which traffic to permit or deny.</li>
-<li><strong>NAT (Network Address Translation):</strong> Maps private internal IPs to a public IP, hiding internal structure.</li>
-<li><strong>DMZ:</strong> A network zone between internet and internal network hosting public-facing services.</li>
+<li><strong>Stateless firewall:</strong> Evaluates each packet independently — fast but cannot track connection state.</li>
+<li><strong>Stateful inspection:</strong> Tracks TCP connection state — automatically allows response packets for established connections, blocks unsolicited inbound.</li>
+<li><strong>NGFW:</strong> Application-aware, user-aware, SSL-inspecting firewall — identifies traffic by application type, not just port.</li>
+<li><strong>WAF:</strong> Layer 7 HTTP-aware firewall — detects SQLi, XSS, CSRF patterns. Defence-in-depth layer, not a primary defence.</li>
+<li><strong>Default deny:</strong> Block all traffic by default, explicitly allow only what is needed — the security-correct firewall posture.</li>
+<li><strong>Egress filtering:</strong> Restricting outbound traffic — limits what a compromised host can do (beaconing, exfiltration, downloading payloads).</li>
+<li><strong>ACL:</strong> Ordered list of permit/deny rules evaluated top-to-bottom — first match wins, implicit deny at the end.</li>
+<li><strong>DMZ:</strong> Network segment between internet and internal network — public-facing services isolated from sensitive internal systems by two firewall boundaries.</li>
+<li><strong>Public subnet:</strong> Has internet gateway route — for load balancers and bastion hosts, never databases.</li>
+<li><strong>Private subnet:</strong> No inbound internet access — for databases, app servers; outbound via NAT Gateway.</li>
+<li><strong>NAT:</strong> Translates private IPs to public — enables many internal hosts to share one public IP, hiding internal addressing.</li>
+<li><strong>Defence in depth:</strong> Multiple independent security layers — network firewall + subnet isolation + host-based firewall + application-level auth.</li>
 </ul>`,
 
-  33: `<p>A VPN (Virtual Private Network) creates an encrypted tunnel over the public internet, allowing remote users or offices to communicate as if they were on the same private network. This protects data from eavesdropping on untrusted networks (public Wi-Fi) and allows secure remote access to corporate resources.</p>
-<p>WireGuard is a modern VPN protocol praised for its simplicity (around 4,000 lines of code vs 400,000 for OpenVPN), performance, and strong cryptography. IPSec is the traditional enterprise standard, commonly used for site-to-site VPNs between office locations. Split tunnelling allows only specific traffic to go through the VPN while the rest uses the regular internet connection.</p>
+  33: `<p>VPNs are how organisations securely extend their private network over the public internet — allowing remote employees to access internal resources, connecting geographically distributed offices, and securing communications on untrusted networks. With remote work now standard, VPN technology has become critical infrastructure. Understanding how VPNs work cryptographically, what the different protocols offer, and their limitations is essential for any security professional.</p>
+<p>The core problem VPNs solve: you want to send data between two points over an untrusted network (the internet) without an eavesdropper being able to read or modify it. The solution: encapsulate your traffic inside an encrypted tunnel. From the network's perspective, it sees only encrypted packets going to the VPN endpoint — it cannot see what is inside.</p>
+
+<h5 class="content-heading">How VPN Tunnels Work</h5>
+<p>A VPN creates a virtual network interface on your device (e.g. <code>tun0</code> on Linux). Traffic destined for the VPN network is routed to this interface, encrypted, and encapsulated in outer IP packets addressed to the VPN server. The VPN server decrypts the packet, extracts the original packet, and forwards it on the internal network — and vice versa for responses.</p>
+<p>The encryption is typically: Diffie-Hellman key exchange to establish a shared secret without transmitting it, then AES-GCM for symmetric encryption of the actual traffic, with authentication tags to detect tampering. Modern protocols also provide <strong>perfect forward secrecy (PFS)</strong> — new session keys are negotiated periodically, so compromising the long-term key does not decrypt past sessions.</p>
+
+<h5 class="content-heading">VPN Protocols Compared</h5>
+<p><strong>WireGuard</strong> — The modern standard. ~4,000 lines of code (vs 400,000 for OpenVPN) — small codebase means a small attack surface and easy security auditing. Uses state-of-the-art cryptography: Curve25519 for key exchange, ChaCha20-Poly1305 for AEAD encryption, BLAKE2 for hashing. Roaming support — maintains the session if your IP address changes (important for mobile users). Integrated into the Linux kernel since 5.6. Used by Cloudflare, Mullvad, and countless enterprises. Performance is significantly better than IPSec or OpenVPN.</p>
+<p><strong>IPSec/IKEv2</strong> — The enterprise standard for site-to-site VPNs. IPSec operates at Layer 3, encrypting entire IP packets. IKEv2 is the key exchange protocol. Natively supported in most operating systems without extra software. Complex configuration but extremely well-understood, widely audited, and FIPS-compliant (required for US government deployments). Two modes: Transport (encrypts payload only, header visible) and Tunnel (encrypts entire packet, wraps in new header — used for VPNs).</p>
+<p><strong>OpenVPN</strong> — Long-established open-source VPN. Runs over SSL/TLS (port 1194 UDP or TCP 443 — can bypass firewalls that block other VPN traffic). Huge community and documentation. Slower than WireGuard, large codebase. Still widely used but WireGuard is preferred for new deployments.</p>
+<p><strong>SSL VPN / TLS VPN</strong>: Web-based remote access using HTTPS — connects via a browser or thin client, no network-level client required. Useful for contractor access or BYOD scenarios.</p>
+
+<h5 class="content-heading">Split Tunnelling</h5>
+<p>By default, a VPN routes all traffic through the tunnel — even your Netflix stream goes through the corporate server. <strong>Split tunnelling</strong> routes only specific traffic through the VPN (corporate network destinations) while everything else uses the regular internet directly. Benefits: reduces VPN server load, improves performance for non-corporate traffic. Security consideration: split tunnelling means corporate devices are directly connected to both the VPN network and the internet — a compromised device on a split-tunnel VPN can potentially pivot from the internet to the corporate network.</p>
+
+<h5 class="content-heading">Zero Trust vs VPN</h5>
+<p>Traditional VPN creates a "castle and moat" perimeter — once you are inside the VPN, you can reach internal resources. If a VPN credential is compromised, the attacker gets broad internal network access. <strong>Zero Trust Network Access (ZTNA)</strong> is the modern replacement: instead of network-level access, users authenticate and are granted access to specific applications based on identity, device health, and context — not network location. Every request is verified. Tools: Cloudflare Access, Zscaler, Google BeyondCorp. ZTNA is increasingly replacing corporate VPNs for remote access.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Site-to-site VPN:</strong> Connects two entire networks (e.g. two office locations) through an encrypted tunnel.</li>
-<li><strong>Remote access VPN:</strong> Connects an individual user's device to a private network over the internet.</li>
-<li><strong>IPSec:</strong> A suite of protocols for authenticating and encrypting IP packets at the network layer.</li>
-<li><strong>Split tunnelling:</strong> Routes only specific traffic through the VPN — reduces load and improves performance.</li>
+<li><strong>VPN tunnel:</strong> Encrypted encapsulation of traffic over an untrusted network — creates a virtual network interface routing selected traffic through the encryption endpoint.</li>
+<li><strong>Perfect forward secrecy:</strong> New session keys negotiated periodically — past sessions remain secure even if the long-term key is later compromised.</li>
+<li><strong>WireGuard:</strong> Modern VPN protocol — 4,000 lines of code, ChaCha20-Poly1305 AEAD, Curve25519 key exchange, Linux kernel integrated. Best performance and simplest security audit.</li>
+<li><strong>IPSec/IKEv2:</strong> Enterprise standard for site-to-site VPNs — OS-native support, FIPS-compliant, complex but well-understood.</li>
+<li><strong>Site-to-site VPN:</strong> Connects two entire networks — transparent to users, all traffic between networks is encrypted.</li>
+<li><strong>Remote access VPN:</strong> Individual device connects to private network — user installs VPN client, authenticates.</li>
+<li><strong>Split tunnelling:</strong> Only corporate traffic goes through VPN — reduces load but introduces risk if device is compromised.</li>
+<li><strong>Zero Trust (ZTNA):</strong> Per-application access based on identity/device/context — replaces broad VPN network access with granular, verified application access.</li>
+<li><strong>Transport mode:</strong> IPSec encrypts only the payload, original header visible — used between endpoints directly.</li>
+<li><strong>Tunnel mode:</strong> IPSec encrypts entire packet and adds new header — used for VPNs where endpoints differ from communicating hosts.</li>
 </ul>`,
 
-  34: `<p>An Intrusion Detection System (IDS) monitors network traffic or host activity for suspicious patterns and generates alerts. An Intrusion Prevention System (IPS) goes further — it can automatically block malicious traffic in real time. Signature-based detection matches known attack patterns; anomaly-based detection flags traffic that deviates from a learned baseline of normal behaviour.</p>
-<p>A SIEM (Security Information and Event Management) platform aggregates logs from firewalls, IDS, servers, and applications into a central system where security teams can search, correlate, and alert on events across the entire infrastructure. SIEMs are the heart of a modern Security Operations Centre (SOC).</p>
+  34: `<p>You cannot defend what you cannot see. Network monitoring, intrusion detection, and security event management are the visibility layer of network security — the systems that tell you when something is wrong, when an attacker is probing your defences, or when a breach has already occurred. The IBM Cost of a Data Breach Report consistently shows that organisations with mature detection capabilities contain breaches significantly faster and at significantly lower cost than those without.</p>
+<p>The challenge: modern infrastructure generates enormous volumes of events. A single firewall can log millions of packets per hour. The signal-to-noise problem — finding the few genuine threats among millions of legitimate events — is what makes detection hard. The solution is layered: network-level IDS/IPS catch known attack signatures and protocol anomalies; SIEM correlates events across the entire stack to find patterns that no single tool would see; threat intelligence provides context about known malicious infrastructure.</p>
+
+<h5 class="content-heading">IDS and IPS — Detection and Prevention</h5>
+<p>An <strong>IDS (Intrusion Detection System)</strong> monitors traffic or host activity, generates alerts, and logs events — but takes no blocking action. An <strong>IPS (Intrusion Prevention System)</strong> does the same but can also automatically block or reset connections matching attack signatures. The trade-off: IPS false positives block legitimate traffic — a false positive in an IDS just generates a noisy alert, while a false positive in an IPS potentially takes down a production service.</p>
+<p><strong>Network IDS/IPS (NIDS/NIPS)</strong> sits on the network (inline for IPS, on a mirror/tap port for passive IDS) and inspects all passing traffic. <strong>Suricata</strong> and <strong>Snort</strong> are the dominant open-source tools. They use rule sets (community rules from Emerging Threats, commercial rules from Proofpoint) to detect: port scans (nmap signatures), exploit attempts (CVE-specific payload signatures), C2 beacon patterns, DNS tunnelling, and data exfiltration patterns.</p>
+<p><strong>Host-based IDS/IPS (HIDS/HIPS)</strong> monitors individual servers — file integrity (has /etc/passwd been modified?), process activity (is a new process making unexpected network connections?), user account changes, privilege escalation. Tools: OSSEC, Wazuh, Tripwire for file integrity monitoring. <strong>OSSEC/Wazuh</strong> aggregates host-based events centrally and provides correlation across all monitored hosts.</p>
+
+<h5 class="content-heading">Detection Approaches</h5>
+<p><strong>Signature-based detection</strong>: Matches network packets or system events against a database of known attack patterns. Very fast and precise — low false positive rate for known attacks. Blind spot: zero-day exploits (attacks targeting vulnerabilities with no existing signature) and slightly modified variants of known attacks that bypass signature matching.</p>
+<p><strong>Anomaly-based detection</strong>: Establishes a baseline of normal behaviour (traffic volume, connection patterns, user activity), then flags deviations. Can detect novel attacks. Challenge: environments constantly change — new services, new business processes, new users — making baselines drift and requiring continuous tuning. High false positive rates are common without significant investment in tuning.</p>
+<p><strong>Behavioral detection (UEBA — User and Entity Behavior Analytics)</strong>: Machine learning models learn what "normal" looks like for each user and entity. Detects subtle anomalies: a user logging in at 3am from a new country, a service account suddenly accessing files it has never touched, an internal host communicating with an external IP at regular intervals (C2 beacon pattern). Commercial tools: Splunk UBA, Microsoft Sentinel, Darktrace.</p>
+
+<h5 class="content-heading">SIEM — The Security Operations Hub</h5>
+<p>A <strong>SIEM (Security Information and Event Management)</strong> platform aggregates logs and events from every security and IT system: firewalls, IDS/IPS, VPN, DNS, web servers, Active Directory, cloud APIs, email gateway, endpoint protection. It provides:</p>
+<ul class="content-list">
+<li><strong>Centralised log storage and search:</strong> Analysts can search all logs in one place — "show me all authentication events for user X across all systems in the last 24 hours."</li>
+<li><strong>Event correlation:</strong> Connect events across systems that individually look benign but together indicate an attack. Example: a port scan from IP X (firewall log), followed by a successful SSH login from IP X (auth log), followed by an outbound connection to a known C2 server (DNS log) — correlated together, this is a clear compromise.</li>
+<li><strong>Alerting and playbooks:</strong> Trigger alerts when correlation rules fire. Runbooks guide analyst response for each alert type.</li>
+<li><strong>Threat intelligence integration:</strong> Enrich events with threat intel feeds — flag traffic to/from known malicious IPs, domains, or file hashes.</li>
+</ul>
+<p>Popular SIEMs: <strong>Splunk</strong> (market leader, powerful search language SPL), <strong>Microsoft Sentinel</strong> (cloud-native, deep Azure integration), <strong>IBM QRadar</strong>, <strong>Elastic Security</strong> (open-source based, lower cost). Cloud environments use CloudTrail (AWS) + GuardDuty (AWS threat detection) + Security Hub (AWS aggregation) as a SIEM-equivalent stack.</p>
+
+<h5 class="content-heading">Alert Fatigue and Tuning</h5>
+<p>The greatest enemy of a SOC is alert fatigue — when analysts receive so many alerts that they stop investigating each one carefully. If your IDS generates 10,000 alerts per day, most will be ignored. Effective detection requires ruthless tuning: understand every rule that fires, suppress or threshold rules that produce persistent false positives, and set alert severity based on business impact. Fewer high-fidelity alerts that analysts trust are far more valuable than thousands of low-quality alerts that get ignored.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Signature-based detection:</strong> Matches traffic against a library of known attack patterns — fast but blind to new attacks.</li>
-<li><strong>Anomaly-based detection:</strong> Flags deviations from a normal baseline — catches new attacks but prone to false positives.</li>
-<li><strong>False positive:</strong> A legitimate activity incorrectly flagged as malicious — too many cause alert fatigue.</li>
-<li><strong>SIEM:</strong> Centralises and correlates security logs across the entire infrastructure for threat hunting and incident response.</li>
+<li><strong>IDS:</strong> Detects and alerts on suspicious network/host activity — passive, no blocking. False positives are noisy but not service-impacting.</li>
+<li><strong>IPS:</strong> Detects and blocks suspicious activity inline — active prevention. False positives block legitimate traffic.</li>
+<li><strong>NIDS/NIPS:</strong> Network-level monitoring — Suricata and Snort are the standard open-source tools.</li>
+<li><strong>HIDS:</strong> Host-based monitoring — file integrity, process activity, privilege changes. Wazuh/OSSEC aggregate these centrally.</li>
+<li><strong>Signature-based detection:</strong> Pattern matching against known attack signatures — fast, precise, blind to novel attacks.</li>
+<li><strong>Anomaly-based detection:</strong> Baseline + deviation flagging — catches new attacks but requires tuning to reduce false positives.</li>
+<li><strong>UEBA:</strong> ML-powered user and entity behavior analytics — detects subtle anomalies indicating insider threats and compromised accounts.</li>
+<li><strong>SIEM:</strong> Aggregates and correlates logs from all systems — enables cross-source attack detection, centralised search, and incident response.</li>
+<li><strong>Event correlation:</strong> Connecting individually innocuous events across multiple systems to identify attack patterns.</li>
+<li><strong>Alert fatigue:</strong> Analyst desensitisation from too many low-quality alerts — the primary operational risk of poorly tuned detection systems.</li>
+<li><strong>Threat intelligence:</strong> External feeds of known malicious IPs, domains, file hashes — enriches SIEM events and automates blocking of known bad infrastructure.</li>
 </ul>`,
 
-  35: `<p>Wi-Fi security has evolved from the broken WEP protocol (cracked in minutes) through WPA2 (still widely used) to WPA3 (current standard). WPA2 with a strong passphrase remains secure, but WPA2-Enterprise using 802.1X authentication is significantly stronger for corporate networks. Common Wi-Fi attacks include evil twin access points, deauthentication floods, and the KRACK attack on WPA2's four-way handshake.</p>
-<p>DNS (Domain Name System) translates human-readable domain names into IP addresses. DNS Spoofing (or Cache Poisoning) tricks a resolver into caching a false DNS record, redirecting users to malicious servers. DNSSEC adds digital signatures to DNS records so resolvers can verify they have not been tampered with. DNS-over-HTTPS (DoH) encrypts DNS queries to prevent eavesdropping.</p>
+  35: `<p>Wireless networks and DNS are two of the most frequently targeted components in network attacks — wireless because it broadcasts over radio waves accessible to anyone nearby, and DNS because it is the phonebook of the internet and tampering with it redirects users anywhere an attacker chooses. Understanding the attacks against both and the defences available is essential for network security practitioners.</p>
+<p>Wi-Fi security protocols tell a cautionary tale about the real-world cost of cryptographic design errors: WEP was broken within months of deployment. WPA1 (TKIP) was deprecated after practical attacks. WPA2 has survived years of scrutiny but is vulnerable to offline dictionary attacks with captured handshakes and to protocol-level attacks like KRACK. The lesson: poorly designed protocols cannot be patched — they must be replaced.</p>
+
+<h5 class="content-heading">Wi-Fi Security Protocols</h5>
+<p><strong>WEP (Wired Equivalent Privacy)</strong> — Introduced in 1997, broken by 2001. Used RC4 stream cipher with a 24-bit IV — the IV is too short (only 16 million values), IVs repeat quickly in busy networks, and the same IV with the same key produces the same keystream. A passive attacker collecting enough traffic can recover the WEP key using statistical analysis in minutes. WEP provides essentially no security. Any network still using WEP (some legacy industrial systems do) is completely exposed.</p>
+<p><strong>WPA2-Personal (PSK)</strong> — The dominant home/SMB standard. Uses a 4-way handshake to derive session keys from the Pre-Shared Key and random nonces. The weakness: an attacker can capture the 4-way handshake (using a passive capture or by sending a deauthentication packet to force a reconnect), then run an offline dictionary attack against the captured handshake. With a weak passphrase, the key is cracked in seconds. With a 20+ character random passphrase, brute-force is impractical. WPA2-Personal has no forward secrecy — cracking the key later decrypts all previously captured traffic.</p>
+<p><strong>WPA3-Personal (SAE)</strong> — Replaces PSK with <strong>SAE (Simultaneous Authentication of Equals)</strong>, based on Dragonfly key exchange. Even if the password is captured as part of the exchange, it cannot be used for offline brute-forcing — SAE provides resistance to offline dictionary attacks. Also provides <strong>forward secrecy</strong> — session keys are unique, so capturing traffic now cannot be decrypted later even if the password is eventually compromised.</p>
+<p><strong>WPA2/WPA3-Enterprise (802.1X)</strong> — For corporate networks. Instead of a shared password, each user authenticates individually using EAP (Extensible Authentication Protocol) against a RADIUS server, typically with corporate credentials (Active Directory) or certificates. No shared secret means no single credential compromises the whole network. The gold standard for corporate Wi-Fi.</p>
+
+<h5 class="content-heading">Wireless Attacks</h5>
+<p><strong>Evil twin attack</strong>: An attacker sets up a rogue access point with the same SSID as a legitimate network (e.g. "Airport_Free_WiFi"). Devices configured to auto-connect to known SSIDs will connect to the attacker's AP. All traffic flows through the attacker — a perfect man-in-the-middle position. Defence: always use HTTPS (TLS encrypts your traffic even on a malicious network), use a VPN on untrusted networks, disable auto-connect to open networks.</p>
+<p><strong>Deauthentication attack</strong>: 802.11 management frames (including deauthentication) are unauthenticated — any device can send a deauthentication frame spoofing the access point's MAC address. This forcibly disconnects clients, causing them to reconnect (and produce a capturable WPA2 handshake). WPA3 uses management frame protection (MFP) — deauth frames are authenticated and cannot be spoofed.</p>
+<p><strong>KRACK (Key Reinstallation Attack)</strong>: A 2017 attack against WPA2's 4-way handshake. By replaying handshake messages, an attacker could force nonce reuse in the encryption, potentially decrypting traffic. Patched by OS updates. Illustrates that even well-analysed protocols can have subtle implementation vulnerabilities.</p>
+<p><strong>Rogue AP detection</strong>: Enterprise WLAN controllers scan the radio environment and alert on unexpected APs advertising your SSID or operating on your network. Automatic containment (sending deauthentication packets to clients of the rogue AP) is possible but legally complex.</p>
+
+<h5 class="content-heading">DNS Security</h5>
+<p><strong>DNS cache poisoning</strong>: A DNS resolver caches query results. If an attacker can inject a forged response that the resolver accepts before the legitimate one arrives, the false record gets cached and served to all subsequent users. Classic Kaminsky attack (2008): by guessing the transaction ID (16-bit, only 65,536 values) and racing responses, attackers could poison resolvers reliably. Fixed by source port randomisation (adds another 16 bits of entropy — 2³² combinations instead of 2¹⁶).</p>
+<p><strong>DNSSEC</strong>: Adds cryptographic signatures to DNS records using public-key cryptography. Each DNS zone has a key pair; records are signed with the private key; resolvers verify signatures using the published public key. A poisoned record without a valid signature is rejected. The root zone and all major TLDs are DNSSEC-signed. Challenge: DNSSEC amplification — signed responses are much larger, usable for DDoS amplification. Deployment is complex; many domains and resolvers still do not support it.</p>
+<p><strong>DNS-over-HTTPS (DoH)</strong> and <strong>DNS-over-TLS (DoT)</strong>: Traditional DNS queries are sent in plaintext over UDP port 53 — ISPs, network operators, and attackers can see every domain you query. DoH encrypts DNS queries inside HTTPS (port 443), making them indistinguishable from web traffic. DoT encrypts queries over TLS (port 853). Both prevent eavesdropping and on-path manipulation. Supported by modern browsers (Firefox uses DoH by default), operating systems, and DNS resolvers (1.1.1.1, 8.8.8.8).</p>
+<p><strong>DNS tunnelling</strong>: Because DNS traffic is rarely blocked, attackers use it as a covert communication channel — encoding data in DNS queries and responses to exfiltrate data or maintain C2 communication through firewalls that block other outbound traffic. Detection: high query volume, long query names, unusual record types (TXT, NULL), queries to rarely-seen domains.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>WPA3:</strong> The current Wi-Fi security standard — uses SAE (Simultaneous Authentication of Equals) replacing WPA2's PSK.</li>
-<li><strong>Evil twin attack:</strong> A rogue access point with the same SSID as a legitimate network to intercept traffic.</li>
-<li><strong>DNSSEC:</strong> Adds cryptographic signatures to DNS records to verify their authenticity.</li>
-<li><strong>DNS-over-HTTPS (DoH):</strong> Encrypts DNS queries inside HTTPS to prevent snooping by ISPs or attackers.</li>
+<li><strong>WEP:</strong> Broken Wi-Fi protocol — IV reuse allows key recovery in minutes. No security value whatsoever.</li>
+<li><strong>WPA2-PSK:</strong> Vulnerable to offline dictionary attacks on captured 4-way handshakes — mitigated by long random passphrases.</li>
+<li><strong>WPA3-SAE:</strong> Replaces PSK with Dragonfly key exchange — resistant to offline attacks, provides forward secrecy.</li>
+<li><strong>WPA2/3-Enterprise (802.1X):</strong> Per-user RADIUS authentication — no shared secret, gold standard for corporate Wi-Fi.</li>
+<li><strong>Evil twin attack:</strong> Rogue AP with legitimate SSID — devices auto-connect, all traffic intercepted. Defence: VPN + HTTPS.</li>
+<li><strong>Deauthentication attack:</strong> Spoofed 802.11 management frame forcibly disconnects clients — fixed in WPA3 via management frame protection.</li>
+<li><strong>DNS cache poisoning:</strong> Injecting forged DNS records into a resolver's cache — redirects users to attacker-controlled servers.</li>
+<li><strong>DNSSEC:</strong> Cryptographic signatures on DNS records — resolvers verify authenticity, preventing poisoning of signed zones.</li>
+<li><strong>DNS-over-HTTPS (DoH):</strong> Encrypts DNS queries in HTTPS — prevents eavesdropping and on-path manipulation by ISPs or attackers.</li>
+<li><strong>DNS tunnelling:</strong> Encoding data in DNS queries for C2 communication or data exfiltration through firewalls — detected by query volume and naming pattern analysis.</li>
+<li><strong>KRACK:</strong> WPA2 nonce-reuse attack via handshake replay — patched by OS updates, illustrates that implementation bugs outlast protocol design.</li>
+<li><strong>Management Frame Protection (MFP):</strong> WPA3 feature authenticating management frames — prevents deauth spoofing attacks.</li>
 </ul>`,
 
   // ── Course 7: Python for Data Science ────────────────────────────────
-  36: `<p>Python has become the dominant language for data science due to its readable syntax, vast ecosystem of libraries, and the fact that it bridges the gap between quick scripting and production-grade software. Setting up a virtual environment (venv or conda) for each project isolates its dependencies and prevents version conflicts between projects on the same machine.</p>
-<p>Python's built-in data structures — lists, dictionaries, sets, and tuples — are the building blocks for all data manipulation. List comprehensions provide a concise, Pythonic way to transform and filter collections. Lambda functions create small, anonymous functions inline — useful for passing simple logic to sort() or filter() without defining a named function.</p>
+  36: `<p>Python has become the lingua franca of data science, machine learning, and scientific computing. Its success is not accidental — Python strikes an unusual balance: readable enough for non-programmers (scientists, analysts, researchers) to learn quickly, yet powerful enough to build production ML pipelines. The NumPy/Pandas/scikit-learn/PyTorch ecosystem is unmatched in any other language. When DeepMind publishes an AlphaFold paper, the reference implementation is Python. When a Kaggle competition is won, the solution is Python. Understanding Python deeply — not just syntax but idioms, performance characteristics, and the ecosystem — makes you effective from day one.</p>
+<p>This module covers the Python fundamentals specifically relevant to data science: environment management, data structures with their time complexities, functional tools (map, filter, comprehensions), generators for memory-efficient data processing, and the object model that underpins scikit-learn's estimator API.</p>
+
+<h5 class="content-heading">Environment Management</h5>
+<p><strong>Virtual environments</strong> solve the dependency conflict problem: Project A requires Django 3.2, Project B requires Django 4.2 — without isolation, they cannot coexist. A virtual environment creates an isolated Python installation with its own <code>site-packages</code>, completely separate from the system Python and other projects.</p>
+<p><code>python -m venv .venv</code> creates a virtual environment in a <code>.venv</code> folder. <code>source .venv/bin/activate</code> (Linux/Mac) or <code>.venv\Scripts\activate</code> (Windows) activates it — your shell prompt changes to show the venv name. Now <code>pip install</code> installs into the venv only. Always add <code>.venv/</code> to <code>.gitignore</code>.</p>
+<p><strong>conda</strong> (Anaconda) manages both Python packages and system-level dependencies (like BLAS/LAPACK for NumPy). Better for data science on Windows where compiled packages often fail with pip. <code>conda create -n myenv python=3.11</code> creates an environment; <code>conda activate myenv</code> activates it.</p>
+<p><strong>requirements.txt</strong>: <code>pip freeze > requirements.txt</code> captures exact package versions. <code>pip install -r requirements.txt</code> recreates the environment. For more robust dependency management with lock files and optional groups, use <strong>Poetry</strong> or <strong>uv</strong> (ultra-fast Rust-based pip replacement).</p>
+
+<h5 class="content-heading">Python Data Structures — Time Complexity Matters</h5>
+<p><strong>List</strong>: Ordered, mutable sequence. <code>append()</code> is O(1) amortised (dynamic array). <code>insert(0, x)</code> is O(n) — shifts all elements. <code>in</code> operator is O(n) — checks every element. For membership testing on large collections, use a set.</p>
+<p><strong>Dictionary</strong>: Key-value hash map. Average O(1) lookup, insert, delete. Since Python 3.7, preserves insertion order. Fundamental to data aggregation: <code>counts = {}; counts[key] = counts.get(key, 0) + 1</code>. Or use <code>collections.Counter</code> for frequency counting, <code>collections.defaultdict</code> to avoid KeyError on first access.</p>
+<p><strong>Set</strong>: Unordered collection of unique values. O(1) average membership test (hash-based). Use instead of list for <code>in</code> checks on large collections: <code>if x in my_set</code> is O(1) vs <code>if x in my_list</code> O(n). Set operations: union (<code>|</code>), intersection (<code>&amp;</code>), difference (<code>-</code>) — invaluable for comparing datasets.</p>
+<p><strong>Tuple</strong>: Immutable sequence — slightly faster than list, hashable (can be used as dict key), signals "this data should not change." Use for coordinates, RGB values, database rows, function return values of multiple items.</p>
+
+<h5 class="content-heading">Comprehensions and Functional Tools</h5>
+<p><strong>List comprehension</strong>: <code>[transform(x) for x in iterable if condition(x)]</code> — concise, readable, and actually faster than an equivalent for-loop because the list construction is optimised in C. Use for simple transforms and filters. Avoid for complex multi-step logic — use a regular loop for readability.</p>
+<p><strong>Dict comprehension</strong>: <code>{k: v for k, v in items.items() if v > 0}</code> — filter or transform a dictionary in one line.</p>
+<p><strong>Generator expression</strong>: <code>(x**2 for x in range(1_000_000))</code> — like a list comprehension but lazy: values are generated one at a time, never all stored in memory simultaneously. Crucial for processing large datasets: <code>sum(x**2 for x in large_file)</code> processes the file line by line without loading it all into memory.</p>
+<p><strong>map() and filter()</strong>: Functional equivalents of comprehensions. <code>map(str, [1, 2, 3])</code> applies str() to each element. <code>filter(lambda x: x > 0, numbers)</code> keeps only positive numbers. Both return lazy iterators — combine with <code>list()</code> to materialise. In modern Python, comprehensions are preferred for readability.</p>
+
+<h5 class="content-heading">Generators — Memory-Efficient Data Processing</h5>
+<p>A <strong>generator function</strong> uses <code>yield</code> instead of <code>return</code>. It generates values lazily — one at a time, only when requested. The function's local state is preserved between yields. This enables processing datasets larger than RAM: a generator that reads a CSV file yields one row at a time, never loading the full file.</p>
+<p><code>def read_chunks(file, chunk_size=1000): data = []; ... yield data</code> — process a 10GB file in 1MB chunks without ever having more than 1MB in memory. The <code>itertools</code> module (islice, chain, groupby, product, combinations) provides powerful generator-based utilities for data manipulation.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Virtual environment:</strong> An isolated Python installation for a project — keeps dependencies separate.</li>
-<li><strong>List comprehension:</strong> <code>[x*2 for x in range(10) if x % 2 == 0]</code> — concise, readable list creation.</li>
-<li><strong>Dictionary:</strong> A key-value mapping; O(1) average lookup time — essential for data aggregation.</li>
-<li><strong>Lambda:</strong> An anonymous function — <code>lambda x: x ** 2</code> is equivalent to <code>def f(x): return x ** 2</code>.</li>
+<li><strong>Virtual environment:</strong> Isolated Python installation per project — prevents dependency conflicts. Always use one; never install packages into the system Python.</li>
+<li><strong>pip freeze:</strong> Captures installed package versions — use with requirements.txt for reproducible environments.</li>
+<li><strong>List:</strong> Dynamic array — O(1) append, O(n) search. Use for ordered sequences of items you will iterate over.</li>
+<li><strong>Dictionary:</strong> Hash map — O(1) average lookup by key. The go-to data structure for aggregation, counting, and lookups.</li>
+<li><strong>Set:</strong> Hash-based unordered collection — O(1) membership test. Use instead of list for large-scale membership checking.</li>
+<li><strong>List comprehension:</strong> [expr for item in iterable if cond] — concise, readable, faster than equivalent for-loop.</li>
+<li><strong>Generator expression:</strong> (expr for item in iterable) — lazy evaluation, no memory allocation. Essential for large datasets.</li>
+<li><strong>yield:</strong> Turns a function into a generator — produces values lazily one at a time, preserving local state between calls.</li>
+<li><strong>Lambda:</strong> Anonymous inline function — lambda x: x**2. Use for simple single-expression functions passed to map/filter/sort.</li>
+<li><strong>collections.Counter:</strong> Frequency counter dict subclass — counts hashable objects, top N, arithmetic operations.</li>
+<li><strong>collections.defaultdict:</strong> Dict that returns a default value for missing keys — eliminates KeyError boilerplate.</li>
 </ul>`,
 
-  37: `<p>NumPy (Numerical Python) provides the ndarray — a fast, memory-efficient multi-dimensional array. NumPy operations are implemented in C and execute far faster than equivalent Python loops. Broadcasting allows NumPy to perform operations on arrays of different shapes without explicit loops — adding a scalar to every element, or adding a row vector to every row of a matrix.</p>
-<p>Vectorisation replaces slow Python for-loops with array operations that run in C underneath. A loop that processes one million numbers in pure Python might take seconds; the equivalent NumPy vectorised operation completes in milliseconds. This performance difference is why NumPy is the foundation of virtually every Python data science library.</p>
+  37: `<p><strong>NumPy</strong> (Numerical Python) is the bedrock of the Python data science stack. Every major library — Pandas, scikit-learn, TensorFlow, PyTorch, SciPy, Matplotlib — builds on NumPy arrays either directly or conceptually. Understanding NumPy deeply means understanding why Pandas operations are fast, why you should never iterate over DataFrame rows in Python, and how to write ML code that runs efficiently. The performance gap between Python loops and NumPy operations is not marginal — it is 100-1000×.</p>
+<p>The reason for this gap: Python is an interpreted, dynamically-typed language — every operation checks types, manages reference counts, and goes through the Python runtime. NumPy's ndarray stores elements of a single, known type contiguously in memory, and operations are implemented in compiled C/Fortran with BLAS/LAPACK for linear algebra — the same optimised numerical libraries used by MATLAB. NumPy can also exploit SIMD CPU instructions (SSE, AVX) to process multiple values per clock cycle.</p>
+
+<h5 class="content-heading">The ndarray — NumPy's Core Data Structure</h5>
+<p>A NumPy <strong>ndarray</strong> (N-dimensional array) is a rectangular grid of values of the same type, stored contiguously in memory. Key attributes: <code>dtype</code> (element type — float64, int32, bool, etc.), <code>shape</code> (tuple of dimension sizes — e.g. (1000, 28, 28) for 1000 greyscale images), <code>ndim</code> (number of dimensions), <code>size</code> (total number of elements).</p>
+<p>Creating arrays: <code>np.array([1, 2, 3])</code>, <code>np.zeros((3, 4))</code>, <code>np.ones((2, 5))</code>, <code>np.arange(0, 10, 0.5)</code>, <code>np.linspace(0, 1, 100)</code> (100 evenly-spaced values), <code>np.random.randn(100, 10)</code> (standard normal samples).</p>
+<p><strong>dtype matters</strong>: <code>float64</code> uses 8 bytes per element; <code>float32</code> uses 4 bytes — half the memory, faster on GPUs, slightly less precision. Neural networks typically use float32. When loading large datasets, specifying <code>dtype='float32'</code> can halve your memory usage. <code>int8</code> for quantised model inference.</p>
+
+<h5 class="content-heading">Indexing and Slicing</h5>
+<p>NumPy indexing is powerful but has important subtleties. Basic slicing (<code>a[1:5, 2:4]</code>) returns a <strong>view</strong> — no data is copied, the new array references the same memory. Modifying a view modifies the original. Advanced indexing with integer arrays or boolean masks (<code>a[a > 0]</code>) returns a <strong>copy</strong>. Understanding views vs copies prevents subtle bugs.</p>
+<p><strong>Boolean indexing</strong>: <code>a[a > 5]</code> returns all elements greater than 5. <code>a[(a > 0) &amp; (a &lt; 10)]</code> uses elementwise AND (use &amp; and |, not <code>and</code>/<code>or</code> which operate on the whole array). This enables filtering without any Python loop.</p>
+<p><strong>Fancy indexing</strong>: Index with an array of indices: <code>a[[0, 2, 7]]</code> returns elements at positions 0, 2, 7. Use for shuffling, reordering, and gathering specific rows: <code>X[shuffled_indices]</code>.</p>
+
+<h5 class="content-heading">Broadcasting — The Key to Vectorised Code</h5>
+<p>Broadcasting is NumPy's mechanism for performing operations on arrays of different shapes without explicit loops or copying. Rules: compare shapes from right to left; dimensions are compatible if they are equal or one of them is 1; a dimension of size 1 is "stretched" to match the other.</p>
+<p>Examples: <code>a + 5</code> — adding a scalar to a 1M-element array: Python implicitly broadcasts the scalar to match. <code>X - X.mean(axis=0)</code> — subtract the column means from every row of a (1000, 784) matrix: the (784,) mean vector broadcasts across the 1000 rows. Without broadcasting, this would require an explicit loop or <code>np.tile()</code>.</p>
+<p>Neural network forward pass: <code>output = np.dot(X, W) + b</code> — W is (784, 128), b is (128,) — the bias vector broadcasts across the batch dimension. This one line does what would require three nested loops in pure Python.</p>
+
+<h5 class="content-heading">Essential NumPy Operations for Data Science</h5>
+<ul class="content-list">
+<li><strong>np.dot() / @:</strong> Matrix multiplication — the fundamental operation of neural networks, SVMs, PCA. Use <code>@</code> operator for readability: <code>C = A @ B</code>.</li>
+<li><strong>np.sum(axis=0/1):</strong> Sum along an axis — axis=0 collapses rows (column sums), axis=1 collapses columns (row sums). Keep dimensions with <code>keepdims=True</code>.</li>
+<li><strong>np.argmax(axis=1):</strong> Index of maximum value along axis — converts softmax output probabilities to class predictions.</li>
+<li><strong>np.concatenate([a, b], axis=0):</strong> Joins arrays along an existing axis. <code>np.stack()</code> creates a new axis.</li>
+<li><strong>np.where(condition, x, y):</strong> Elementwise conditional — replace negative values with 0: <code>np.where(a > 0, a, 0)</code> — this is ReLU.</li>
+<li><strong>np.unique(arr, return_counts=True):</strong> Unique values and their frequencies — useful for class distribution analysis.</li>
+<li><strong>np.linalg.svd():</strong> Singular Value Decomposition — the mathematical foundation of PCA, recommendation systems, and image compression.</li>
+</ul>
+
+<h5 class="content-heading">Performance Tips</h5>
+<p>Measure before optimising. Use <code>%timeit</code> in Jupyter to compare approaches. Profile with <code>cProfile</code>. Common patterns: vectorise inner loops first, use in-place operations (<code>a += b</code> instead of <code>a = a + b</code>) to avoid creating temporary arrays, use <code>np.einsum()</code> for complex tensor contractions, and consider <code>numba</code> (JIT compilation) for loops that cannot be vectorised.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>ndarray:</strong> NumPy's N-dimensional array — stores elements of a single data type contiguously in memory.</li>
-<li><strong>Broadcasting:</strong> Automatically expands smaller arrays to match larger ones during arithmetic operations.</li>
-<li><strong>Vectorisation:</strong> Replacing Python loops with array operations — dramatically faster due to C implementation.</li>
-<li><strong>np.linalg:</strong> NumPy's linear algebra module — provides matrix multiplication, determinants, and eigenvalues.</li>
+<li><strong>ndarray:</strong> Contiguous fixed-type N-dimensional array — 100-1000× faster than equivalent Python loops for numerical operations.</li>
+<li><strong>dtype:</strong> Array element type (float64, float32, int32, bool) — choose based on precision needs and memory constraints.</li>
+<li><strong>View vs copy:</strong> Slicing returns a view (shared memory), fancy/boolean indexing returns a copy — modifying a view changes the original.</li>
+<li><strong>Boolean indexing:</strong> a[a > 0] — filter arrays without Python loops. Use & and | for elementwise logic, not and/or.</li>
+<li><strong>Broadcasting:</strong> Automatic shape matching for array operations — dimensions of size 1 are stretched. Eliminates most manual tiling and looping.</li>
+<li><strong>Vectorisation:</strong> Replacing Python for-loops with NumPy array operations — moves computation to compiled C/BLAS code.</li>
+<li><strong>@ operator:</strong> Matrix multiplication (np.matmul) — the fundamental neural network operation.</li>
+<li><strong>np.where():</strong> Elementwise conditional selection — used for ReLU, clipping, and conditional transformations.</li>
+<li><strong>np.linalg:</strong> Linear algebra module — SVD, eigenvalues, matrix inverse, norms. Foundation of PCA and matrix factorisation.</li>
+<li><strong>axis parameter:</strong> Controls which dimension to reduce — axis=0 collapses rows (operates down columns), axis=1 collapses columns (operates across rows).</li>
 </ul>`,
 
-  38: `<p>Pandas is built on NumPy and provides two key data structures: Series (one-dimensional) and DataFrame (two-dimensional, like a spreadsheet). DataFrames can load data from CSV, Excel, SQL, JSON, and many other formats. The ability to select, filter, group, and merge data with concise syntax makes Pandas the indispensable tool for tabular data manipulation in Python.</p>
-<p>GroupBy splits a DataFrame into groups based on a column's values, applies a function to each group (sum, mean, count, custom aggregations), and combines the results. Merging DataFrames works just like SQL JOINs — inner, left, right, and outer merges are all supported. The <code>apply()</code> function lets you run a custom function on each row or column.</p>
+  38: `<p><strong>Pandas</strong> is the primary tool for tabular data manipulation in Python. If you have data in a CSV, Excel file, SQL database, or JSON — and you need to clean it, filter it, aggregate it, join it, reshape it, or compute statistics on it — Pandas is almost certainly the right tool. It provides a DataFrame (think: a programmable spreadsheet) with an expressive, composable API that makes complex data transformations readable and concise.</p>
+<p>The key to using Pandas effectively is thinking in terms of vectorised operations on entire columns, not loops over individual rows. <code>df['price'] * df['quantity']</code> computes a new column elementwise. <code>df[df['age'] > 30]</code> filters rows. <code>df.groupby('category')['revenue'].sum()</code> does a SQL GROUP BY. These operations are implemented in C and run orders of magnitude faster than equivalent Python loops over rows.</p>
+
+<h5 class="content-heading">Core Data Structures</h5>
+<p><strong>Series</strong>: A one-dimensional labelled array. Think of it as a dictionary with a NumPy array as values. Index can be integers (default) or any hashable type (strings, dates). Operations are vectorised. <code>s.value_counts()</code>, <code>s.describe()</code>, <code>s.apply(func)</code>, <code>s.map(dict)</code> for category mapping.</p>
+<p><strong>DataFrame</strong>: A 2D labelled data structure — a collection of Series sharing an index. Columns can have different dtypes. Key operations: <code>df.head(10)</code>, <code>df.info()</code> (dtypes and non-null counts), <code>df.describe()</code> (summary statistics), <code>df.shape</code>, <code>df.dtypes</code>.</p>
+<p><strong>Index</strong>: Every DataFrame has a row index. Setting a meaningful column as the index (<code>df.set_index('user_id')</code>) enables fast lookup by that column. DatetimeIndex enables time-series resampling and slicing.</p>
+
+<h5 class="content-heading">Selecting and Filtering Data</h5>
+<p><strong>Column selection</strong>: <code>df['column']</code> returns a Series. <code>df[['col1', 'col2']]</code> returns a DataFrame with those columns.</p>
+<p><strong>loc vs iloc</strong>: <code>df.loc[row_label, col_label]</code> — label-based selection (uses index values). <code>df.iloc[row_int, col_int]</code> — integer position-based selection. Mixing them up is a common source of bugs. Always use <code>loc</code> for label-based row selection after filtering.</p>
+<p><strong>Boolean filtering</strong>: <code>df[df['age'] > 30]</code>. Combine conditions with <code>&amp;</code> and <code>|</code> (use parentheses): <code>df[(df['age'] > 30) &amp; (df['country'] == 'UK')]</code>. <code>df.query('age > 30 and country == "UK"')</code> is a readable string-based alternative.</p>
+<p><strong>isin()</strong>: <code>df[df['category'].isin(['A', 'B', 'C'])]</code> — equivalent to SQL's IN clause. <code>~df['category'].isin([...]) </code> — NOT IN.</p>
+
+<h5 class="content-heading">GroupBy — Split-Apply-Combine</h5>
+<p><code>df.groupby('region')['sales'].sum()</code> — groups all rows by the 'region' column, selects the 'sales' column, and sums within each group. Returns a Series indexed by region. This is the Pandas equivalent of <code>SELECT region, SUM(sales) FROM df GROUP BY region</code>.</p>
+<p>Multiple aggregations: <code>df.groupby('region').agg({'sales': 'sum', 'orders': 'count', 'aov': 'mean'})</code>. Named aggregations: <code>df.groupby('region').agg(total_sales=('sales','sum'), order_count=('orders','count'))</code> — clean column names in the result.</p>
+<p><code>transform()</code> applies a function to each group and returns a result the same size as the input — useful for adding group-level statistics as a new column: <code>df['region_avg'] = df.groupby('region')['sales'].transform('mean')</code>. Each row gets the mean of its region. Equivalent to a SQL window function <code>AVG(sales) OVER (PARTITION BY region)</code>.</p>
+
+<h5 class="content-heading">Merging and Reshaping</h5>
+<p><code>pd.merge(df1, df2, on='user_id', how='left')</code> — SQL-style JOIN. <code>how</code> options: 'inner' (default), 'left', 'right', 'outer'. Merge on multiple keys: <code>on=['user_id', 'date']</code>.</p>
+<p><strong>pivot_table</strong>: <code>df.pivot_table(values='sales', index='region', columns='product', aggfunc='sum', fill_value=0)</code> — creates a cross-tabulation. The 2D equivalent of a grouped aggregation.</p>
+<p><strong>melt()</strong>: Converts wide format to long format (unpivoting) — essential for working with time-series data where dates are columns.</p>
+<p><strong>Method chaining</strong>: Pandas methods return DataFrames, enabling chains: <code>df.query('active == True').groupby('region')['revenue'].sum().sort_values(ascending=False).head(10)</code> — readable, no intermediate variables.</p>
+
+<h5 class="content-heading">Handling Missing Data</h5>
+<p><code>df.isna()</code> returns a boolean DataFrame. <code>df.isna().sum()</code> counts NaN per column. <code>df.dropna()</code> removes rows with any NaN; <code>df.dropna(subset=['critical_col'])</code> removes only if specific columns are NaN. <code>df.fillna(df.mean())</code> fills with column means — be careful to fit on training data only.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>DataFrame:</strong> A 2D labelled data structure with columns of potentially different types.</li>
-<li><strong>groupby():</strong> Split-apply-combine — group rows, apply an aggregation, combine results into a new DataFrame.</li>
-<li><strong>merge():</strong> Combines two DataFrames based on common columns — equivalent to a SQL JOIN.</li>
-<li><strong>NaN:</strong> "Not a Number" — Pandas' representation of missing values; use <code>dropna()</code> or <code>fillna()</code> to handle them.</li>
+<li><strong>DataFrame:</strong> 2D labelled tabular data structure — columns of different types sharing a row index.</li>
+<li><strong>Series:</strong> 1D labelled array — a single column or row of a DataFrame.</li>
+<li><strong>loc vs iloc:</strong> loc uses label-based indexing; iloc uses integer-position indexing — mixing them up causes subtle bugs.</li>
+<li><strong>Boolean filtering:</strong> df[df['col'] > x] — vectorised row filtering. Use & and | with parentheses, not and/or.</li>
+<li><strong>groupby().agg():</strong> Split-apply-combine — equivalent to SQL GROUP BY with multiple aggregations.</li>
+<li><strong>transform():</strong> Group operation returning same-size result — adds group statistics as a new column (equivalent to SQL window function).</li>
+<li><strong>pd.merge():</strong> SQL-style JOIN — inner/left/right/outer; merge on one or multiple key columns.</li>
+<li><strong>pivot_table():</strong> Cross-tabulation aggregation — rows × columns with an aggregated value at each intersection.</li>
+<li><strong>Method chaining:</strong> df.filter().groupby().agg().sort_values() — compose operations into readable, concise pipelines.</li>
+<li><strong>isna() / fillna():</strong> Detect and handle missing values — always fit imputation parameters on training data only.</li>
+<li><strong>Vectorised operations:</strong> Column arithmetic, string methods (.str.), datetime methods (.dt.) — never loop over DataFrame rows in Python.</li>
 </ul>`,
 
-  39: `<p>Data visualisation transforms numbers into visual insights that are immediately understandable. Matplotlib is the foundational plotting library — highly customisable but verbose. Seaborn builds on Matplotlib with a higher-level API and beautiful default styles, making statistical plots (box plots, violin plots, pair plots, heat maps) trivial to create.</p>
-<p>A good visualisation communicates one clear insight. Choose your chart type based on what you are showing: bar charts for comparing categories, line charts for trends over time, scatter plots for relationships between two variables, and histograms for distributions. Always label your axes, include a title, and choose colour palettes accessible to colour-blind readers.</p>
+  39: `<p>Data visualisation is the art of turning numbers into insights that a human can grasp immediately. A well-constructed chart communicates in seconds what a table of numbers cannot communicate in minutes. In data science, visualisation serves two distinct purposes: <strong>exploratory</strong> (for yourself — quickly understanding your data during EDA) and <strong>explanatory</strong> (for others — communicating findings clearly to stakeholders). The tools and standards differ between these two uses.</p>
+<p>Python's visualisation ecosystem has layers. <strong>Matplotlib</strong> is the foundation — maximally flexible, verbose, and directly controls every pixel. <strong>Seaborn</strong> builds on Matplotlib with a high-level statistical plotting API and beautiful defaults. <strong>Plotly</strong> creates interactive charts embeddable in web dashboards. <strong>Altair</strong> uses a declarative grammar-of-graphics approach. Understanding Matplotlib's object model unlocks all of them, since most build on top of it.</p>
+
+<h5 class="content-heading">Matplotlib — The Foundation</h5>
+<p>Matplotlib's object hierarchy: a <strong>Figure</strong> is the entire canvas (the window or image file). Inside the Figure are one or more <strong>Axes</strong> objects (individual plots). Each Axes has x and y axis objects, titles, labels, tick marks, and the actual plot elements (lines, bars, scatter points). Always use the object-oriented API for non-trivial work — it gives explicit control and avoids confusing stateful plt.* calls.</p>
+<p><code>fig, ax = plt.subplots(figsize=(10, 6))</code> — creates a Figure and a single Axes. <code>fig, axes = plt.subplots(2, 3, figsize=(15, 8))</code> — creates a 2×3 grid of subplots. Access individual plots: <code>axes[0, 1].plot(...)</code>.</p>
+<p>Essential styling: <code>ax.set_title('Revenue by Region', fontsize=14, fontweight='bold')</code>, <code>ax.set_xlabel('Month')</code>, <code>ax.set_ylabel('Revenue ($)')</code>, <code>ax.legend(loc='upper left')</code>, <code>ax.grid(True, alpha=0.3)</code>. Save: <code>fig.savefig('chart.png', dpi=150, bbox_inches='tight')</code>.</p>
+
+<h5 class="content-heading">Choosing the Right Chart</h5>
+<ul class="content-list">
+<li><strong>Line chart:</strong> Time series and continuous trends. <code>ax.plot(dates, values)</code>. Add markers for sparse data, shade confidence intervals with <code>ax.fill_between()</code>. Use for: stock prices, model training loss curves, monthly metrics.</li>
+<li><strong>Bar chart:</strong> Comparing discrete categories. Horizontal bars (<code>ax.barh()</code>) are better when category names are long. Grouped bars for comparing across two categorical dimensions. Use for: revenue by region, model performance comparison.</li>
+<li><strong>Scatter plot:</strong> Relationship between two continuous variables. Add a trend line: <code>np.polyfit()</code> + <code>ax.plot()</code> or <code>sns.regplot()</code>. Colour points by a third variable with <code>scatter(c=labels, cmap='viridis')</code>. Use for: feature correlations, model predictions vs actuals.</li>
+<li><strong>Histogram:</strong> Distribution of a single variable. <code>ax.hist(data, bins=30, density=True)</code>. Overlay a KDE (kernel density estimate) with Seaborn: <code>sns.histplot(data, kde=True)</code>. Use for: checking normality, identifying skew, outlier detection.</li>
+<li><strong>Box plot:</strong> Summary of distribution (median, quartiles, outliers) — especially useful for comparing distributions across groups. <code>sns.boxplot(data=df, x='category', y='value')</code>. Violin plots add a KDE for richer shape information.</li>
+<li><strong>Heatmap:</strong> Matrix values as colour — use for correlation matrices, confusion matrices, pivot tables. <code>sns.heatmap(corr_matrix, annot=True, fmt='.2f', cmap='RdBu_r', center=0)</code>.</li>
+</ul>
+
+<h5 class="content-heading">Seaborn — Statistical Visualisation</h5>
+<p>Seaborn integrates directly with Pandas DataFrames. Pass the DataFrame and column names: <code>sns.scatterplot(data=df, x='sqft', y='price', hue='neighbourhood', size='bedrooms')</code>. The <code>hue</code> parameter adds a colour dimension, <code>size</code> adds a size dimension — up to 4 variables in one plot.</p>
+<p><strong>Pair plot</strong>: <code>sns.pairplot(df, hue='target', diag_kind='kde')</code> — creates a grid of scatter plots for every feature pair, with distributions on the diagonal. The fastest way to visualise all pairwise relationships in a dataset during EDA. With 10 features, this generates 90 scatter plots in one line.</p>
+<p><strong>FacetGrid</strong>: Small multiples — one plot per category value. <code>g = sns.FacetGrid(df, col='region', row='year'); g.map(sns.histplot, 'revenue')</code>. Reveals patterns that would be obscured in a single aggregated view.</p>
+<p><strong>Colour palettes and accessibility</strong>: Use colourblind-friendly palettes: <code>sns.set_palette('colorblind')</code> or Matplotlib's 'tab10'. Avoid red-green combinations (the most common form of colour blindness). For sequential data, use perceptually uniform colormaps: 'viridis', 'plasma', 'cividis' — these look good in greyscale print too.</p>
+
+<h5 class="content-heading">Plotly — Interactive Charts</h5>
+<p>Plotly charts are interactive by default — hover tooltips, zoom, pan, legend toggles, downloadable as PNG. Essential for dashboards and Jupyter notebooks where exploration is interactive. <code>import plotly.express as px; px.scatter(df, x='gdp', y='life_exp', color='continent', size='pop', hover_name='country')</code> — one line creates a fully interactive bubble chart with tooltips. <code>px.line()</code>, <code>px.bar()</code>, <code>px.histogram()</code>, <code>px.choropleth()</code> (map). Embed in Dash or Streamlit for web dashboards.</p>
+
+<h5 class="content-heading">Visualisation Best Practices</h5>
+<p>One chart, one insight — do not pack three messages into one chart. Always label axes with units. Start y-axis at zero for bar charts (truncating inflates perceived differences). Use titles that state the conclusion ("Revenue grew 47% YoY in Q3") not just the subject ("Revenue by Quarter"). Reduce chartjunk — remove unnecessary gridlines, borders, tick marks. Use colour purposefully, not decoratively.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Figure and Axes:</strong> Matplotlib's hierarchy — a Figure is the whole image; Axes is an individual plot within it.</li>
-<li><strong>Seaborn heatmap:</strong> Visualises a correlation matrix — shows which features are linearly related.</li>
-<li><strong>Histogram:</strong> Shows the distribution of a single numerical variable by counting values in bins.</li>
-<li><strong>Pair plot:</strong> A grid of scatter plots for every pair of features — great for quick exploratory analysis.</li>
+<li><strong>Figure and Axes:</strong> Matplotlib's hierarchy — Figure is the canvas, Axes is an individual plot. Always use fig, ax = plt.subplots() for explicit control.</li>
+<li><strong>Line chart:</strong> Best for time series and continuous trends — use fill_between() for confidence intervals.</li>
+<li><strong>Bar chart:</strong> Best for comparing discrete categories — horizontal bars when labels are long.</li>
+<li><strong>Histogram:</strong> Distribution of a single variable — use bins and kde=True for shape analysis.</li>
+<li><strong>Box plot:</strong> Median, quartiles, and outliers across groups — violin plots add KDE shape information.</li>
+<li><strong>Heatmap:</strong> Matrix values as colour — use for correlation matrices and confusion matrices with sns.heatmap().</li>
+<li><strong>Pair plot:</strong> All pairwise scatter plots in one call — sns.pairplot() — fastest EDA tool for feature relationships.</li>
+<li><strong>Seaborn hue/size:</strong> Map additional categorical/continuous variables to colour and marker size — up to 4 dimensions in one chart.</li>
+<li><strong>Plotly Express:</strong> One-line interactive charts — hover tooltips, zoom, pan built in. Essential for dashboards.</li>
+<li><strong>Colourblind palettes:</strong> Use 'colorblind' or 'tab10', avoid red-green — 8% of men have colour vision deficiency.</li>
+<li><strong>Perceptually uniform colourmaps:</strong> 'viridis', 'plasma', 'cividis' — look correct in greyscale, no misleading brightness gradients.</li>
 </ul>`,
 
-  40: `<p>Exploratory Data Analysis (EDA) is the first thing you do with any new dataset — before building models. The goal is to understand the data's structure, find anomalies, test assumptions, and generate hypotheses. EDA saves enormous time by revealing data quality issues early, before they corrupt model results and send you on a long debugging chase.</p>
-<p>Outliers are data points that differ significantly from the rest. They can indicate genuine rare events (fraud, sensor failures) or data entry errors. The IQR method identifies outliers as points more than 1.5 × IQR below the first quartile or above the third quartile. Always investigate outliers before removing them — they often contain important information.</p>
+  40: `<p><strong>Exploratory Data Analysis (EDA)</strong> is the first — and arguably most important — step in any data science project. Before building a single model, you must understand your data: its structure, its quality, its distributions, its relationships, and its quirks. EDA is where you discover that 30% of your target variable is missing, that two features are perfectly correlated (one is redundant), that a key column has a data entry error causing impossible negative values, or that your training data has a time-based leak. Finding these problems during EDA takes an hour; finding them after a week of model development costs days of debugging.</p>
+<p>EDA is not a mechanical checklist — it is an investigative process driven by questions. Each finding raises new questions: you see a bimodal distribution and ask "why are there two peaks?" You find a strong correlation and ask "is this real or spurious?" Good EDA is the difference between building a model on trustworthy data and building one on a foundation of undetected problems.</p>
+
+<h5 class="content-heading">The EDA Workflow</h5>
+<p><strong>Step 1 — Understand the dataset structure</strong>: <code>df.shape</code> (rows × columns), <code>df.dtypes</code> (are numeric columns actually numeric, or stored as object/string?), <code>df.info()</code> (non-null counts per column — first look at missingness), <code>df.head(10)</code> and <code>df.sample(20)</code> (visual inspection — do values look plausible?).</p>
+<p><strong>Step 2 — Summary statistics</strong>: <code>df.describe()</code> for numerics — check min/max for impossible values (negative age, price of $0), check whether mean ≈ median (large difference signals skew or outliers), check whether std is reasonable relative to the mean. <code>df.describe(include='object')</code> for categoricals — check unique value counts and the most frequent value.</p>
+<p><strong>Step 3 — Missing value analysis</strong>: <code>df.isna().sum().sort_values(ascending=False)</code> — ordered list of missing counts. <code>df.isna().mean() * 100</code> — percentage missing per column. Visualise with <code>import missingno as msno; msno.matrix(df)</code> — reveals patterns (columns that are missing together may indicate a systematic data collection issue). Investigate whether missingness is random (MCAR) or structured (MAR/MNAR).</p>
+<p><strong>Step 4 — Distribution analysis</strong>: Plot histograms for every numerical feature. Look for: skewness (log-transform right-skewed distributions for linear models), bimodality (two distinct populations — consider splitting), impossible values (prices of -$100, ages of 999), and gaps in distributions (data collection issues). <code>df.hist(figsize=(20, 15), bins=30)</code> plots all at once.</p>
+<p><strong>Step 5 — Correlation analysis</strong>: <code>corr = df.select_dtypes('number').corr()</code>, then visualise with a heatmap. Look for: features highly correlated with the target (good predictors), features highly correlated with each other (multicollinearity — may cause issues for linear models), and unexpected correlations (might indicate data leakage).</p>
+<p><strong>Step 6 — Target variable analysis</strong>: For classification, check class balance — <code>df['target'].value_counts(normalize=True)</code>. A 99%/1% split requires special handling (class weights, resampling). For regression, plot the target distribution — is it normally distributed, log-normal, bounded?</p>
+<p><strong>Step 7 — Bivariate analysis</strong>: For each feature vs. the target. Numeric features: box plots grouped by target class (classification) or scatter plots (regression). Categorical features: bar charts of target rate per category. This tells you directly which features are informative before any modelling.</p>
+
+<h5 class="content-heading">Outlier Detection and Treatment</h5>
+<p><strong>IQR method</strong>: Q1 = 25th percentile, Q3 = 75th percentile, IQR = Q3 - Q1. Outliers are defined as values below Q1 - 1.5×IQR or above Q3 + 1.5×IQR. These are the "whisker" boundaries in a box plot. Use <code>df[col].quantile([0.25, 0.75])</code> to compute. Stricter threshold (3×IQR) for "extreme outliers."</p>
+<p><strong>Z-score method</strong>: Values more than 3 standard deviations from the mean are outliers. Assumes approximately normal distribution — unreliable for skewed data. <code>(df[col] - df[col].mean()) / df[col].std()</code>.</p>
+<p><strong>Before removing outliers, always investigate</strong>: Is the value physically impossible (age = -5, price = 0)? Remove. Is it a genuine extreme but valid value (a CEO's salary in a salary dataset)? Keep — it is real information. Is it a data entry error (height = 7.5 feet entered instead of 5.7)? Fix if possible, otherwise remove. Removing real outliers that represent genuine rare events (fraud, equipment failure, disease) is one of the most common EDA mistakes.</p>
+<p><strong>Winsorising</strong>: Cap outliers at a percentile rather than removing them. <code>df[col].clip(lower=df[col].quantile(0.01), upper=df[col].quantile(0.99))</code> — clips extreme 1% on each side. Preserves all rows while limiting distortion from extreme values.</p>
+
+<h5 class="content-heading">Feature Relationships</h5>
+<p><strong>Skewness and transformations</strong>: Right-skewed distributions (long tail to the right, mean > median) are common for financial data, user counts, and time measurements. Log transformation (<code>np.log1p(df[col])</code> — log(1+x) to handle zeros) often produces a more normal distribution, which helps linear models. Box-Cox transformation is more general but requires positive values.</p>
+<p><strong>Categorical feature analysis</strong>: <code>df['cat_col'].value_counts()</code> — check for high cardinality (hundreds of unique values — challenges one-hot encoding), rare categories (categories with very few examples may need grouping into "Other"), and unexpected values (typos, encoding inconsistencies — "United States", "US", "USA" as separate categories).</p>
+<p><strong>Time-based analysis</strong>: If data has a timestamp, always visualise it. Plot the target variable over time — are there trends, seasonality, sudden shifts (data collection change, business event)? Check whether your train/test split respects time — random splitting on time-series data causes leakage.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>describe():</strong> Pandas function that gives count, mean, std, min, quartiles, and max for numerical columns.</li>
-<li><strong>Correlation:</strong> A value between -1 and 1 indicating the linear relationship between two variables.</li>
-<li><strong>IQR (Interquartile Range):</strong> Q3 - Q1 — the middle 50% of the data; used to detect outliers.</li>
-<li><strong>Skewness:</strong> Asymmetry in the distribution — a long right tail means positive skew; may require log transformation.</li>
+<li><strong>EDA:</strong> Investigative analysis before modelling — reveals data quality issues, distributions, relationships, and potential leakage. The highest-leverage step in any ML project.</li>
+<li><strong>df.describe():</strong> Summary statistics for all numeric columns — check for impossible values, skew (mean vs median gap), and reasonable ranges.</li>
+<li><strong>Missing value analysis:</strong> isna().sum() + missingno matrix — understand volume and pattern of missingness before deciding on imputation strategy.</li>
+<li><strong>Correlation matrix:</strong> Heatmap of Pearson correlations — identify strong predictors, multicollinear features, and suspicious perfect correlations (leakage).</li>
+<li><strong>IQR outlier detection:</strong> Below Q1 - 1.5×IQR or above Q3 + 1.5×IQR — investigate before removing; outliers are often signal, not noise.</li>
+<li><strong>Winsorising:</strong> Capping extreme values at percentiles — preserves all rows while limiting distortion from legitimate extreme values.</li>
+<li><strong>Skewness:</strong> Asymmetry of distribution — positive skew (right tail) is common in financial data; log transformation normalises it for linear models.</li>
+<li><strong>Class balance:</strong> value_counts(normalize=True) on target — severe imbalance requires special handling (class weights, SMOTE, PR-AUC over ROC-AUC).</li>
+<li><strong>Bivariate analysis:</strong> Feature vs target plots — the most direct signal of predictive usefulness before any modelling.</li>
+<li><strong>Time-based split:</strong> For time-series data, always split chronologically — random splits cause leakage from future to past.</li>
+<li><strong>High cardinality:</strong> Categorical feature with many unique values — challenges one-hot encoding; use target encoding or embeddings instead.</li>
 </ul>`,
 
-  41: `<p>Scikit-learn is Python's go-to machine learning library, providing a consistent API across dozens of algorithms. Every estimator follows the same pattern: instantiate the model, call <code>fit(X_train, y_train)</code> to train it, then call <code>predict(X_test)</code> to generate predictions. Pipelines chain preprocessing and modelling steps, preventing data leakage and simplifying cross-validation.</p>
-<p>Cross-validation gives a more reliable performance estimate than a single train/test split by training and evaluating the model on multiple different splits of the data. k-fold cross-validation splits data into k equal parts, trains on k-1 folds, and tests on the remaining fold — repeating k times and averaging the scores. This reduces the risk of getting lucky or unlucky with your random split.</p>
+  41: `<p><strong>Scikit-learn</strong> is the most complete and widely used ML library in any language. Its greatest design achievement is a unified API: every algorithm — from logistic regression to random forests to SVMs to k-means clustering — follows the same three-method interface: <code>fit()</code>, <code>predict()</code>, and <code>transform()</code>. This consistency means you can swap algorithms with one line of code, build preprocessing/model pipelines that work correctly with cross-validation, and write generic code that works with any estimator. Understanding scikit-learn's design patterns is as important as knowing its algorithms.</p>
+<p>Scikit-learn is best for classical ML on tabular data. For deep learning, PyTorch and TensorFlow/Keras are the standard. For gradient boosting on tabular data at scale, XGBoost and LightGBM offer scikit-learn-compatible APIs while outperforming sklearn's native GradientBoostingClassifier.</p>
+
+<h5 class="content-heading">The Estimator API</h5>
+<p>Every scikit-learn object is an <strong>estimator</strong> — it learns from data via <code>fit()</code> and applies what it learned via <code>predict()</code> or <code>transform()</code>. Three types:</p>
+<ul class="content-list">
+<li><strong>Transformers:</strong> Preprocess data. <code>fit(X_train)</code> learns parameters (mean, std for StandardScaler; vocabulary for TfidfVectorizer). <code>transform(X)</code> applies the learned transformation. <code>fit_transform(X_train)</code> does both at once. Never call fit on test data.</li>
+<li><strong>Predictors:</strong> Models. <code>fit(X_train, y_train)</code> trains the model. <code>predict(X_test)</code> generates hard predictions. <code>predict_proba(X_test)</code> generates class probabilities (for probabilistic classifiers). <code>score(X_test, y_test)</code> returns the default metric (R² for regressors, accuracy for classifiers).</li>
+<li><strong>Meta-estimators:</strong> Wrap other estimators — Pipeline, GridSearchCV, cross_val_score, VotingClassifier. They implement the same fit/predict interface, so they compose cleanly.</li>
+</ul>
+
+<h5 class="content-heading">Pipelines — The Correct Way to Preprocess</h5>
+<p>A <code>Pipeline</code> chains transformers and a final estimator. The critical property: when used inside cross-validation, <code>fit()</code> is called on each training fold separately — the scaler's mean and std are computed only from training data, never from validation data. This prevents data leakage that would occur if you scaled the entire dataset before splitting.</p>
+<p><code>from sklearn.pipeline import Pipeline; pipe = Pipeline([('scaler', StandardScaler()), ('classifier', LogisticRegression())]); pipe.fit(X_train, y_train); pipe.predict(X_test)</code> — the scaler is fit on X_train, then transforms X_train for the classifier to learn on. At predict time, the scaler transforms X_test using the training-fitted parameters.</p>
+<p><strong>ColumnTransformer</strong>: Different preprocessing for different column types. Numeric columns: StandardScaler. Categorical columns: OneHotEncoder. In one object: <code>preprocessor = ColumnTransformer([('num', StandardScaler(), num_cols), ('cat', OneHotEncoder(handle_unknown='ignore'), cat_cols)])</code>. Then: <code>pipe = Pipeline([('prep', preprocessor), ('model', RandomForestClassifier())])</code>. This is the production-quality pattern for ML pipelines.</p>
+
+<h5 class="content-heading">Cross-Validation — Reliable Performance Estimation</h5>
+<p>A single train/test split gives one performance estimate that is highly sensitive to which examples happen to land in test. Cross-validation (CV) gives k estimates from k different splits — the mean is a more reliable estimate, and the std tells you how variable performance is across splits.</p>
+<p><strong>k-Fold CV</strong>: Splits data into k equal folds. Trains on k-1 folds, evaluates on the held-out fold. Repeats k times (each fold serves as validation once). Average the k scores. <code>cross_val_score(model, X, y, cv=5, scoring='roc_auc')</code> — 5-fold CV, returns array of 5 scores.</p>
+<p><strong>Stratified k-Fold</strong>: For classification — ensures each fold has the same class distribution as the full dataset. Critical for imbalanced datasets where a random fold might have no positive examples. <code>StratifiedKFold(n_splits=5)</code>.</p>
+<p><strong>RepeatedStratifiedKFold</strong>: Repeats the full stratified k-fold multiple times with different random seeds. More reliable but more expensive. Use for final model evaluation before deployment.</p>
+<p><strong>TimeSeriesSplit</strong>: For time-series data — training always comes before validation chronologically. Prevents future leakage. <code>TimeSeriesSplit(n_splits=5)</code>.</p>
+
+<h5 class="content-heading">Hyperparameter Tuning</h5>
+<p><strong>GridSearchCV</strong>: Exhaustive search over a parameter grid. <code>GridSearchCV(RandomForestClassifier(), {'n_estimators': [100, 200], 'max_depth': [5, 10, None]}, cv=5, scoring='roc_auc', n_jobs=-1)</code>. Evaluates all combinations (6 here) with 5-fold CV each — 30 model fits. Works well for small grids; exponentially expensive for large ones.</p>
+<p><strong>RandomizedSearchCV</strong>: Randomly samples n_iter combinations from the parameter distributions. With a budget of 50 iterations, it explores far more of the parameter space than a grid with 50 fixed combinations, especially when many hyperparameters are irrelevant. Usually finds a near-optimal solution with far fewer evaluations than grid search.</p>
+<p><strong>Optuna / Hyperopt</strong>: Bayesian hyperparameter optimisation — uses results of previous trials to guide the search toward promising regions. Dramatically more efficient than random search for expensive models. The professional-grade approach for XGBoost and neural network tuning.</p>
+
+<h5 class="content-heading">Model Evaluation — Choosing the Right Metric</h5>
+<p>The <code>scoring</code> parameter controls what metric cross-validation optimises and reports. Common values: <code>'accuracy'</code>, <code>'roc_auc'</code>, <code>'f1'</code>, <code>'f1_weighted'</code> (for multiclass), <code>'neg_mean_squared_error'</code>, <code>'r2'</code>. Choose the metric that aligns with your business objective — not always accuracy.</p>
+<p><strong>Classification report</strong>: <code>from sklearn.metrics import classification_report; print(classification_report(y_test, y_pred))</code> — prints precision, recall, F1 for each class and weighted averages. Essential for imbalanced datasets where overall accuracy misleads.</p>
+<p><strong>Confusion matrix</strong>: <code>from sklearn.metrics import ConfusionMatrixDisplay; ConfusionMatrixDisplay.from_estimator(model, X_test, y_test)</code> — visual plot of TP/FP/TN/FN. Immediately shows which classes the model confuses.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>fit() / predict():</strong> The universal scikit-learn interface — all models use the same method names.</li>
-<li><strong>Pipeline:</strong> Chains transformers and a final estimator to prevent data leakage during cross-validation.</li>
-<li><strong>k-fold cross-validation:</strong> Evaluates a model on k different splits to produce a reliable performance estimate.</li>
-<li><strong>ROC-AUC:</strong> Area Under the ROC Curve — measures a classifier's ability to distinguish between classes across all thresholds.</li>
+<li><strong>Estimator API:</strong> fit() trains, predict() infers, transform() preprocesses — universal interface across all sklearn algorithms.</li>
+<li><strong>Pipeline:</strong> Chains transformers + model — prevents data leakage by fitting preprocessing within each CV fold.</li>
+<li><strong>ColumnTransformer:</strong> Applies different preprocessing to different column groups — the production pattern for mixed-type datasets.</li>
+<li><strong>k-fold CV:</strong> k models trained/evaluated on different splits — mean score is more reliable than a single train/test estimate.</li>
+<li><strong>StratifiedKFold:</strong> Maintains class proportions in each fold — required for imbalanced classification.</li>
+<li><strong>TimeSeriesSplit:</strong> Chronological CV — training always precedes validation. Required for any time-dependent data.</li>
+<li><strong>GridSearchCV:</strong> Exhaustive hyperparameter search — all combinations evaluated. Use for small grids (under ~50 combinations).</li>
+<li><strong>RandomizedSearchCV:</strong> Random hyperparameter sampling — explores more space than grid search with the same compute budget.</li>
+<li><strong>Optuna:</strong> Bayesian hyperparameter optimisation — guided search learns from previous trials. Fastest route to optimal hyperparameters.</li>
+<li><strong>classification_report:</strong> Per-class precision/recall/F1 — essential for imbalanced datasets where accuracy alone misleads.</li>
+<li><strong>n_jobs=-1:</strong> Use all CPU cores for parallel fitting — essential for GridSearchCV and RandomizedSearchCV performance.</li>
 </ul>`,
 
   // ── Course 8: Cloud Computing & AWS ──────────────────────────────────
-  42: `<p>Cloud computing delivers computing resources — servers, storage, databases, networking — over the internet on a pay-as-you-go basis. Instead of buying and maintaining physical hardware, you rent exactly the capacity you need and scale up or down in minutes. AWS (Amazon Web Services) is the market leader, running a significant portion of the internet including Netflix, Airbnb, and NASA.</p>
-<p>IAM (Identity and Access Management) controls who can do what in your AWS account. Every action in AWS is an API call that must be authorised by an IAM policy. The principle of least privilege — granting only the minimum permissions needed to do a job — is the single most important security practice in cloud environments. A misconfigured IAM policy has been the root cause of many high-profile cloud data breaches.</p>
+  42: `<p>Cloud computing has fundamentally changed how software is built and operated. Before cloud, launching a product meant buying servers, renting rack space in a data centre, waiting weeks for hardware delivery, and hiring sysadmins to maintain it. AWS, launched publicly in 2006, changed this to: create an account, call an API, have a server in 60 seconds. The implications were enormous — startups could launch with minimal capital, companies could scale to millions of users without upfront infrastructure investment, and engineers could iterate at a speed impossible with physical hardware.</p>
+<p>AWS is now far more than just servers. It offers over 200 managed services: databases, machine learning platforms, data warehouses, content delivery, message queues, video processing, IoT, identity management, and more. Understanding the core services and the security model that governs them is essential for any developer deploying to AWS.</p>
+
+<h5 class="content-heading">Cloud Service Models</h5>
+<p><strong>IaaS (Infrastructure as a Service)</strong>: You get raw virtual hardware — VMs, storage, networking. You manage the OS, runtime, middleware, and application. Full control, full responsibility. Example: EC2. Use when you need control over the environment, specific software versions, or non-standard configurations.</p>
+<p><strong>PaaS (Platform as a Service)</strong>: The provider manages the infrastructure and runtime; you manage your application code and data. Example: AWS Elastic Beanstalk, Heroku, Google App Engine. Faster to get started but less control. Good for standard web applications.</p>
+<p><strong>SaaS (Software as a Service)</strong>: The provider manages everything — infrastructure, platform, and application. You just use the software. Example: Salesforce, Gmail, GitHub. You have no server responsibilities.</p>
+<p><strong>FaaS (Function as a Service / Serverless)</strong>: You provide individual functions; the provider manages containers, scaling, and execution. Example: AWS Lambda. Pay per invocation, scales to zero. Ideal for event-driven, stateless workloads.</p>
+<p>The shared responsibility model defines what AWS manages vs what you manage. AWS is always responsible for the physical infrastructure, hypervisor, and global network. You are always responsible for your data, IAM permissions, network configuration within your VPC, and application security. In the middle (OS patching, DB engine updates) depends on which service you use — RDS handles OS patching, EC2 does not.</p>
+
+<h5 class="content-heading">IAM — Identity and Access Management</h5>
+<p>IAM is the security foundation of every AWS account. Every API call in AWS — whether from the console, CLI, SDK, or another service — requires authentication and authorisation by IAM. Without IAM configured correctly, your cloud infrastructure is either inaccessible or completely exposed.</p>
+<p><strong>IAM Users</strong>: Represent individual people or applications. Have long-term access key credentials (Access Key ID + Secret Access Key) for programmatic access. Problem: long-term credentials that can be leaked, rotated infrequently, and shared across environments. Avoid for application code — use roles instead.</p>
+<p><strong>IAM Roles</strong>: Temporary credentials assumed by AWS services, EC2 instances, Lambda functions, or cross-account access. An EC2 instance with an attached role automatically gets rotating temporary credentials — no need to store access keys anywhere. This is the secure, recommended approach for all application code running on AWS.</p>
+<p><strong>IAM Policies</strong>: JSON documents defining what actions are allowed on which resources. Example: allow <code>s3:GetObject</code> on <code>arn:aws:s3:::my-bucket/*</code>. Attach policies to users, groups, or roles. AWS evaluates all applicable policies — default deny, explicit allow wins, explicit deny always wins.</p>
+<p><strong>Least privilege in practice</strong>: A Lambda function that only reads from DynamoDB should have a policy allowing only <code>dynamodb:GetItem</code> and <code>dynamodb:Query</code> on the specific table ARN — nothing else. The 2019 Capital One breach was caused by an over-privileged IAM role on an EC2 instance that allowed the attacker to access S3 buckets across the entire account after exploiting an SSRF vulnerability.</p>
+<p><strong>AWS Organizations and SCPs</strong>: For multi-account setups, Service Control Policies (SCPs) set guardrails that apply across all accounts — even the root user of a member account cannot exceed SCP boundaries. Use to prevent anyone creating resources in unapproved regions, or to mandate encryption.</p>
+
+<h5 class="content-heading">AWS Global Infrastructure</h5>
+<p><strong>Regions</strong>: Geographic areas containing multiple data centres — us-east-1 (N. Virginia), eu-west-1 (Ireland), ap-southeast-1 (Singapore), etc. Data does not leave a region unless you explicitly replicate it. Choose regions based on data residency regulations (GDPR requires EU data to stay in EU), latency to your users, and service availability (not all services are in all regions).</p>
+<p><strong>Availability Zones (AZs)</strong>: Each region has 2-6 AZs — physically separate data centres within the region with independent power, cooling, and networking. Designing across multiple AZs provides resilience against a single data centre failure. If your database is in one AZ and it fails, you lose your database. Multi-AZ eliminates this single point of failure.</p>
+<p><strong>Edge Locations</strong>: Hundreds of endpoints for CloudFront (CDN) and Route 53 (DNS) — serve content from the nearest location to the user for minimal latency.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>IaaS:</strong> Infrastructure as a Service — you manage OS and above; AWS manages hardware (e.g. EC2).</li>
-<li><strong>PaaS:</strong> Platform as a Service — you manage your app; provider manages runtime and infrastructure (e.g. Heroku).</li>
-<li><strong>IAM Role:</strong> A set of permissions that can be assumed by a service or user — prefer roles over access keys.</li>
-<li><strong>Least privilege:</strong> Grant only the permissions required for a task — nothing more.</li>
+<li><strong>IaaS:</strong> Raw virtual infrastructure (EC2) — you manage OS and above. Full control, full responsibility.</li>
+<li><strong>PaaS:</strong> Managed platform (Elastic Beanstalk) — you manage code and data. Faster start, less control.</li>
+<li><strong>FaaS:</strong> Function-level execution (Lambda) — no server management, pay per invocation, scales to zero.</li>
+<li><strong>Shared responsibility model:</strong> AWS owns physical infra + hypervisor; you own data + IAM + application security. The boundary shifts by service.</li>
+<li><strong>IAM User:</strong> Long-term credentials for a person or app — avoid for application code, use roles instead.</li>
+<li><strong>IAM Role:</strong> Temporary credentials assumed by services — the secure way for EC2/Lambda to access AWS resources.</li>
+<li><strong>IAM Policy:</strong> JSON allow/deny rules attached to users/roles — evaluated as default deny, explicit allow, explicit deny always wins.</li>
+<li><strong>Least privilege:</strong> Grant only the minimum permissions required — over-privileged roles are the #1 cloud breach enabler.</li>
+<li><strong>AWS Region:</strong> Geographic cluster of AZs — data stays in the region unless explicitly replicated.</li>
+<li><strong>Availability Zone:</strong> Physically separate data centre within a region — deploy across multiple AZs for high availability.</li>
+<li><strong>SCP:</strong> Service Control Policy — account-level guardrails in AWS Organizations that override even root user permissions.</li>
 </ul>`,
 
-  43: `<p>EC2 (Elastic Compute Cloud) provides resizable virtual machines in the cloud. You choose the instance type (CPU, RAM, network performance), operating system, and storage. Security Groups act as virtual firewalls — they control which ports and IPs can communicate with your instance, and all traffic is denied by default until you explicitly allow it.</p>
-<p>A VPC (Virtual Private Cloud) is your private, isolated section of the AWS network. Inside a VPC you create subnets in different Availability Zones for fault tolerance. Public subnets route traffic through an Internet Gateway; private subnets use a NAT Gateway to initiate outbound traffic without being directly reachable from the internet — protecting databases and internal services.</p>
+  43: `<p><strong>EC2</strong> is the backbone of AWS compute — virtual machines (called instances) that you can configure, start, stop, and terminate on demand. EC2 is where most traditional server-based applications run on AWS. Understanding EC2 — instance types, storage, networking, and auto-scaling — is fundamental to deploying any production application. Even if you use higher-level services like ECS, EKS, or Elastic Beanstalk, they all run on EC2 instances underneath.</p>
+<p>A well-architected EC2 deployment combines: right-sized instance types matched to your workload, Auto Scaling groups to handle variable traffic, an Application Load Balancer to distribute requests, and a VPC with properly segmented subnets to enforce network isolation. Each of these components plays a distinct role in availability, performance, and security.</p>
+
+<h5 class="content-heading">Instance Types</h5>
+<p>EC2 instance types follow a naming pattern: <code>family + size</code>. Common families: <strong>t</strong> (burstable, cheap — t3.micro for dev/test), <strong>m</strong> (general purpose — m6i.large for web servers), <strong>c</strong> (compute-optimised — c6i for CPU-heavy workloads), <strong>r</strong> (memory-optimised — r6i for in-memory databases), <strong>p/g</strong> (GPU — for ML training), <strong>i</strong> (storage-optimised — for high I/O databases). Sizes: nano, micro, small, medium, large, xlarge, 2xlarge, etc. — each doubling roughly doubles vCPU and RAM.</p>
+<p>Always right-size based on actual metrics (CPU utilisation, memory). AWS Compute Optimiser analyses your CloudWatch metrics and recommends instance types. Over-provisioning is common and expensive; under-provisioning causes performance problems. Graviton (ARM-based) instances (m7g, c7g) offer 20-40% better price-performance than equivalent x86 instances for most workloads.</p>
+
+<h5 class="content-heading">AMIs and Launch Templates</h5>
+<p>An <strong>AMI (Amazon Machine Image)</strong> is a snapshot of an instance's root volume plus launch permissions — the template from which new instances are launched. AWS provides base AMIs (Amazon Linux 2023, Ubuntu, Windows Server). You can create custom AMIs from a running instance after installing your software — "golden image" pattern. Custom AMIs make Auto Scaling fast: new instances launch with your software pre-installed rather than running user data scripts on every launch.</p>
+<p><strong>Launch Templates</strong> define all instance configuration in a versioned, reusable template: instance type, AMI, security groups, IAM role, user data script, EBS volume configuration. Auto Scaling Groups reference a launch template — when scaling out, new instances are launched with exactly that configuration. Always use launch templates (not the older launch configurations) for new deployments.</p>
+
+<h5 class="content-heading">Security Groups and Network ACLs</h5>
+<p><strong>Security Groups</strong> are stateful virtual firewalls attached to EC2 instances (and other resources). Rules specify allowed traffic by protocol, port range, and source/destination (IP range or another security group). Stateful means response traffic is automatically allowed — if you allow inbound port 443, the response traffic is automatically permitted without an explicit outbound rule. All inbound traffic is denied by default; all outbound is allowed by default.</p>
+<p>Best practice: reference other security groups rather than IP addresses where possible. Allow your application server's security group to connect to your database security group on port 5432 — this is more maintainable and more secure than specifying IP ranges that change when instances are replaced.</p>
+<p><strong>Network ACLs (NACLs)</strong> are stateless firewall rules at the subnet level — both inbound and outbound rules must explicitly allow traffic (unlike stateful Security Groups). NACLs are evaluated before Security Groups and provide a second layer of defence. Use NACLs to block specific IP ranges (e.g. known malicious IP blocks) or as an additional boundary between subnets.</p>
+
+<h5 class="content-heading">VPC Architecture</h5>
+<p>A <strong>VPC</strong> is your private, isolated section of the AWS network with a custom IP range (CIDR block — typically 10.0.0.0/16). Within the VPC, create subnets in multiple AZs. Standard three-tier architecture:</p>
+<ul class="content-list">
+<li><strong>Public subnets:</strong> Have an Internet Gateway route. Host: Application Load Balancer, NAT Gateway, bastion hosts. Never databases.</li>
+<li><strong>Private subnets (app tier):</strong> No internet gateway. Host: EC2 application servers, ECS containers. Outbound internet via NAT Gateway (for updates, external API calls).</li>
+<li><strong>Private subnets (data tier):</strong> No internet access at all. Host: RDS databases, ElastiCache. Only accessible from the app tier security group.</li>
+</ul>
+<p><strong>VPC Peering and AWS PrivateLink</strong>: Connect two VPCs privately — useful for microservices in separate accounts or connecting to AWS services without traversing the public internet. <strong>VPC Endpoints</strong> allow your VPC to connect to AWS services (S3, DynamoDB, Secrets Manager) privately without NAT Gateway — faster and cheaper for high-volume service calls.</p>
+
+<h5 class="content-heading">Auto Scaling</h5>
+<p>An <strong>Auto Scaling Group (ASG)</strong> manages a fleet of EC2 instances, automatically adjusting capacity based on policies. Key settings: minimum capacity (never scale below this), desired capacity (start here), maximum capacity (never exceed this). Scaling policies: target tracking (maintain 60% CPU utilisation — scales out when above, in when below), step scaling (add 2 instances when CPU > 80%), scheduled scaling (add instances before known traffic spikes).</p>
+<p>Combine with an <strong>Application Load Balancer (ALB)</strong>: the ALB distributes HTTP/HTTPS traffic across healthy instances in multiple AZs. Health checks determine which instances receive traffic — if an instance fails health checks, the ALB stops sending it traffic and the ASG terminates and replaces it automatically. This gives you self-healing infrastructure.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Security Group:</strong> A stateful virtual firewall for EC2 — defines allowed inbound and outbound traffic.</li>
-<li><strong>AMI (Amazon Machine Image):</strong> A template containing the OS and software configuration for launching EC2 instances.</li>
-<li><strong>Public subnet:</strong> A subnet with a route to the Internet Gateway — instances here can be accessed from the internet.</li>
-<li><strong>NAT Gateway:</strong> Allows private-subnet instances to make outbound internet requests without being publicly accessible.</li>
+<li><strong>EC2 instance types:</strong> t (burstable/cheap), m (general), c (compute), r (memory), p/g (GPU), i (storage) — right-size based on actual utilisation metrics.</li>
+<li><strong>AMI:</strong> Root volume snapshot + launch permissions — custom AMIs pre-install software for faster Auto Scaling launches.</li>
+<li><strong>Launch Template:</strong> Versioned, reusable instance configuration — the modern replacement for launch configurations.</li>
+<li><strong>Security Group:</strong> Stateful virtual firewall — inbound denied by default, responses automatically allowed. Reference SGs instead of IPs for maintainability.</li>
+<li><strong>NACL:</strong> Stateless subnet-level firewall — both inbound and outbound rules required. Evaluated before Security Groups.</li>
+<li><strong>VPC:</strong> Isolated network with custom CIDR — segment into public, app-private, and data-private subnets across multiple AZs.</li>
+<li><strong>Internet Gateway:</strong> VPC component enabling inbound/outbound internet — attached to VPC, routed from public subnets only.</li>
+<li><strong>NAT Gateway:</strong> Managed NAT in a public subnet — allows private instances outbound internet access without inbound exposure.</li>
+<li><strong>VPC Endpoint:</strong> Private connection from VPC to AWS services — no internet, no NAT Gateway, lower cost and latency for high-volume S3/DynamoDB access.</li>
+<li><strong>Auto Scaling Group:</strong> Fleet management with min/desired/max — scales based on metrics, replaces unhealthy instances automatically.</li>
+<li><strong>ALB:</strong> Application Load Balancer — distributes HTTP/HTTPS across instances in multiple AZs with health checking.</li>
 </ul>`,
 
-  44: `<p>S3 (Simple Storage Service) is AWS's object storage service — you store any file (object) in a bucket and retrieve it via a URL. S3 is highly durable (designed for 99.999999999% durability), infinitely scalable, and cheap. It powers static website hosting, data lakes, application file uploads, and serves as the backbone for many AWS services including data pipelines and machine learning workflows.</p>
-<p>S3 storage classes let you balance cost and access speed. Standard is for frequently accessed data. Infrequent Access and Glacier archive tiers offer significant cost savings (up to 90% cheaper) for data accessed rarely. Lifecycle policies automatically transition objects between storage classes based on age, keeping storage costs optimised without manual management.</p>
+  44: `<p><strong>S3</strong> (Simple Storage Service) is one of the most important AWS services — the foundational storage layer for a huge fraction of the internet. It stores files (objects) of any size in buckets, accessible via API or URL. S3's durability guarantee (eleven nines — 99.999999999%) means the expected loss of a single object would take 10 million years on average. It underpins: static websites, application uploads, machine learning training data, data lakes, CloudFront CDN origins, backup archives, and inter-service data exchange in almost every AWS architecture.</p>
+<p>S3 is not a traditional filesystem — it is an object store. Objects are identified by a key (a string, often formatted like a path: <code>images/2024/photo.jpg</code>) within a bucket. There are no real directories, no renaming operations (rename = copy + delete), and no partial updates (you overwrite the entire object). These constraints shape how you design around S3.</p>
+
+<h5 class="content-heading">S3 Security — The Most Misconfigured AWS Service</h5>
+<p>S3 bucket misconfigurations are responsible for a disproportionate number of cloud data breaches. The default is now private — new buckets block all public access by default. But mistakes happen. Key security controls:</p>
+<p><strong>Block Public Access settings</strong>: Account-level and bucket-level switches that prevent any public access regardless of bucket or object ACLs. Enable these at the account level — it prevents accidental exposure across all buckets. The 2019 Capital One breach, the 2017 Verizon breach, and numerous others involved S3 buckets made public accidentally or through misconfigured ACLs.</p>
+<p><strong>Bucket policies</strong>: JSON policies defining which principals (users, roles, services) can perform which actions on which objects. Grant least privilege — never <code>"Principal": "*"</code> (public) unless intentionally serving public content. <code>aws:SecureTransport</code> condition: deny all requests not using HTTPS — prevents unencrypted access.</p>
+<p><strong>Server-side encryption</strong>: Encrypt all data at rest. <code>SSE-S3</code>: AWS manages keys. <code>SSE-KMS</code>: You control keys in AWS KMS — enables audit logging of key usage and allows key revocation. Enforce encryption by requiring <code>x-amz-server-side-encryption</code> in the bucket policy.</p>
+<p><strong>Access logging and CloudTrail</strong>: Enable S3 server access logging to track all requests. Enable CloudTrail for API-level logging of all S3 management operations. Essential for forensics after a breach and for compliance.</p>
+<p><strong>Pre-signed URLs</strong>: Generate time-limited signed URLs for private objects: <code>s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=3600)</code>. The URL is valid for 1 hour only — even if leaked, it expires. The correct pattern for user file downloads from private buckets — never expose your S3 bucket publicly for user files.</p>
+
+<h5 class="content-heading">Storage Classes and Cost Optimisation</h5>
+<p>S3 has multiple storage classes with different durability, availability, and cost profiles. Choose based on access patterns:</p>
+<ul class="content-list">
+<li><strong>S3 Standard:</strong> ~$0.023/GB/month. Millisecond access, 99.99% availability. Use for frequently accessed data.</li>
+<li><strong>S3 Intelligent-Tiering:</strong> Automatically moves objects between tiers based on access patterns — no retrieval fees. Use when access patterns are unknown or variable.</li>
+<li><strong>S3 Standard-IA (Infrequent Access):</strong> ~$0.0125/GB/month — 46% cheaper. Per-retrieval fee. 30-day minimum storage. Use for backups accessed monthly or less.</li>
+<li><strong>S3 Glacier Instant Retrieval:</strong> ~$0.004/GB/month. Millisecond retrieval. Use for long-term archives accessed quarterly.</li>
+<li><strong>S3 Glacier Deep Archive:</strong> ~$0.00099/GB/month (the cheapest AWS storage). 12-hour retrieval time. 180-day minimum. Use for compliance archives retained 7+ years.</li>
+</ul>
+<p><strong>Lifecycle policies</strong>: Automatically transition objects between classes based on age and prefix. Example: transition objects to Standard-IA after 30 days, Glacier after 90 days, delete after 365 days. Eliminates manual cost management and ensures compliance retention periods are enforced automatically.</p>
+
+<h5 class="content-heading">S3 Features for Applications</h5>
+<p><strong>Versioning</strong>: Keep all versions of every object. Protects against accidental deletion and overwrites — deleted objects are just marked with a delete marker, not permanently removed. Essential for any bucket containing important data. Cost: you pay for storage of all versions.</p>
+<p><strong>S3 Event Notifications</strong>: Trigger Lambda functions, SQS queues, or SNS topics when objects are created, modified, or deleted. The foundation of event-driven data pipelines: image upload → S3 → Lambda notification → image processing → result stored back to S3.</p>
+<p><strong>S3 Transfer Acceleration</strong>: Routes uploads through CloudFront edge locations to the nearest AWS backbone entry point — dramatically faster uploads from distant regions. Uses the same endpoint but adds <code>.s3-accelerate.amazonaws.com</code>.</p>
+<p><strong>Multipart Upload</strong>: Required for objects over 5GB, recommended for anything over 100MB. Splits the file into parts uploaded in parallel, then assembled server-side. Retry individual failed parts without restarting the full upload.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Bucket:</strong> A globally unique container for S3 objects — all objects live inside a bucket.</li>
-<li><strong>Object:</strong> A file stored in S3, identified by its key (path-like name) within a bucket.</li>
-<li><strong>Storage class:</strong> Determines durability, availability, and price — choose based on how often data is accessed.</li>
-<li><strong>Pre-signed URL:</strong> A temporary URL granting time-limited access to a private S3 object — great for secure file downloads.</li>
+<li><strong>S3 object:</strong> File stored by key within a bucket — no real directories, no partial updates, identified by bucket + key.</li>
+<li><strong>Block Public Access:</strong> Account/bucket-level switch preventing all public access — enable at account level to prevent accidental exposure.</li>
+<li><strong>Bucket policy:</strong> JSON access control for the bucket — least privilege, require HTTPS via aws:SecureTransport condition.</li>
+<li><strong>SSE-KMS:</strong> Server-side encryption with customer-managed KMS key — enables key usage auditing and revocation.</li>
+<li><strong>Pre-signed URL:</strong> Time-limited signed URL for private object access — the correct pattern for user file downloads (not public buckets).</li>
+<li><strong>S3 Standard-IA:</strong> Infrequent Access — 46% cheaper than Standard with per-retrieval fee. Use for monthly-or-less accessed backups.</li>
+<li><strong>S3 Glacier Deep Archive:</strong> ~$0.001/GB/month — cheapest storage. 12-hour retrieval. Use for 7+ year compliance archives.</li>
+<li><strong>Lifecycle policy:</strong> Automatic object transitions between storage classes by age/prefix — eliminates manual cost management.</li>
+<li><strong>Versioning:</strong> Retains all object versions — protects against accidental deletion. Deleted objects are marked, not immediately destroyed.</li>
+<li><strong>S3 Event Notifications:</strong> Triggers Lambda/SQS/SNS on object create/delete — foundation of event-driven data pipelines.</li>
+<li><strong>Multipart upload:</strong> Parallel upload of large files in parts — required over 5GB, recommended over 100MB.</li>
 </ul>`,
 
-  45: `<p>RDS (Relational Database Service) lets you run MySQL, PostgreSQL, MariaDB, Oracle, or SQL Server without managing the underlying server. AWS handles patching, backups, and hardware failure. Multi-AZ deployments automatically maintain a synchronous standby replica in a second Availability Zone, providing automatic failover in case the primary instance fails.</p>
-<p>Read replicas are asynchronous copies of your database that can serve read traffic — critical for read-heavy applications that would otherwise bottleneck on a single instance. Aurora is AWS's cloud-native database engine that is compatible with MySQL and PostgreSQL but offers significantly higher performance and automatic storage scaling.</p>
+  45: `<p><strong>RDS</strong> (Relational Database Service) lets you run PostgreSQL, MySQL, MariaDB, Oracle, or SQL Server without managing the underlying server. The operational overhead AWS eliminates is substantial: OS patching, database engine upgrades, hardware replacement, backup management, replication setup, failover orchestration. Your team focuses on schema design, query optimisation, and application logic instead of database infrastructure maintenance. For most applications, RDS is the correct choice over self-managed databases on EC2.</p>
+<p>Choosing the right database architecture for your application — instance size, Multi-AZ, read replicas, Aurora vs standard RDS — directly impacts both your costs and your availability SLA. Understanding what each option provides and what it costs is essential for designing production systems on AWS.</p>
+
+<h5 class="content-heading">High Availability — Multi-AZ</h5>
+<p><strong>Multi-AZ deployment</strong> maintains a synchronous standby replica in a second Availability Zone. Every write to the primary is synchronously replicated to the standby before the write is acknowledged. If the primary fails — hardware failure, OS crash, AZ outage — AWS automatically fails over to the standby. DNS is updated to point to the standby (now the new primary) within 60-120 seconds. Your application reconnects using the same endpoint; no manual intervention required.</p>
+<p>Multi-AZ is not a read scaling solution — the standby does not serve traffic. It is purely a high availability mechanism. Cost: approximately double (you pay for two instances). Essential for any production database. Use single-AZ only for non-production environments.</p>
+<p>The failover process: AWS detects the primary failure, promotes the standby, updates the DNS CNAME for the endpoint. Applications using connection pooling may need to handle reconnection. Set a short DNS TTL and ensure your connection pool retries connections after a brief pause.</p>
+
+<h5 class="content-heading">Read Replicas — Scaling Reads</h5>
+<p><strong>Read replicas</strong> are asynchronous copies of your database that can serve read-only queries — SELECT statements. Unlike Multi-AZ standby (synchronous, same region), read replicas use asynchronous replication and can be in the same region, a different region, or even a different AWS account. Replication lag — the delay between a write on the primary and its appearance on the replica — is typically milliseconds for low-load primaries but can grow to minutes under heavy write load.</p>
+<p>Architecture pattern for read-heavy applications: point all SELECT queries to a read replica endpoint, all writes to the primary endpoint. With the right connection routing (at the ORM level or using a database proxy), you can scale reads linearly by adding more replicas. Up to 15 read replicas for Aurora, 5 for standard RDS MySQL/PostgreSQL.</p>
+<p>Read replicas can be promoted to standalone databases — useful for disaster recovery (promote a cross-region replica if the entire primary region fails) or for database migrations (use a replica to test new database versions without impacting production).</p>
+
+<h5 class="content-heading">Aurora — Cloud-Native Performance</h5>
+<p><strong>Aurora</strong> is AWS's custom database engine, compatible with MySQL and PostgreSQL APIs, designed from the ground up for the cloud. Key architectural differences: the storage layer is separated from the compute layer. Aurora uses a distributed storage system across six storage nodes in three AZs — data is always written to 6 places (quorum write of 4, quorum read of 3). The storage auto-scales automatically from 10GB to 128TB in 10GB increments.</p>
+<p>Performance claims: up to 5× faster than standard MySQL, up to 3× faster than standard PostgreSQL. Achieved through: the distributed storage layer with read-ahead caching, log-structured writes (avoids double-write buffer), and a redo-log-only replication approach.</p>
+<p><strong>Aurora Serverless v2</strong>: Aurora that auto-scales compute capacity instantly based on load — from 0.5 to 128 ACUs (Aurora Capacity Units). Eliminates over-provisioning for variable-load databases. Charges per ACU-second of actual usage. Ideal for development environments, test databases, and applications with unpredictable traffic patterns.</p>
+<p><strong>Aurora Global Database</strong>: Replicates an Aurora cluster to up to 5 secondary regions with less than 1 second lag — enables global reads with local latency and cross-region disaster recovery with RPO &lt; 1 second and RTO &lt; 1 minute.</p>
+
+<h5 class="content-heading">RDS Security</h5>
+<p>Always deploy RDS in private subnets — never publicly accessible. Use security groups to allow access only from application server security groups. Enable encryption at rest (AES-256 via AWS KMS) — this is the default for new RDS instances. Enable encryption in transit by requiring SSL connections in your parameter group. Enable Enhanced Monitoring and Performance Insights to diagnose slow queries and wait events. Use AWS Secrets Manager to store database credentials and rotate them automatically — never hardcode credentials in application code or environment variables.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Multi-AZ:</strong> Synchronous standby in a second AZ — provides automatic failover with minimal downtime.</li>
-<li><strong>Read replica:</strong> Asynchronous copy of the DB for read-only queries — offloads read traffic from the primary.</li>
-<li><strong>Automated backups:</strong> RDS takes daily snapshots and stores transaction logs for point-in-time recovery.</li>
-<li><strong>Parameter group:</strong> A container for database engine configuration — tune memory, connections, and timeouts.</li>
+<li><strong>RDS managed service:</strong> AWS handles OS patching, engine upgrades, backups, and hardware — you focus on schema and queries.</li>
+<li><strong>Multi-AZ:</strong> Synchronous standby in a second AZ — automatic failover in 60-120s. High availability, not a read scaling solution.</li>
+<li><strong>Failover:</strong> DNS CNAME update to standby — applications reconnect to the same endpoint automatically.</li>
+<li><strong>Read replica:</strong> Asynchronous copy for SELECT queries — scales reads horizontally. Replication lag increases under heavy write load.</li>
+<li><strong>Cross-region read replica:</strong> Disaster recovery — can be promoted to standalone in minutes if the primary region fails.</li>
+<li><strong>Aurora:</strong> Cloud-native MySQL/PostgreSQL-compatible engine — 6-way distributed storage, auto-scaling, up to 5× MySQL performance.</li>
+<li><strong>Aurora Serverless v2:</strong> Compute auto-scales per-second — eliminates over-provisioning for variable workloads.</li>
+<li><strong>Aurora Global Database:</strong> Cross-region replication with &lt;1s lag — enables global reads and sub-minute RTO/RPO disaster recovery.</li>
+<li><strong>Automated backups:</strong> Daily snapshots + continuous transaction log backup — point-in-time recovery to any second within the retention window.</li>
+<li><strong>AWS Secrets Manager:</strong> Stores and auto-rotates DB credentials — never hardcode passwords in application code.</li>
+<li><strong>Performance Insights:</strong> Visual database performance analysis — shows top wait events and queries by load contribution.</li>
 </ul>`,
 
-  46: `<p>AWS Lambda runs your code in response to events (HTTP requests, S3 uploads, database changes, scheduled triggers) without you provisioning or managing any servers. You pay only for the actual compute time used — down to the millisecond. Lambda automatically scales from zero to thousands of concurrent executions, making it ideal for unpredictable or bursty workloads.</p>
-<p>Cold starts occur when Lambda needs to initialise a new execution environment — this can add 100ms–1s of latency to the first invocation. Keeping functions warm with scheduled pings, using smaller deployment packages, and writing functions in Node.js or Python (which have shorter cold starts than Java or .NET) are common optimisation strategies.</p>
+  46: `<p><strong>AWS Lambda</strong> is the flagship serverless compute service — it runs your code in response to events without any server management. You write a function, upload it, define a trigger, and Lambda handles everything: provisioning containers, scaling from zero to thousands of concurrent executions in seconds, patching the runtime, and billing you per millisecond of actual execution time. There are no idle costs — a Lambda function that runs once per day costs essentially nothing vs an EC2 instance running 24/7.</p>
+<p>Serverless architecture has changed how event-driven and microservice-based applications are built. The combination of Lambda + API Gateway + DynamoDB + S3 can replace traditional server-based architectures for many workloads — with better scalability, lower operational overhead, and often lower cost at moderate traffic levels. However, Lambda is not a silver bullet — it has constraints around runtime duration, memory, cold starts, and statelessness that require architectural consideration.</p>
+
+<h5 class="content-heading">Lambda Execution Model</h5>
+<p>When a Lambda function is invoked, AWS assigns an <strong>execution environment</strong> — a lightweight container with your code, runtime, and dependencies. The environment has: a frozen code package loaded from S3, an initialised runtime (Node.js, Python, Java, Go, Ruby, .NET, or a custom runtime), and a temporary file system at <code>/tmp</code> (up to 10GB). After the function completes, the environment is either reused for the next invocation (warm start) or discarded.</p>
+<p>Lambda execution configuration: <strong>memory</strong> (128MB to 10GB) — CPU allocation scales proportionally with memory, so allocating more memory also gives more CPU even if you do not use the extra RAM. <strong>timeout</strong> (up to 15 minutes). <strong>concurrency</strong> — by default, up to 1000 concurrent executions per region across all functions. Reserved concurrency prevents one function from consuming all concurrency; provisioned concurrency pre-warms environments.</p>
+<p><strong>Handler function</strong>: Every Lambda function has a handler — the entry point called by the runtime: <code>def handler(event, context): ... return response</code> (Python) or <code>exports.handler = async (event) => { ... };</code> (Node.js). The <code>event</code> object contains the trigger-specific payload; <code>context</code> has metadata (remaining time, request ID, log stream name).</p>
+
+<h5 class="content-heading">Cold Starts — Understanding and Mitigating</h5>
+<p>A <strong>cold start</strong> occurs when Lambda must initialise a new execution environment before running your code — typically adding 100ms–2s of latency. The cold start overhead comes from: container provisioning, runtime initialisation (JVM startup for Java can take 1-3s), loading your deployment package, and running your initialisation code (outside the handler).</p>
+<p>Cold starts matter for user-facing latency-sensitive requests. For asynchronous event processing (S3 triggers, SQS consumers, scheduled jobs), cold starts rarely matter. Minimisation strategies: choose a fast-cold-start runtime (Python and Node.js typically 100-300ms; Java 1-3s without custom runtimes); keep deployment packages small (fewer dependencies = faster loading); keep initialisation code outside the handler minimal; use Lambda SnapStart (Java) which snapshots post-initialisation state. <strong>Provisioned Concurrency</strong> keeps a specified number of environments pre-initialised — eliminates cold starts entirely at a cost of running idle capacity.</p>
+
+<h5 class="content-heading">Event Sources and Integration</h5>
+<p>Lambda integrates with virtually every AWS service as an event source:</p>
+<ul class="content-list">
+<li><strong>API Gateway / Function URL:</strong> HTTP requests invoke Lambda synchronously — returns the response. Build REST APIs, GraphQL APIs, webhook endpoints.</li>
+<li><strong>S3:</strong> Object created/deleted events — image resizing, document processing, ETL pipelines.</li>
+<li><strong>DynamoDB Streams / Kinesis:</strong> Stream processing — every record change triggers processing. CDC (change data capture) pipelines.</li>
+<li><strong>SQS:</strong> Queue consumer — Lambda polls the queue and invokes your function with batches of messages. Automatic backpressure management.</li>
+<li><strong>EventBridge:</strong> Scheduled rules (cron) and event bus routing — replace scheduled tasks/cron jobs without servers.</li>
+<li><strong>SNS:</strong> Push notifications fan-out — one SNS message triggers multiple Lambda subscribers.</li>
+<li><strong>CloudFront (Lambda@Edge / CloudFront Functions):</strong> Run code at the CDN edge — modify requests/responses at the network level closest to users.</li>
+</ul>
+
+<h5 class="content-heading">Serverless Architecture Patterns</h5>
+<p><strong>API + Lambda + DynamoDB</strong>: The canonical serverless web API. API Gateway routes HTTP requests to Lambda functions that read/write DynamoDB. Scales from 0 to millions of requests with no configuration. DynamoDB's single-digit millisecond latency ensures fast function execution. Cost: pay only for requests made, not for idle servers.</p>
+<p><strong>Step Functions</strong>: Orchestrate multi-step workflows with state machines — coordinate Lambda functions with branching, parallel execution, retries, and wait states. Used for order processing pipelines, ML training workflows, and any multi-step business process.</p>
+<p><strong>Dead Letter Queues (DLQ)</strong>: For asynchronous invocations — if a Lambda function fails after all retries, the event goes to an SQS queue or SNS topic for investigation. Without a DLQ, failed async events are silently discarded.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Event-driven:</strong> Lambda functions execute in response to triggers — not continuously running servers.</li>
-<li><strong>Cold start:</strong> Latency added when Lambda initialises a new container for the first invocation.</li>
-<li><strong>Execution role:</strong> An IAM role granting the Lambda function permissions to access other AWS services.</li>
-<li><strong>API Gateway:</strong> A managed service that routes HTTP requests to Lambda functions — creates a serverless REST API.</li>
+<li><strong>Lambda execution environment:</strong> Container with code + runtime — reused for warm invocations, fresh for cold starts.</li>
+<li><strong>Cold start:</strong> Environment initialisation latency (100ms–3s) — matters for latency-sensitive requests, not for async processing.</li>
+<li><strong>Provisioned Concurrency:</strong> Pre-warmed environments — eliminates cold starts at the cost of idle capacity charges.</li>
+<li><strong>Handler:</strong> The function entry point called by the runtime — receives event payload and context metadata.</li>
+<li><strong>Memory/CPU scaling:</strong> Lambda CPU scales proportionally with memory allocation — increase memory to get more CPU.</li>
+<li><strong>Execution role:</strong> IAM role defining what AWS services the function can access — least privilege principle applies.</li>
+<li><strong>API Gateway:</strong> Managed HTTP routing to Lambda — REST APIs, WebSocket APIs, HTTP APIs (simpler, cheaper).</li>
+<li><strong>SQS trigger:</strong> Lambda polls SQS and processes batches — automatic backpressure, no polling infrastructure needed.</li>
+<li><strong>Step Functions:</strong> Serverless workflow orchestration — state machines with branching, parallel steps, retries, and human approval waits.</li>
+<li><strong>DLQ:</strong> Dead Letter Queue — captures failed async invocations for debugging instead of silently discarding them.</li>
+<li><strong>Lambda@Edge:</strong> Lambda running at CloudFront edge locations — modify HTTP requests/responses closest to the user.</li>
 </ul>`,
 
-  47: `<p>Elastic Beanstalk is a PaaS that automatically handles the deployment, capacity provisioning, load balancing, and monitoring of your application. You push your code and Beanstalk figures out the rest — useful for teams that want the flexibility of EC2 without the operational overhead. CloudFormation takes this further with Infrastructure as Code — you define your entire stack in a YAML or JSON template and AWS creates or updates it automatically.</p>
-<p>Cloud costs can spiral quickly without active management. AWS Cost Explorer visualises spending patterns. Reserved Instances offer up to 72% discount over on-demand pricing for committed one or three-year usage. Spot Instances leverage AWS's spare capacity at up to 90% discount — ideal for fault-tolerant batch workloads that can handle interruption.</p>
+  47: `<p>As cloud applications mature, teams quickly realise that manually clicking through the AWS console to provision resources is error-prone, unrepeatable, and impossible to audit. Infrastructure as Code (IaC) solves this by treating your cloud environment — servers, databases, networking, security groups, everything — exactly like application code: version-controlled, peer-reviewed, tested, and automatically deployed. AWS provides two complementary services: <strong>Elastic Beanstalk</strong> for developers who want PaaS simplicity, and <strong>CloudFormation</strong> for teams who want full declarative control of every AWS resource. Understanding both, plus the economics of cloud pricing models, transforms you from someone who uses AWS into someone who engineers with it.</p>
+
+<h5 class="content-heading">Elastic Beanstalk — PaaS Without Losing EC2 Flexibility</h5>
+<p>Elastic Beanstalk is AWS's Platform as a Service layer. You upload your application code (a ZIP file, a Docker image, or a Node.js/Python/Java package) and Beanstalk automatically handles the entire deployment lifecycle: provisioning EC2 instances, configuring an Application Load Balancer, setting up an Auto Scaling Group, deploying your code, running health checks, and exposing CloudWatch metrics. For a solo developer or a small team building a Node.js API or a Django web app, Beanstalk eliminates weeks of infrastructure work.</p>
+<p>Beanstalk offers multiple deployment strategies that balance speed against availability. <strong>All at once</strong> deploys to all instances simultaneously — fastest but causes downtime. <strong>Rolling</strong> updates instances in batches — keeps some capacity live during the deploy. <strong>Rolling with additional batch</strong> launches extra instances first so no capacity is lost. <strong>Immutable</strong> launches an entirely new set of instances alongside the old ones and only swaps traffic over when health checks pass — ideal for production; a failed deployment has zero impact on live traffic. <strong>Blue/green</strong> deploys to a completely separate Beanstalk environment and swaps Route 53 DNS — the ultimate zero-downtime strategy with instant rollback capability.</p>
+<p>You can customise Beanstalk deeply using <code>.ebextensions</code> configuration files in your source bundle. These YAML files can install OS packages, modify Nginx configuration, set environment variables, run database migrations on deploy, or configure CloudWatch alarms. The underlying EC2 instances are fully accessible via SSH if needed — you never lose control of the machine, unlike fully managed PaaS services.</p>
+
+<h5 class="content-heading">CloudFormation — Declarative Infrastructure as Code</h5>
+<p>CloudFormation lets you describe your entire AWS infrastructure in a YAML or JSON template. You declare the desired end state — "I want a VPC with two public subnets, an RDS MySQL instance, an EC2 Auto Scaling Group of t3.medium instances behind an ALB, and an S3 bucket" — and CloudFormation builds it. More importantly, when you update the template and submit the change, CloudFormation computes a <strong>change set</strong> showing exactly what will be added, modified, or deleted, then applies only those changes in the correct dependency order. Deleting the CloudFormation stack deletes all managed resources — no orphaned resources silently accumulating cost.</p>
+<p>Templates consist of logical resources (the AWS resource declarations), Parameters (values supplied at deploy time like environment name or instance type), Mappings (lookup tables like region-to-AMI-ID), Conditions (deploy different resources for prod vs. dev), and Outputs (values exported for other stacks to consume). The <strong>Fn::ImportValue</strong> function allows stacks to share data — a networking stack exports VPC and subnet IDs; application stacks import them. This cross-stack referencing keeps templates manageable and reusable.</p>
+<p>The <strong>AWS Cloud Development Kit (CDK)</strong> is a higher-level abstraction over CloudFormation. Instead of YAML, you write infrastructure in TypeScript, Python, Java, or C#, using familiar programming constructs — loops, conditionals, classes, inheritance — to generate CloudFormation templates. A CDK construct library provides pre-built patterns like "an ECS Fargate service with an ALB and auto-scaling" as a single import. CDK synthesises your code into a CloudFormation template, which is then deployed normally. This gives you the full expressiveness of a programming language with the reliability and auditability of CloudFormation.</p>
+
+<h5 class="content-heading">Cloud Cost Optimisation — Engineering Economics</h5>
+<p>AWS's default pricing model — <strong>On-Demand instances</strong> — charges by the second with no commitment. This is right for unpredictable workloads but is the most expensive option for steady-state production traffic. Understanding AWS's pricing tiers is a core engineering skill; cloud waste regularly accounts for 30–40% of AWS bills at fast-growing companies.</p>
+<p><strong>Reserved Instances (RIs)</strong> commit to a 1-year or 3-year term for a specific instance family, operating system, and region in exchange for up to 72% discount over on-demand pricing. Standard RIs are the cheapest but fully committed. <strong>Convertible RIs</strong> allow changing the instance type, OS, or tenancy during the term for slightly less discount — useful when your capacity needs might evolve. <strong>Savings Plans</strong> are a newer, more flexible commitment model: instead of reserving specific instances, you commit to spending a fixed $/hour on compute for 1 or 3 years, and AWS applies the discount to any eligible compute usage (EC2, Fargate, Lambda). Savings Plans typically deliver 66% savings with far more flexibility than RIs.</p>
+<p><strong>Spot Instances</strong> tap AWS's unused EC2 capacity at up to 90% discount — the same physical hardware as on-demand but available only when AWS has spare capacity. The trade-off: AWS can reclaim your instance with only 2 minutes' notice when demand rises. Spot is ideal for stateless, fault-tolerant batch workloads — ML training jobs, video transcoding, scientific simulation, data processing pipelines — where jobs can checkpoint and restart. Spot is increasingly used in Kubernetes node groups and ECS Fargate Spot for web workloads that can tolerate occasional interruption, mixed with on-demand capacity for minimum availability.</p>
+<p><strong>AWS Cost Explorer</strong> provides granular visualisation of spending by service, account, region, tag, and time period. Cost anomaly detection uses ML to alert on unexpected spending spikes. <strong>AWS Budgets</strong> lets you set spend thresholds with SNS alerts or even automated actions (like stopping EC2 instances) when thresholds are breached. Tagging every resource with team, project, and environment tags is a prerequisite for meaningful cost attribution — untagged resources make cost allocation impossible.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Elastic Beanstalk:</strong> Upload your app code and AWS handles the underlying infrastructure automatically.</li>
-<li><strong>CloudFormation:</strong> Define all your AWS resources in a template file — infrastructure as code.</li>
-<li><strong>Reserved Instance:</strong> Commit to 1 or 3 years of usage for up to 72% discount over on-demand pricing.</li>
-<li><strong>Spot Instance:</strong> Unused EC2 capacity at up to 90% discount — can be interrupted with 2 minutes notice.</li>
+<li><strong>Elastic Beanstalk:</strong> AWS PaaS that automates EC2 provisioning, load balancing, auto-scaling, and deployments — developers upload code, Beanstalk handles the rest while retaining full EC2 access.</li>
+<li><strong>Immutable deployment:</strong> Beanstalk strategy that launches a fresh set of instances alongside the existing ones, swaps traffic only when healthy — zero-downtime deploy with instant safe rollback.</li>
+<li><strong>.ebextensions:</strong> YAML configuration files packaged inside your application bundle that customise Beanstalk environments — install packages, configure Nginx, run migration scripts.</li>
+<li><strong>CloudFormation:</strong> AWS IaC service that creates, updates, and deletes infrastructure declaratively from YAML/JSON templates, computing exact change sets before applying any modification.</li>
+<li><strong>Change set:</strong> A CloudFormation preview showing exactly which resources will be created, modified, or deleted before any changes are applied — essential safety gate for production updates.</li>
+<li><strong>AWS CDK:</strong> A higher-level IaC framework that generates CloudFormation templates from TypeScript, Python, or Java code — enabling loops, conditionals, and OOP patterns in infrastructure definitions.</li>
+<li><strong>On-Demand pricing:</strong> Pay by the second with no commitment — most flexible but most expensive; appropriate for unpredictable or short-lived workloads.</li>
+<li><strong>Reserved Instances:</strong> 1- or 3-year capacity commitment offering up to 72% discount — right for steady-state production workloads with predictable instance requirements.</li>
+<li><strong>Savings Plans:</strong> Commit to a fixed $/hour spend for 1 or 3 years; applies automatically to any eligible compute (EC2, Fargate, Lambda) with ~66% savings and greater flexibility than RIs.</li>
+<li><strong>Spot Instances:</strong> AWS spare-capacity pricing at up to 90% discount — reclaimable with 2-minute notice; ideal for fault-tolerant batch jobs, ML training, and interruptible workloads.</li>
+<li><strong>AWS Cost Explorer:</strong> Visualises spend by service, region, account, or tag with ML-powered anomaly detection to surface unexpected cost spikes before they become large bills.</li>
+<li><strong>Resource tagging:</strong> Applying team, project, and environment tags to every AWS resource — the prerequisite for cost attribution, security governance, and automated operations.</li>
 </ul>`,
 
   // ── Course 9: React & Modern JavaScript ──────────────────────────────
-  48: `<p>ES6 (released 2015) and subsequent versions transformed JavaScript from a scripting language into a powerful, expressive programming language. Arrow functions provide concise syntax and lexically bind <code>this</code> — eliminating one of JavaScript's most confusing quirks. Destructuring lets you extract values from objects and arrays in a single concise statement.</p>
-<p>The module system (<code>import</code> / <code>export</code>) replaced the old pattern of polluting the global scope. Modules are the foundation of modern JavaScript bundlers like Vite and webpack, enabling tree-shaking (removing unused code) to keep bundle sizes small. Optional chaining (<code>?.</code>) and nullish coalescing (<code>??</code>) make defensive coding dramatically cleaner.</p>
+  48: `<p>In 2015, TC39 (the committee that standardises JavaScript) released ES2015 — also called ES6 — the most significant update to JavaScript since the language's creation in 1995. Annual releases have followed ever since, each adding features that make JavaScript more expressive, safer, and more performant. Understanding these modern features is essential: virtually every React, Node.js, and TypeScript codebase uses them pervasively, and older patterns they replace (manual <code>this</code> binding, <code>var</code>, <code>arguments</code> objects, IIFE module patterns) are now considered legacy code to be refactored away.</p>
+
+<h5 class="content-heading">Arrow Functions and Lexical <code>this</code></h5>
+<p>The single most impactful ES6 feature for everyday coding is the arrow function. Beyond syntactic brevity, arrow functions solve JavaScript's most notorious source of bugs: dynamic <code>this</code> binding. In traditional functions, <code>this</code> is determined by how the function is called, not where it is defined. This means a callback passed to <code>setTimeout</code> or an event listener would lose its surrounding object's <code>this</code>, requiring workarounds like <code>const self = this</code> or <code>.bind(this)</code>. Arrow functions capture <code>this</code> from the surrounding lexical scope at definition time and never rebind it — the problem simply disappears.</p>
+<p>Arrow functions cannot be used as constructors (no <code>new</code>) and have no <code>arguments</code> object (use rest parameters instead). For methods on class instances where you actually want dynamic <code>this</code>, regular functions or class method syntax are still correct. The mental model: arrow functions are best for callbacks, array methods (<code>.map</code>, <code>.filter</code>, <code>.reduce</code>), and any function that is not itself an object or constructor.</p>
+<pre><code>// Old pattern — this is lost in the callback
+function Timer() {
+  this.seconds = 0;
+  setInterval(function() { this.seconds++; }, 1000); // 'this' is undefined in strict mode
+}
+
+// Arrow function — lexical this
+function Timer() {
+  this.seconds = 0;
+  setInterval(() => { this.seconds++; }, 1000); // works correctly
+}</code></pre>
+
+<h5 class="content-heading">Destructuring, Spread, and Rest</h5>
+<p>Destructuring is syntactic sugar for extracting values from objects and arrays into named variables. Object destructuring lets you rename variables, provide defaults, and destructure nested objects in a single declaration. Array destructuring unpacks positionally and can skip elements with commas. Both forms are ubiquitous in React: function components receive props via object destructuring, and <code>useState</code> returns its pair via array destructuring.</p>
+<p>The spread operator (<code>...</code>) expands an iterable into individual elements. In object literals it creates shallow copies with overrides — the idiomatic way to produce new objects without mutating the original, critical in Redux reducers and React state updates. In function calls it spreads an array as individual arguments. The rest parameter (<code>...args</code>) is the inverse: it gathers remaining arguments into an array, replacing the messy <code>arguments</code> object and enabling variadic functions cleanly.</p>
+<pre><code>// Destructuring with defaults and rename
+const { name: fullName = 'Anonymous', age = 0 } = user;
+
+// Nested destructuring
+const { address: { city, country } } = user;
+
+// Spread to create new object (immutable update)
+const updated = { ...user, age: user.age + 1 };
+
+// Rest parameters
+const sum = (...nums) => nums.reduce((acc, n) => acc + n, 0);</code></pre>
+
+<h5 class="content-heading">ES Modules — <code>import</code> and <code>export</code></h5>
+<p>Before ES modules, JavaScript had no native module system. Developers used IIFEs (Immediately Invoked Function Expressions) to create scope, or CommonJS (<code>require</code>/<code>module.exports</code>) in Node.js. The ES module specification brings static imports and exports directly into the language. <strong>Static</strong> means the module graph is deterministic at parse time — the bundler (Vite, webpack, Rollup) can analyse exactly which exports are used and which are not, enabling <strong>tree-shaking</strong>: unused exports are eliminated from the production bundle entirely.</p>
+<p>Named exports allow a module to export multiple values; import curly braces select which ones you want. Default exports let a module export one primary value. Dynamic <code>import()</code> (a function, not a keyword) loads a module asynchronously at runtime — the foundation of code splitting, where large parts of an app are only downloaded when first needed, reducing initial page load dramatically.</p>
+<pre><code>// Named exports
+export const PI = 3.14159;
+export function add(a, b) { return a + b; }
+
+// Default export
+export default class Calculator { ... }
+
+// Import
+import Calculator, { PI, add } from './math.js';
+
+// Dynamic import — loads only when called
+const { Chart } = await import('./charting.js');</code></pre>
+
+<h5 class="content-heading">Optional Chaining, Nullish Coalescing, and Newer Additions</h5>
+<p>Optional chaining (<code>?.</code>) short-circuits property access chains when a value is <code>null</code> or <code>undefined</code>, returning <code>undefined</code> instead of throwing a TypeError. This eliminates verbose defensive checks like <code>user && user.address && user.address.city</code>. It works for property access, method calls (<code>obj.method?.()</code>), and array index access (<code>arr?.[0]</code>).</p>
+<p>Nullish coalescing (<code>??</code>) provides a default value when the left side is <code>null</code> or <code>undefined</code> — crucially, unlike <code>||</code>, it does NOT treat <code>0</code>, <code>false</code>, or <code>''</code> as falsy. This matters enormously: <code>count || 10</code> returns 10 when count is 0 (a bug); <code>count ?? 10</code> returns 0 correctly. Other notable modern additions: <strong>Promise.allSettled</strong> (waits for all promises regardless of rejection), <strong>Array.at(-1)</strong> (last element without <code>arr[arr.length - 1]</code>), <strong>Object.entries/fromEntries</strong> for round-tripping objects through array transformations, and <strong>logical assignment operators</strong> (<code>||=</code>, <code>&&=</code>, <code>??=</code>) for conditional assignment.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Arrow function:</strong> <code>const add = (a, b) => a + b</code> — shorter syntax and lexically bound <code>this</code>.</li>
-<li><strong>Destructuring:</strong> <code>const { name, age } = user</code> — extract values from objects/arrays in one line.</li>
-<li><strong>Optional chaining (<code>?.</code>):</strong> Access nested properties safely — returns undefined instead of throwing an error.</li>
-<li><strong>Spread operator:</strong> <code>{ ...obj, newProp: val }</code> — creates a shallow copy with added or overridden properties.</li>
+<li><strong>Arrow function:</strong> Concise function syntax that lexically binds <code>this</code> from the surrounding scope — eliminates the need for <code>.bind(this)</code> or <code>const self = this</code> in callbacks.</li>
+<li><strong>Lexical <code>this</code>:</strong> Arrow functions capture <code>this</code> at definition time rather than call time — the value is fixed and predictable regardless of how the function is later invoked.</li>
+<li><strong>Destructuring:</strong> Syntax to unpack object properties or array elements into named variables in a single line — supports defaults, renaming, and nesting.</li>
+<li><strong>Spread operator (<code>...</code>):</strong> Expands an iterable into individual elements — creates shallow object/array copies without mutation, essential for immutable state updates.</li>
+<li><strong>Rest parameters (<code>...args</code>):</strong> Gathers remaining function arguments into a real array — replaces the legacy <code>arguments</code> object with a clean, iterable alternative.</li>
+<li><strong>ES module:</strong> Static <code>import</code>/<code>export</code> syntax that enables tree-shaking, making the module dependency graph analysable at build time to eliminate dead code.</li>
+<li><strong>Tree-shaking:</strong> Bundler optimisation that removes unused module exports from the production build — only code that is actually imported ends up in the bundle.</li>
+<li><strong>Dynamic import():</strong> Asynchronously loads a module at runtime, returning a Promise — the mechanism behind code splitting and lazy loading of routes or features.</li>
+<li><strong>Optional chaining (<code>?.</code>):</strong> Short-circuits property access on <code>null</code>/<code>undefined</code> values, returning <code>undefined</code> instead of throwing — replaces long chains of <code>&& </code> null guards.</li>
+<li><strong>Nullish coalescing (<code>??</code>):</strong> Returns the right operand only when the left is <code>null</code> or <code>undefined</code> — unlike <code>||</code>, correctly treats <code>0</code>, <code>false</code>, and <code>''</code> as valid values.</li>
+<li><strong>Template literals:</strong> Backtick strings supporting embedded expressions (<code>${expr}</code>) and multi-line content — enable readable string interpolation and tagged template DSLs.</li>
+<li><strong>Promises and async/await:</strong> Language-level asynchronous programming that replaces callback pyramids — <code>await</code> pauses execution inside an <code>async</code> function until a Promise settles, making async code read sequentially.</li>
 </ul>`,
 
-  49: `<p>React is a library for building user interfaces from small, reusable pieces called components. Each component is a JavaScript function that returns JSX — a syntax that looks like HTML but is actually JavaScript. React maintains a virtual DOM (an in-memory copy of the real DOM) and updates only the parts of the page that actually changed, making UI updates efficient even in complex applications.</p>
-<p>Props (properties) are how parent components pass data down to children — they are read-only inside the child. Lists of elements must include a <code>key</code> prop so React can track which items changed, were added, or were removed. Composition — building complex UIs from small, single-responsibility components — is the core architectural pattern in React.</p>
+  49: `<p>React was created at Facebook in 2011 and open-sourced in 2013. It emerged from a painful engineering problem: as Facebook's newsfeed became more complex, keeping the UI in sync with rapidly changing data became nearly impossible. Traditional approaches — manually updating the DOM, or using two-way data binding frameworks — produced cascades of unpredictable mutations. React's core insight was radical: instead of trying to keep the DOM in sync incrementally, re-render the entire component whenever data changes and let a fast diffing algorithm figure out the minimal DOM mutations needed. This declarative model — "describe what the UI should look like at any point in time" rather than "describe how to change it" — transformed front-end development and spawned an entire ecosystem.</p>
+
+<h5 class="content-heading">JSX — JavaScript with HTML-Like Syntax</h5>
+<p>JSX is a syntax extension that lets you write HTML-like markup inside JavaScript. It is not a template language — it compiles directly to <code>React.createElement(type, props, ...children)</code> function calls. This means JSX is pure JavaScript: you can use any JavaScript expression inside curly braces, import components from files, apply conditional rendering with ternary operators, and compose components by nesting them as tags.</p>
+<p>JSX has a few important differences from HTML. <code>class</code> becomes <code>className</code> (since <code>class</code> is a reserved JavaScript keyword). Event handlers are camelCase (<code>onClick</code>, not <code>onclick</code>) and receive a synthetic event object. Every JSX expression must have a single root element — wrap siblings in a <code>&lt;div&gt;</code> or a React Fragment (<code>&lt;&gt;...&lt;/&gt;</code>) to avoid adding unnecessary DOM nodes. Self-closing tags must include the slash: <code>&lt;img /&gt;</code>, not <code>&lt;img&gt;</code>.</p>
+<pre><code>// JSX compiles to:
+const element = &lt;h1 className="title"&gt;Hello&lt;/h1&gt;;
+// ... React.createElement('h1', { className: 'title' }, 'Hello')
+
+// Dynamic values and conditional rendering
+function Greeting({ user }) {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Hello, {user.name}!&lt;/h1&gt;
+      {user.isAdmin &amp;&amp; &lt;span&gt;Admin&lt;/span&gt;}
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h5 class="content-heading">The Virtual DOM and Reconciliation</h5>
+<p>The real DOM is slow to manipulate — every read or write can force the browser to recalculate layout, repaint pixels, or both. React's strategy is to maintain a <strong>virtual DOM</strong>: a lightweight JavaScript representation of the UI tree, living entirely in memory. When state changes, React re-renders the component tree into a new virtual DOM tree. It then <strong>diffs</strong> the new tree against the previous one using a reconciliation algorithm (O(n) rather than the naive O(n³) of a general tree diff, thanks to heuristics about same-level comparisons).</p>
+<p>The result is a minimal set of actual DOM mutations — only the nodes that actually changed are updated in the real DOM. In practice, this means React's rendering model is both conceptually simple (always re-render everything) and practically performant (the actual DOM changes are minimal). React 18 introduced <strong>Concurrent Mode</strong> with automatic batching and the ability to interrupt and reprioritise renders — long-running renders no longer block the browser's event loop, making UIs feel more responsive under heavy load.</p>
+
+<h5 class="content-heading">Props, Composition, and Component Design</h5>
+<p>Props are the mechanism for passing data from parent to child components. They are immutable inside the child — a component should never modify its own props. This one-way data flow (from parent down the component tree) makes the data flow predictable and easy to trace. To pass data upward, a parent passes a callback function as a prop; the child calls it to notify the parent of an event, which then updates its own state and re-renders.</p>
+<p><strong>Composition</strong> is the fundamental design pattern: build complex UIs from small, single-responsibility components. A <code>&lt;Button&gt;</code> component handles styling and click events. A <code>&lt;Modal&gt;</code> component handles overlay logic. A <code>&lt;UserCard&gt;</code> composes an avatar, name, and status. This contrasts with inheritance — in React you almost never extend a component class. The <code>children</code> prop is particularly powerful: it allows a parent to inject arbitrary JSX into a child component, enabling highly flexible layout and wrapper components without coupling the wrapper to the wrapped content.</p>
+<pre><code>// Composition via children prop
+function Card({ title, children }) {
+  return (
+    &lt;div className="card"&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;div className="card-body"&gt;{children}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Usage — any JSX can be children
+&lt;Card title="User Profile"&gt;
+  &lt;Avatar src={user.photo} /&gt;
+  &lt;p&gt;{user.bio}&lt;/p&gt;
+&lt;/Card&gt;</code></pre>
+
+<h5 class="content-heading">Lists, Keys, and Conditional Rendering</h5>
+<p>Rendering lists is done by mapping arrays to JSX elements. The critical requirement is the <code>key</code> prop: every element in a list must have a unique, stable key among siblings. React uses keys to identify which items changed, were added, or were removed between renders. Without keys, React falls back to positional comparison — insert an item at the top of a 1,000-item list and React will re-render all 1,000 items as if each changed. With stable keys (database IDs, not array indices), React correctly identifies only the new item needs mounting.</p>
+<p>Common pitfall: using the array index as a key. This breaks when items are reordered or filtered — the keys shift with the positions, causing React to misidentify which items changed. Always prefer a stable, unique identifier from your data. Conditional rendering uses standard JavaScript: the short-circuit <code>&& </code> pattern for "render only if true", the ternary for "render one of two", and early returns for "render nothing if condition fails".</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>JSX:</strong> HTML-like syntax compiled to <code>React.createElement()</code> calls — not a template language, it is JavaScript.</li>
-<li><strong>Props:</strong> Read-only data passed from parent to child component.</li>
-<li><strong>Key prop:</strong> A unique identifier on list items that helps React efficiently update lists.</li>
-<li><strong>Conditional rendering:</strong> Render different UI based on state — use <code>&&</code> for simple cases, ternary for if/else.</li>
+<li><strong>JSX:</strong> Syntax extension that compiles to <code>React.createElement()</code> calls — HTML-like syntax in JavaScript files, supporting any JS expression inside <code>{}</code> curly braces.</li>
+<li><strong>Component:</strong> A JavaScript function that accepts props and returns JSX — the fundamental unit of composition in React, encapsulating UI, logic, and styling together.</li>
+<li><strong>Virtual DOM:</strong> React's in-memory JavaScript representation of the UI tree — diffs against the previous version on each render to compute minimal real DOM updates.</li>
+<li><strong>Reconciliation:</strong> React's diffing algorithm that compares the current and previous virtual DOM trees to determine the minimum set of actual DOM mutations needed.</li>
+<li><strong>Props:</strong> Immutable data passed from parent to child component — the mechanism for one-way data flow down the component tree.</li>
+<li><strong>One-way data flow:</strong> Data flows only from parent to child via props — children communicate upward by calling callback functions passed as props.</li>
+<li><strong>Composition:</strong> Building complex UIs by nesting small, single-responsibility components — preferred over inheritance in React architecture.</li>
+<li><strong>Children prop:</strong> Special prop containing the JSX content nested inside a component's tags — enables flexible wrapper and layout components without tight coupling.</li>
+<li><strong>Key prop:</strong> A stable, unique identifier required on list elements — React uses it to correctly identify which items were added, removed, or reordered without re-rendering the whole list.</li>
+<li><strong>React Fragment:</strong> A wrapper (<code>&lt;&gt;&lt;/&gt;</code> or <code>&lt;React.Fragment&gt;</code>) that groups sibling elements without adding a real DOM node — avoids unnecessary div wrappers in the output HTML.</li>
+<li><strong>Conditional rendering:</strong> Rendering different JSX based on state or props — implemented with <code>&amp;&amp;</code> for simple conditions, ternary for binary choices, or early returns for "render nothing".</li>
+<li><strong>Concurrent Mode:</strong> React 18's rendering model that allows React to interrupt, pause, and reprioritise renders — prevents long renders from blocking the browser's event loop and making the UI feel sluggish.</li>
 </ul>`,
 
-  50: `<p>Hooks are functions that let you use React features inside functional components. <code>useState</code> gives a component local state — when state changes, React re-renders the component. <code>useEffect</code> handles side effects (data fetching, subscriptions, timers) and runs after the component renders. Its cleanup function prevents memory leaks from subscriptions that outlive the component.</p>
-<p>Custom hooks let you extract and reuse stateful logic across multiple components. A hook that fetches data, manages loading/error states, and returns the result can be shared between any component that needs it — without duplicating code. The rules of hooks are strict: only call hooks at the top level of a component or custom hook, never inside loops, conditions, or nested functions.</p>
+  50: `<p>Before hooks (introduced in React 16.8 in February 2019), stateful logic could only live in class components. This created a painful split: functional components were stateless presentation components; class components were stateful containers. Logic reuse between class components required awkward patterns like Higher-Order Components (HOCs) or render props, which created deeply nested component trees and made tracing data flow difficult. Hooks solved all of this by allowing any functional component to use state, side effects, context, refs, and more — while also enabling that logic to be extracted into reusable custom hooks that share behaviour without the component hierarchy complexity.</p>
+
+<h5 class="content-heading">useState — Local State Management</h5>
+<p><code>useState</code> initialises a state variable with a starting value and returns an array of two elements: the current value and a setter function. Calling the setter schedules a re-render with the new value — React does not mutate state directly. State updates may be asynchronous and batched; React 18 batches all state updates in event handlers, timeouts, and promises by default. Never read state immediately after calling its setter and expect the new value — you will still see the old value in the current render.</p>
+<p>For object or array state, always pass a new reference to the setter — never mutate the existing state directly. <code>setUser({ ...user, name: 'Alice' })</code> creates a new object; <code>user.name = 'Alice'; setUser(user)</code> does not trigger a re-render because the reference is the same. The functional update form — <code>setCount(prev => prev + 1)</code> — is important whenever the new state depends on the current state, especially in async callbacks or effects where the state variable captured in the closure may be stale.</p>
+<pre><code>const [count, setCount] = useState(0);
+const [user, setUser] = useState({ name: '', age: 0 });
+
+// Functional update — safe in async contexts
+const increment = () => setCount(prev => prev + 1);
+
+// Object state — always create new reference
+const updateName = (name) => setUser(prev => ({ ...prev, name }));</code></pre>
+
+<h5 class="content-heading">useEffect — Side Effects and the Dependency Array</h5>
+<p><code>useEffect</code> runs after the browser has painted the screen. It is the right place for side effects that should not happen during rendering: fetching data, subscribing to external data sources, setting up timers, or directly manipulating the DOM. The dependency array is the mechanism for controlling when the effect re-runs: an empty array <code>[]</code> means run once on mount; a list of values means re-run whenever any of them changes; omitting the array means re-run after every render (rarely what you want).</p>
+<p>The cleanup function (returned from the effect callback) runs before the next effect execution and when the component unmounts. Always clean up subscriptions, event listeners, and timers to prevent memory leaks. A critical pattern: because network requests are asynchronous, the response may arrive after the component has unmounted. Use a cancelled flag or an <code>AbortController</code> inside the effect to ignore stale responses.</p>
+<pre><code>useEffect(() => {
+  const controller = new AbortController();
+
+  fetch(\`/api/users/\${userId}\`, { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(err => { if (err.name !== 'AbortError') setError(err); });
+
+  return () => controller.abort(); // cleanup — cancels request on unmount
+}, [userId]); // re-run when userId changes</code></pre>
+
+<h5 class="content-heading">useMemo, useCallback, and useRef</h5>
+<p><code>useMemo</code> memoises the result of an expensive computation. It recalculates only when a listed dependency changes; otherwise it returns the cached value from the last render. Use it for operations that are genuinely expensive (complex data transformations, filtering large arrays) — not for every computation, as the bookkeeping overhead can outweigh the savings for simple values.</p>
+<p><code>useCallback</code> memoises a function reference. Without it, a new function object is created on every render, which causes any child component that receives the function as a prop (and uses <code>React.memo</code>) to re-render unnecessarily. Wrap event handlers passed to memoised child components in <code>useCallback</code> to prevent this. <code>useRef</code> provides a mutable container whose <code>.current</code> property persists across renders without triggering re-renders when changed — used for DOM node references, storing interval IDs, and holding values that should persist without causing renders (like the previous value of a prop for comparison).</p>
+
+<h5 class="content-heading">Custom Hooks — Reusable Stateful Logic</h5>
+<p>A custom hook is any function whose name starts with <code>use</code> and that calls one or more React hooks inside. Custom hooks are the mechanism for sharing stateful logic between components without the component hierarchy overhead of HOCs or render props. A <code>useFetch</code> hook that manages loading, error, and data states; a <code>useLocalStorage</code> hook that syncs state with the browser's localStorage; a <code>useWindowSize</code> hook that returns the viewport dimensions and updates on resize — these are all patterns that would be duplicated in multiple components without custom hooks.</p>
+<p>The rules of hooks exist because React relies on the order of hook calls being stable across renders to correctly associate each hook call with its internal state slot. Calling a hook inside a conditional or loop would change the order on some renders, corrupting React's internal state. ESLint's <code>eslint-plugin-react-hooks</code> enforces these rules automatically — treat any lint error from this plugin as a bug, not a style preference.</p>
+<pre><code>function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(url)
+      .then(r => r.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// Usage in any component:
+const { data: users, loading, error } = useFetch('/api/users');</code></pre>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>useState:</strong> Returns <code>[value, setValue]</code> — calling <code>setValue</code> triggers a re-render with the new value.</li>
-<li><strong>useEffect dependency array:</strong> Controls when the effect runs — empty <code>[]</code> means run once on mount only.</li>
-<li><strong>useMemo:</strong> Memoises an expensive computed value — recalculates only when dependencies change.</li>
-<li><strong>Custom hook:</strong> A function starting with "use" that calls other hooks — reusable stateful logic.</li>
+<li><strong>Hook:</strong> A function (must start with <code>use</code>) that lets functional components access React features like state and lifecycle — introduced in React 16.8 to replace class components.</li>
+<li><strong>useState:</strong> Returns <code>[value, setter]</code> — the setter schedules a re-render with the new value; always pass a new reference for objects/arrays, never mutate in place.</li>
+<li><strong>Functional update form:</strong> <code>setState(prev => newValue)</code> — reads the current state rather than the stale closure value; required whenever new state depends on old state in async contexts.</li>
+<li><strong>useEffect:</strong> Runs after the browser paints — the correct place for data fetching, subscriptions, and DOM manipulation; controlled by the dependency array.</li>
+<li><strong>Dependency array:</strong> The second argument to <code>useEffect</code>, <code>useMemo</code>, and <code>useCallback</code> — specifies which values must change to re-run the effect or recompute the memo.</li>
+<li><strong>Cleanup function:</strong> Returned from a <code>useEffect</code> callback — runs before the next effect and on unmount; used to cancel requests, clear timers, and remove event listeners.</li>
+<li><strong>useMemo:</strong> Memoises an expensive computation's result — only recomputes when listed dependencies change; protects against recalculating costly operations on every render.</li>
+<li><strong>useCallback:</strong> Memoises a function reference — prevents child components from re-rendering because a parent re-created the same callback function on each render.</li>
+<li><strong>useRef:</strong> A mutable container whose <code>.current</code> persists across renders without triggering re-renders — used for DOM references, timer IDs, and storing previous values.</li>
+<li><strong>Custom hook:</strong> A <code>use</code>-prefixed function encapsulating reusable stateful logic — the primary mechanism for sharing behaviour between components without HOC nesting.</li>
+<li><strong>Rules of hooks:</strong> Only call hooks at the top level (never in loops or conditions) and only from React functions — ensures stable hook call order for correct state association.</li>
+<li><strong>React.memo:</strong> Higher-order component that memoises a component — skips re-rendering if props are shallowly equal; effective only when combined with <code>useCallback</code> for function props.</li>
 </ul>`,
 
-  51: `<p>React Router v6 enables client-side routing — navigating between pages without a full browser reload. Routes are declared with <code>&lt;Route&gt;</code> components; the URL determines which component renders. Dynamic segments (<code>/users/:id</code>) are accessed with the <code>useParams</code> hook. The <code>useNavigate</code> hook provides programmatic navigation — redirect after login, for example.</p>
-<p>Fetching data from an API is a core skill in React. The <code>useEffect</code> hook fires after render, making it the right place for API calls. Always manage three states: loading (show a spinner), success (show the data), and error (show a message). React Query improves on manual data fetching by adding caching, background refetching, and automatic loading/error states.</p>
+  51: `<p>Single Page Applications (SPAs) present a fundamental challenge: users expect URLs to work — bookmarking a product page, sharing a link to a specific post, pressing back to go to the previous view. But SPAs load a single HTML file and manipulate the DOM dynamically. Without a routing library, navigation would break all browser conventions. React Router solves this by synchronising the React component tree with the browser URL using the HTML5 History API, so the address bar updates, back/forward buttons work correctly, and the correct components render for each URL — all without a round-trip to the server.</p>
+
+<h5 class="content-heading">React Router v6 Architecture</h5>
+<p>React Router v6 (released 2021) is a near-complete redesign from v5. Routes are nested naturally in JSX, and the best matching route wins automatically — no more ordering-dependent exact props. The <code>&lt;BrowserRouter&gt;</code> wraps the entire app and provides the routing context. Inside, <code>&lt;Routes&gt;</code> acts as a switch, rendering only the first <code>&lt;Route&gt;</code> whose path matches the current URL.</p>
+<p>Route paths support dynamic segments using the colon syntax (<code>/users/:userId</code>), wildcard segments (<code>/docs/*</code>), and optional segments. Nested routes create layout hierarchies: a parent route renders a layout component (with navigation, sidebar, etc.), and its child routes render into an <code>&lt;Outlet /&gt;</code> placeholder inside the layout — eliminating the repetitive layout wrapping that plagued v5 apps.</p>
+<pre><code>// App.jsx — route configuration
+&lt;BrowserRouter&gt;
+  &lt;Routes&gt;
+    &lt;Route path="/" element={&lt;Layout /&gt;}&gt;
+      &lt;Route index element={&lt;Home /&gt;} /&gt;
+      &lt;Route path="users" element={&lt;UserList /&gt;} /&gt;
+      &lt;Route path="users/:userId" element={&lt;UserDetail /&gt;} /&gt;
+      &lt;Route path="*" element={&lt;NotFound /&gt;} /&gt;
+    &lt;/Route&gt;
+  &lt;/Routes&gt;
+&lt;/BrowserRouter&gt;
+
+// Layout.jsx — renders child routes here
+function Layout() {
+  return (
+    &lt;div&gt;
+      &lt;Navbar /&gt;
+      &lt;Outlet /&gt; {/* child route renders here */}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h5 class="content-heading">Navigation Hooks</h5>
+<p><code>useParams</code> returns an object of key-value pairs matching the dynamic segments in the route path. In a route declared as <code>/users/:userId</code>, calling <code>useParams()</code> inside <code>UserDetail</code> returns <code>{ userId: '42' }</code> — always a string, so parse to a number if your API expects one. <code>useNavigate</code> returns a navigate function for programmatic navigation — redirect to a dashboard after a successful login, go back one step in history with <code>navigate(-1)</code>, or replace the current history entry (useful for post-form-submission redirects that should not be re-submitted on back).</p>
+<p><code>useLocation</code> returns the current URL location object including pathname, search, hash, and state — useful for reading query parameters or passing state between routes without exposing it in the URL. <code>useSearchParams</code> provides a URLSearchParams-like interface for reading and updating query string parameters, making search/filter UI straightforward. The <code>&lt;Link&gt;</code> component renders an <code>&lt;a&gt;</code> tag that navigates via the router instead of causing a full page reload; <code>&lt;NavLink&gt;</code> adds an active class when its href matches the current URL — perfect for navigation menus.</p>
+
+<h5 class="content-heading">Data Fetching — Manual vs React Query</h5>
+<p>The manual pattern for data fetching in React uses <code>useEffect</code> to trigger a fetch, and <code>useState</code> to store loading, error, and data states. This works but requires significant boilerplate — and critically, does not handle caching, deduplication of requests, or background updates. If two components on the same page fetch the same endpoint, you get two network requests. If you navigate away and back, you get a full refetch with a flash of loading state even though the data probably hasn't changed.</p>
+<p><strong>React Query</strong> (or its newer branding TanStack Query) fundamentally rethinks data fetching by treating server data as a cache. Every query is identified by a key (an array of values); React Query fetches the data once, caches it, and serves the cache to any other component that requests the same key. It automatically refetches in the background when the window regains focus or the network reconnects, so data stays fresh without full loading spinners. The <code>useQuery</code> hook returns <code>{ data, isLoading, isError, error, isFetching }</code> — the distinction between <code>isLoading</code> (no data yet) and <code>isFetching</code> (background refresh) allows sophisticated UX: show stale data immediately while a background update runs silently.</p>
+<pre><code>// React Query — replaces useEffect + useState for fetching
+import { useQuery } from '@tanstack/react-query';
+
+function UserProfile({ userId }) {
+  const { data: user, isLoading, isError } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetch(\`/api/users/\${userId}\`).then(r => r.json()),
+    staleTime: 5 * 60 * 1000, // data is fresh for 5 minutes
+  });
+
+  if (isLoading) return &lt;Spinner /&gt;;
+  if (isError) return &lt;ErrorMessage /&gt;;
+  return &lt;div&gt;{user.name}&lt;/div&gt;;
+}</code></pre>
+
+<h5 class="content-heading">Route-Level Code Splitting</h5>
+<p>Large React apps load all JavaScript upfront by default — a user visiting the landing page downloads code for the admin dashboard, checkout flow, and settings panel they may never visit. Code splitting defers loading by lazily importing route components only when their route is first navigated to. React's <code>lazy()</code> function wraps a dynamic <code>import()</code>; the surrounding <code>&lt;Suspense&gt;</code> renders a fallback (spinner or skeleton) while the chunk loads. The result: dramatically smaller initial bundle and faster first contentful paint for the majority of users.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>React Router v6:</strong> Uses <code>&lt;Routes&gt;</code> and <code>&lt;Route&gt;</code> components to map URLs to components.</li>
-<li><strong>useParams:</strong> Returns URL parameters from dynamic route segments like <code>/courses/:id</code>.</li>
-<li><strong>useNavigate:</strong> Programmatic navigation — call <code>navigate('/dashboard')</code> after a successful action.</li>
-<li><strong>React Query:</strong> Manages server state — caching, background updates, and loading/error states out of the box.</li>
+<li><strong>Client-side routing:</strong> URL changes handled by JavaScript using the HTML5 History API — no server round-trip, instant navigation between views while maintaining browser history conventions.</li>
+<li><strong>BrowserRouter:</strong> React Router's history provider — wraps the entire application and supplies URL context to all routing hooks and components.</li>
+<li><strong>Nested routes:</strong> Child routes rendered inside a parent layout's <code>&lt;Outlet /&gt;</code> — creates hierarchical UI layouts without repeating navigation and sidebar code in every component.</li>
+<li><strong>useParams:</strong> Hook returning an object of dynamic URL segment values — <code>/users/:id</code> yields <code>{ id: '42' }</code>; values are always strings, parse as needed.</li>
+<li><strong>useNavigate:</strong> Returns a <code>navigate</code> function for programmatic routing — accepts a path string or a delta (<code>-1</code> for back); use the <code>replace</code> option to avoid adding to history.</li>
+<li><strong>useSearchParams:</strong> Hook for reading and updating URL query string parameters — the idiomatic way to implement search filters and sort controls that survive page refresh.</li>
+<li><strong>React Query (TanStack Query):</strong> A server-state management library — caches fetch results by query key, deduplicates concurrent requests, and automatically refetches stale data in the background.</li>
+<li><strong>staleTime:</strong> React Query config controlling how long cached data is considered fresh — data within staleTime is served from cache without triggering any network request.</li>
+<li><strong>isLoading vs isFetching:</strong> <code>isLoading</code> is true only on the initial load with no cached data; <code>isFetching</code> is true on any network request including background refreshes — enables showing stale data while updating silently.</li>
+<li><strong>Code splitting:</strong> Loading route-level components lazily via <code>React.lazy()</code> and <code>&lt;Suspense&gt;</code> — splits the bundle so each page's JavaScript is only downloaded when that page is visited.</li>
+<li><strong>Outlet:</strong> React Router placeholder component rendered in a parent route's layout — where the currently active child route's component appears.</li>
+<li><strong>NavLink:</strong> Enhanced <code>Link</code> that automatically applies an active class when its href matches the current URL — used to highlight the current page in navigation menus.</li>
 </ul>`,
 
-  52: `<p>As applications grow, passing props through many layers of components ("prop drilling") becomes unwieldy. Context API solves this by creating a global value accessible to any component in the tree without passing it through every intermediate component. It is ideal for data that many components need — current user, theme, language preference.</p>
-<p>Redux Toolkit (RTK) is the recommended way to use Redux — a predictable state container for large applications. State lives in a central store; components read from it via selectors and dispatch actions to modify it. RTK Query extends Redux Toolkit with a powerful data fetching and caching layer that eliminates much of the boilerplate of manual API integration.</p>
+  52: `<p>State management is one of the most debated topics in React development — not because it is technically hard, but because choosing the wrong tool for the scale of your problem creates either unnecessary complexity or painful limitations. The React ecosystem offers a spectrum of solutions: local component state with <code>useState</code>, shared state with Context API, complex local state with <code>useReducer</code>, and global application state with Redux Toolkit or Zustand. Understanding where each tool fits — and when you are overengineering — is a mark of React maturity. The guiding principle: <em>use the simplest tool that solves your problem.</em></p>
+
+<h5 class="content-heading">Prop Drilling and When It Becomes a Problem</h5>
+<p>Prop drilling occurs when data must be passed through multiple intermediate components that do not themselves use it, purely to deliver it to a deeply nested child. A theme preference set at the app root might pass through <code>&lt;App&gt;</code> → <code>&lt;Layout&gt;</code> → <code>&lt;Sidebar&gt;</code> → <code>&lt;SidebarItem&gt;</code> with every intermediate component forwarding a <code>theme</code> prop it does not care about. This creates tight coupling, makes components harder to reuse (every component needs the prop even if it delegates it), and makes refactoring painful.</p>
+<p>Context API is React's built-in solution: create a context, wrap the relevant part of the component tree in a Provider with the value to share, and any descendant component can read the value directly with <code>useContext</code> without intermediate components needing to know about it. Context is excellent for values that change infrequently and are needed by many components: authenticated user, colour theme, internationalisation locale, feature flags. It is <strong>not</strong> a general-purpose state manager for frequently changing data — every component that consumes a context re-renders when the context value changes, even if the specific value it reads did not change.</p>
+<pre><code>// Create context with a default value
+const ThemeContext = createContext('light');
+
+// Provide value high in the tree
+function App() {
+  const [theme, setTheme] = useState('light');
+  return (
+    &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;
+      &lt;Layout /&gt;
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+
+// Consume anywhere in the tree — no props needed
+function ThemeToggle() {
+  const { theme, setTheme } = useContext(ThemeContext);
+  return &lt;button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}&gt;{theme}&lt;/button&gt;;
+}</code></pre>
+
+<h5 class="content-heading">useReducer — State Machines for Complex Local State</h5>
+<p><code>useReducer</code> is an alternative to <code>useState</code> for managing complex state that involves multiple sub-values or where the next state depends on the previous state in non-trivial ways. It takes a reducer function (a pure function mapping <code>(state, action) => newState</code>) and an initial state, and returns the current state and a dispatch function. This is the same pattern as Redux but kept local to a single component or subtree.</p>
+<p>Use <code>useReducer</code> when: state has multiple related fields that change together (a form with 10 fields), state transitions follow defined patterns (a multi-step wizard), or the state update logic is complex enough that you want to test it in isolation. The reducer is a pure function — easy to unit test without rendering any component. Pairing <code>useReducer</code> with Context gives you a lightweight global state solution suitable for medium-complexity apps without adding external dependencies.</p>
+
+<h5 class="content-heading">Redux Toolkit — Industrial-Strength State Management</h5>
+<p>Redux was created in 2015 by Dan Abramov and has three core principles: a single store holds all application state; state is read-only and only changed by dispatching actions; reducers are pure functions specifying how state changes. This predictability is Redux's superpower: the entire application state history can be recorded (Redux DevTools), replayed, and time-travelled. For large teams with complex shared state, Redux's strict constraints prevent a class of mutation-related bugs that plague less structured approaches.</p>
+<p><strong>Redux Toolkit (RTK)</strong>, released in 2019, is the modern, opinionated way to use Redux. It eliminates the verbose boilerplate of classic Redux (action type constants, action creator factories, switch statements in reducers). The <code>createSlice</code> function generates action creators and reducers from a single object definition using Immer under the hood — you can write "mutating" reducer logic (<code>state.count++</code>) and Immer converts it to an immutable update. Slices are composed into the store with <code>configureStore</code>, which also sets up Redux DevTools and the redux-thunk middleware automatically.</p>
+<pre><code>// counterSlice.js
+import { createSlice } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { value: 0 },
+  reducers: {
+    increment: state => { state.value += 1; },        // Immer handles immutability
+    incrementBy: (state, action) => { state.value += action.payload; },
+    reset: state => { state.value = 0; },
+  },
+});
+
+export const { increment, incrementBy, reset } = counterSlice.actions;
+export default counterSlice.reducer;
+
+// In a component:
+const count = useSelector(state => state.counter.value);
+const dispatch = useDispatch();
+dispatch(increment());
+dispatch(incrementBy(5));</code></pre>
+<p><strong>RTK Query</strong> extends Redux Toolkit with a complete data fetching and caching layer. Define API endpoints declaratively; RTK Query generates hooks (<code>useGetUserQuery</code>, <code>useUpdateUserMutation</code>) that handle loading states, caching, cache invalidation, and optimistic updates automatically. For applications already using Redux, RTK Query is often preferable to React Query as it integrates directly with the Redux store and DevTools.</p>
+
+<h5 class="content-heading">Choosing the Right Tool</h5>
+<p>The decision matrix: if state is only needed by one component, use <code>useState</code>. If state is shared by a subtree of components, lift it to their common ancestor. If lifting creates prop drilling through many layers, use Context API. If the state is complex, changes frequently, or involves async actions from many parts of the app, use Redux Toolkit. <strong>Zustand</strong> is a popular lightweight alternative to Redux — a single hook gives you a global store with no boilerplate, no Provider, no action/reducer ceremony. For smaller apps that just need simple global state without Redux's constraints and DevTools, Zustand is often the pragmatic choice.</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>Context API:</strong> Broadcasts a value to all components within a Provider without prop drilling.</li>
-<li><strong>useReducer:</strong> Manages complex state transitions with a pure reducer function — like useState for complex state.</li>
-<li><strong>Redux slice:</strong> An RTK concept grouping a reducer and its action creators together in one place.</li>
-<li><strong>Selector:</strong> A function that reads and derives values from the Redux store — memoised with reselect for performance.</li>
+<li><strong>Prop drilling:</strong> Passing data through multiple intermediate components that do not use it — a signal that a state management solution is needed for that piece of data.</li>
+<li><strong>Context API:</strong> React's built-in mechanism for broadcasting a value to any descendant component without prop drilling — best for slowly-changing global data like theme, user, or locale.</li>
+<li><strong>useContext:</strong> Hook that reads the current value from a React context — triggers a re-render whenever the context Provider's value changes.</li>
+<li><strong>useReducer:</strong> Manages state with a pure <code>(state, action) => newState</code> reducer — ideal for complex local state with multiple related fields or defined transition patterns.</li>
+<li><strong>Redux:</strong> Predictable state container with a single immutable store, action dispatching, and pure reducers — enables time-travel debugging and deterministic state history.</li>
+<li><strong>Redux Toolkit (RTK):</strong> Official, opinionated Redux toolset that eliminates boilerplate using <code>createSlice</code>, <code>configureStore</code>, and Immer for safe "mutating" reducer syntax.</li>
+<li><strong>createSlice:</strong> RTK function generating a reducer and action creators from a single object — groups the reducer logic and its corresponding actions in one place.</li>
+<li><strong>Immer:</strong> Library used inside RTK that intercepts "mutating" state writes in reducers and converts them to immutable updates — lets you write <code>state.value++</code> safely.</li>
+<li><strong>Selector:</strong> A function that reads and derives values from the Redux store — memoised with <code>createSelector</code> (reselect) to avoid unnecessary recomputation on unrelated state changes.</li>
+<li><strong>RTK Query:</strong> Data fetching and caching layer built into Redux Toolkit — generates typed hooks for each endpoint with automatic caching, cache invalidation, and optimistic updates.</li>
+<li><strong>Zustand:</strong> Minimal global state library — a single hook per store, no Provider, no actions ceremony; ideal for small-to-medium apps that need global state without Redux's overhead.</li>
+<li><strong>State colocation:</strong> Keeping state as close as possible to where it is used — the guiding principle to avoid premature global state that makes components harder to reason about and test.</li>
 </ul>`,
 
-  53: `<p>Testing gives you confidence that your code works correctly and that future changes do not break existing features. React Testing Library (RTL) encourages testing from the user's perspective — interacting with elements by their accessible role or text rather than implementation details like CSS classes or component state. This makes tests resilient to refactoring.</p>
-<p>Vite has largely replaced Create React App for new projects — it is dramatically faster in development thanks to native ES modules and only bundling what is actually imported. When deploying to production, Vite creates an optimised bundle with code splitting and tree-shaking. Platforms like Netlify and Vercel deploy React apps automatically from GitHub with zero configuration.</p>
+  53: `<p>A React application without tests is a liability: every refactor is a gamble, every deployment is a leap of faith, and every bug found in production costs far more than one found in development. Testing provides a safety net that lets your team move quickly with confidence. Alongside testing, the choice of build tooling and deployment pipeline dramatically affects developer velocity. The ecosystem has evolved rapidly: Vite has replaced the slow Create React App; Vitest replaces Jest in Vite projects; Netlify and Vercel have made zero-config continuous deployment the default expectation. Understanding this full pipeline — from writing a test to shipping to production — is the mark of a complete React engineer.</p>
+
+<h5 class="content-heading">The Testing Trophy — Which Tests to Write</h5>
+<p>The testing pyramid (many unit tests, fewer integration tests, few E2E tests) was designed for backend systems. For React UIs, Kent C. Dodds (creator of React Testing Library) proposes the <strong>testing trophy</strong>: the majority of your tests should be <strong>integration tests</strong> — rendering a component and its children together, interacting with them as a user would, and asserting on the resulting UI. Integration tests give the best return on investment: they catch real bugs (unlike isolated unit tests that can pass while the composed system fails) and are far faster to write and run than full end-to-end browser tests.</p>
+<p>A small number of unit tests are appropriate for pure functions and complex business logic that is independent of the UI. A small number of end-to-end tests (using Playwright or Cypress) cover the most critical user journeys — login, checkout, form submission — to catch integration issues between the frontend, backend, and database. The goal is not 100% coverage but high-value coverage: tests that would catch real user-facing bugs.</p>
+
+<h5 class="content-heading">React Testing Library — Testing the User's Perspective</h5>
+<p>React Testing Library (RTL) renders components into a virtual DOM (using jsdom) and provides queries for finding elements the way a user would — by accessible role, label text, placeholder, or visible text content. This is a deliberate design choice: querying by CSS class or component internal state makes tests brittle (they break when you refactor the implementation without changing the behaviour). Querying by what the user sees makes tests resilient — if the text on a button changes from "Submit" to "Save", the test fails for the right reason.</p>
+<p>Queries have priority: prefer <code>getByRole</code> (finds semantic elements like buttons, headings, checkboxes by their ARIA role) because it also verifies your accessibility attributes are correct. Fall back to <code>getByLabelText</code> for form fields, <code>getByText</code> for other visible content, and <code>getByTestId</code> only as a last resort when nothing else is semantically appropriate. The <code>userEvent</code> library (instead of the lower-level <code>fireEvent</code>) simulates real user interactions including hover, focus, and keyboard navigation — catching bugs that only appear with real browser events.</p>
+<pre><code>import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import LoginForm from './LoginForm';
+
+test('submits credentials and calls onLogin', async () => {
+  const user = userEvent.setup();
+  const onLogin = jest.fn();
+
+  render(&lt;LoginForm onLogin={onLogin} /&gt;);
+
+  await user.type(screen.getByLabelText('Email'), 'alice@example.com');
+  await user.type(screen.getByLabelText('Password'), 'secret123');
+  await user.click(screen.getByRole('button', { name: 'Sign in' }));
+
+  expect(onLogin).toHaveBeenCalledWith({
+    email: 'alice@example.com',
+    password: 'secret123',
+  });
+});</code></pre>
+
+<h5 class="content-heading">Mocking — Isolating Components from External Dependencies</h5>
+<p>Components that fetch data from APIs cannot be tested without mocking the network. <code>jest.fn()</code> creates a mock function that records all calls, arguments, and return values. Mocking the global <code>fetch</code> or using <code>msw</code> (Mock Service Worker) intercepts network requests at the service worker level — the closest simulation of real network behaviour without making actual HTTP requests. MSW works in both tests and development, allowing you to prototype UI against mock API responses before the backend is built.</p>
+<p>Vitest (used with Vite) provides the same API as Jest — <code>describe</code>, <code>it</code>, <code>expect</code>, <code>vi.fn()</code>, <code>vi.mock()</code> — but runs tests natively as ES modules, much faster, with no Babel transform overhead. For React projects built with Vite, Vitest is the natural choice; the setup is minimal since it shares the same Vite config as the application.</p>
+
+<h5 class="content-heading">Vite — The Modern Build Tool</h5>
+<p>Create React App (CRA) was the default React project scaffold for years, but its underlying webpack configuration became a bottleneck: cold start times of 30+ seconds for large projects and HMR (Hot Module Replacement) taking several seconds per change. Vite (from the Vue creator Evan You) fundamentally rethinks the dev server. In development, Vite serves files as native ES modules — no bundling step at all. The browser requests each module as needed; Vite transforms on-demand. Cold start is near-instant. HMR updates are measured in milliseconds because only the changed module is re-evaluated, not the entire bundle.</p>
+<p>For production, Vite uses Rollup to create an optimised bundle with code splitting, tree-shaking, minification, and asset hashing. The output is a set of files ready to be served from any static host. Vite's plugin ecosystem covers TypeScript, JSX, CSS modules, SVG imports, environment variables, and more — the <code>vite.config.ts</code> is far simpler than a custom webpack config.</p>
+
+<h5 class="content-heading">Deployment — CI/CD for React Apps</h5>
+<p>Modern React deployment is straightforward: push to a GitHub branch, a CI pipeline runs tests and builds the production bundle, and if both pass, the app is deployed automatically. Netlify and Vercel both connect directly to GitHub repositories, detect the build command (<code>npm run build</code>) and output directory (<code>dist/</code>), and handle CDN distribution, custom domains, HTTPS certificates, and preview deployments (a unique URL for every pull request) with zero configuration.</p>
+<p>For more control, a GitHub Actions workflow can run tests, build the bundle, and deploy to AWS S3 (with CloudFront as CDN) or any hosting provider. Key production optimisations: <strong>code splitting</strong> by route (each page's code loads only when visited), <strong>tree-shaking</strong> (unused imports removed), <strong>minification</strong> (variable names shortened, whitespace removed), <strong>asset hashing</strong> (filename includes content hash so CDNs can cache indefinitely while new deploys invalidate immediately), and <strong>gzip/Brotli compression</strong> (the server compresses JS files before sending, reducing transfer size 70–80%).</p>
+
 <h5 class="content-heading">Key Concepts</h5>
 <ul class="content-list">
-<li><strong>React Testing Library:</strong> Renders components in a virtual DOM and queries them the way a user would interact.</li>
-<li><strong>jest.fn():</strong> Creates a mock function to verify it was called with the correct arguments.</li>
-<li><strong>Code splitting:</strong> Breaks the bundle into chunks loaded on demand — improves initial page load time.</li>
-<li><strong>Tree shaking:</strong> Removes unused exported code during the build — keeps the final bundle small.</li>
+<li><strong>Testing trophy:</strong> Integration tests form the bulk of a React test suite — render real component trees and interact via RTL, balancing coverage against speed and maintenance cost.</li>
+<li><strong>React Testing Library (RTL):</strong> Renders components into jsdom and provides user-centric queries — finds elements by accessible role, label, or text rather than implementation details.</li>
+<li><strong>getByRole:</strong> RTL's preferred query method — finds elements by ARIA role and simultaneously validates accessibility semantics (buttons, headings, checkboxes, textboxes).</li>
+<li><strong>userEvent:</strong> RTL companion library that simulates realistic user interactions (type, click, keyboard) including events that <code>fireEvent</code> skips — catches a broader class of interaction bugs.</li>
+<li><strong>jest.fn() / vi.fn():</strong> Creates a mock function that records all invocations — use with <code>expect(fn).toHaveBeenCalledWith(args)</code> to verify callbacks and event handlers are triggered correctly.</li>
+<li><strong>MSW (Mock Service Worker):</strong> Intercepts network requests at the service worker level during tests and development — the most realistic way to mock APIs without modifying application code.</li>
+<li><strong>Vitest:</strong> Vite-native test runner with the same API as Jest — no Babel transform, runs tests as native ES modules; dramatically faster for Vite-based projects.</li>
+<li><strong>Vite:</strong> Modern build tool that serves ES modules natively in development (near-instant start, millisecond HMR) and uses Rollup for optimised production builds.</li>
+<li><strong>Code splitting:</strong> Lazy-loading route components with <code>React.lazy()</code> — the production bundle is split into chunks loaded on demand, reducing initial JS download.</li>
+<li><strong>Tree shaking:</strong> Rollup/webpack static analysis removing unused module exports from the production bundle — requires ES module syntax (<code>import</code>/<code>export</code>); CommonJS <code>require</code> defeats it.</li>
+<li><strong>Asset hashing:</strong> Including a content hash in built filenames (e.g., <code>main.a3f9b2.js</code>) — CDNs cache the file indefinitely; deploying a new version generates a new hash, bypassing the cache automatically.</li>
+<li><strong>Preview deployments:</strong> Unique URLs generated for every pull request by Vercel/Netlify — allows stakeholders to review changes in a production-like environment before merging to main.</li>
 </ul>`,
 };
