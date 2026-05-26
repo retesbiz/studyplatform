@@ -7,6 +7,14 @@ const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+
+// Prevent HTML files from being cached so fixes deploy instantly
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html') || req.path === '/') {
+    res.setHeader('Cache-Control', 'no-store');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check — shows DB + env status

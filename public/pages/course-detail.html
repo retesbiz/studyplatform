@@ -229,7 +229,15 @@
 initPage();
 
 const courseId = new URLSearchParams(location.search).get('id');
-if (!courseId) location.href = 'courses.html';
+if (!courseId) { location.href = 'courses.html'; }
+
+// Fallback: if loadCourse never resolves after 15s, show error
+setTimeout(() => {
+  const pb = document.getElementById('page-body');
+  if (pb && pb.querySelector('.empty-state')?.textContent.includes('Loading')) {
+    pb.innerHTML = '<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Server is not responding</h4><p style="color:var(--ink3);margin-top:8px">The API did not reply within 15 seconds. <a href="" onclick="location.reload();return false;">Reload</a> or <a href="courses.html">go back</a>.</p></div>';
+  }
+}, 15000);
 
 async function loadCourse(attempt) {
   attempt = attempt || 1;
