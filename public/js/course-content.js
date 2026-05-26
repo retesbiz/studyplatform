@@ -1346,7 +1346,7 @@ const COURSE_CONTENT = {
 <h5 class="content-heading">ES6+ Essential Features</h5>
 <p><strong>Destructuring</strong>: Extract values from objects and arrays concisely — <code>const { name, age = 25 } = user</code> (with default), <code>const [first, ...rest] = array</code>. In function parameters: <code>function greet({ name, role }) { }</code> — self-documenting, avoids repetitive <code>options.name</code> access.</p>
 <p><strong>Spread/Rest</strong>: <code>...arr</code> spreads an array/object. <code>const merged = { ...defaults, ...overrides }</code> creates a new object with overrides winning. In function params: <code>function sum(...nums)</code> collects all arguments into an array.</p>
-<p><strong>Template literals</strong>: <code>`Hello, ${name}! You have ${count} messages.`</code> — multiline strings, embedded expressions, no string concatenation.</p>
+<p><strong>Template literals</strong>: <code>&#96;Hello, ${name}! You have ${count} messages.&#96;</code> — multiline strings, embedded expressions, no string concatenation.</p>
 <p><strong>Modules</strong>: <code>export</code> / <code>import</code> — explicit dependencies, tree-shakeable by bundlers. Named exports: <code>export function add() { }</code>. Default export: <code>export default class App { }</code>. Dynamic import: <code>const mod = await import('./heavy-module.js')</code> — loads code on demand for code splitting.</p>
 
 <h5 class="content-heading">Key Concepts</h5>
@@ -1359,7 +1359,7 @@ const COURSE_CONTENT = {
 <li><strong>async/await:</strong> Syntactic sugar over Promises — makes async code read synchronously. Use Promise.all() for parallel operations.</li>
 <li><strong>Destructuring:</strong> Extract values from objects/arrays concisely, with defaults and renaming — reduces boilerplate.</li>
 <li><strong>Spread operator:</strong> Expands arrays/objects — use for shallow copies, merging objects, spreading arguments.</li>
-<li><strong>Template literals:</strong> Backtick strings with ${} expression interpolation and multiline support.</li>
+<li><strong>Template literals:</strong> Backtick strings with <code>\${}</code> expression interpolation and multiline support.</li>
 <li><strong>ES Modules:</strong> import/export for explicit dependencies — enables tree-shaking and dynamic code splitting.</li>
 <li><strong>Optional chaining (?.):</strong> Access nested properties safely — returns undefined instead of throwing if an intermediate value is null/undefined.</li>
 <li><strong>Nullish coalescing (??):</strong> Returns the right side only if the left is null or undefined — unlike ||, does not short-circuit on 0 or empty string.</li>
