@@ -220,8 +220,12 @@ async function seedQuizData() {
   console.log('Quiz data seeded.');
 }
 
-initDb()
-  .then(migrateXp)
-  .then(seedQuizData)
-  .then(() => app.listen(PORT, () => console.log(`StudyNest running on port ${PORT}`)))
-  .catch(err => { console.error('Startup failed:', err.message); process.exit(1); });
+// Start listening immediately so Railway health checks and user requests don't hang.
+// DB init + seeding run in the background — all routes still work once DB is ready.
+app.listen(PORT, () => {
+  console.log(`StudyNest running on port ${PORT}`);
+  initDb()
+    .then(migrateXp)
+    .then(seedQuizData)
+    .catch(err => console.error('Background DB init error:', err.message));
+});
