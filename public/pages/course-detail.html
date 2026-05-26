@@ -232,8 +232,17 @@ const courseId = new URLSearchParams(location.search).get('id');
 if (!courseId) location.href = 'courses.html';
 
 async function loadCourse() {
-  const c = await api('GET', '/courses/' + courseId);
-  if (!c) return;
+  let c;
+  try {
+    c = await api('GET', '/courses/' + courseId);
+  } catch(e) {
+    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>Failed to load course</h4><p style="color:var(--ink3);margin-top:8px">Check your connection and <a href="" onclick="location.reload()">try again</a>.</p></div>`;
+    return;
+  }
+  if (!c || c.message) {
+    document.getElementById('page-body').innerHTML = `<div class="empty-state" style="padding:80px"><div class="empty-state-icon">⚠️</div><h4>${(c && c.message) || 'Course not found'}</h4><p style="color:var(--ink3);margin-top:8px"><a href="courses.html">← Back to Courses</a></p></div>`;
+    return;
+  }
 
   document.title = c.title + ' — StudyNest';
 

@@ -92,9 +92,11 @@ function closeModal(id) { document.getElementById(id)?.classList.remove('open');
 async function api(method, path, body) {
   const opts = { method, headers: authHeaders() };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch('/api' + path, opts);
-  if (res.status === 401) { logout(); return; }
-  return res.json();
+  let res;
+  try { res = await fetch('/api' + path, opts); } catch(e) { throw new Error('Network error: ' + e.message); }
+  if (res.status === 401) { logout(); return null; }
+  const text = await res.text();
+  try { return JSON.parse(text); } catch(e) { throw new Error('Server error (' + res.status + ')'); }
 }
 
 // ── FORMAT HELPERS ────────────────────────────────────────
