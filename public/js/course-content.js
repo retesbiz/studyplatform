@@ -1346,7 +1346,7 @@ const COURSE_CONTENT = {
 <h5 class="content-heading">ES6+ Essential Features</h5>
 <p><strong>Destructuring</strong>: Extract values from objects and arrays concisely — <code>const { name, age = 25 } = user</code> (with default), <code>const [first, ...rest] = array</code>. In function parameters: <code>function greet({ name, role }) { }</code> — self-documenting, avoids repetitive <code>options.name</code> access.</p>
 <p><strong>Spread/Rest</strong>: <code>...arr</code> spreads an array/object. <code>const merged = { ...defaults, ...overrides }</code> creates a new object with overrides winning. In function params: <code>function sum(...nums)</code> collects all arguments into an array.</p>
-<p><strong>Template literals</strong>: <code>&#96;Hello, ${name}! You have ${count} messages.&#96;</code> — multiline strings, embedded expressions, no string concatenation.</p>
+<p><strong>Template literals</strong>: <code>&#96;Hello, \${name}! You have \${count} messages.&#96;</code> — multiline strings, embedded expressions, no string concatenation.</p>
 <p><strong>Modules</strong>: <code>export</code> / <code>import</code> — explicit dependencies, tree-shakeable by bundlers. Named exports: <code>export function add() { }</code>. Default export: <code>export default class App { }</code>. Dynamic import: <code>const mod = await import('./heavy-module.js')</code> — loads code on demand for code splitting.</p>
 
 <h5 class="content-heading">Key Concepts</h5>
@@ -2257,7 +2257,7 @@ const { Chart } = await import('./charting.js');</code></pre>
 <li><strong>Dynamic import():</strong> Asynchronously loads a module at runtime, returning a Promise — the mechanism behind code splitting and lazy loading of routes or features.</li>
 <li><strong>Optional chaining (<code>?.</code>):</strong> Short-circuits property access on <code>null</code>/<code>undefined</code> values, returning <code>undefined</code> instead of throwing — replaces long chains of <code>&& </code> null guards.</li>
 <li><strong>Nullish coalescing (<code>??</code>):</strong> Returns the right operand only when the left is <code>null</code> or <code>undefined</code> — unlike <code>||</code>, correctly treats <code>0</code>, <code>false</code>, and <code>''</code> as valid values.</li>
-<li><strong>Template literals:</strong> Backtick strings supporting embedded expressions (<code>${expr}</code>) and multi-line content — enable readable string interpolation and tagged template DSLs.</li>
+<li><strong>Template literals:</strong> Backtick strings supporting embedded expressions (<code>\${expr}</code>) and multi-line content — enable readable string interpolation and tagged template DSLs.</li>
 <li><strong>Promises and async/await:</strong> Language-level asynchronous programming that replaces callback pyramids — <code>await</code> pauses execution inside an <code>async</code> function until a Promise settles, making async code read sequentially.</li>
 </ul>`,
 

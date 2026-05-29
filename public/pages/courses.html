@@ -133,7 +133,7 @@ async function loadCourses() {
   }
 
   document.getElementById('course-grid').innerHTML = courses.map(c => `
-    <div class="course-card" onclick="location.href='course-detail.html?id=${c.id}'" style="cursor:pointer">
+    <div class="course-card" onclick="location.href='course-detail.html?v=2&id=${c.id}'" style="cursor:pointer">
       <div class="course-thumb ${c.color_class}">
         ${c.icon}
         <div class="course-thumb-badge">
